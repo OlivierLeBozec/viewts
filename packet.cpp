@@ -1,0 +1,88 @@
+#include "packet.h"
+
+packet::packet(unsigned char* data):
+    m_data(data),
+    m_pcrprev(0)
+{
+    if (data[0] != 0x47) {
+        std::cerr << "Sync byte mismatch" << std::endl;
+        return;
+    }
+}
+
+packet::AdaptationField_t packet::getAdaptationField(void)
+{
+    return (AdaptationField_t) ((m_data[3] & 0x30) >> 4);
+}
+
+bool packet::hasPes(void)
+{
+    // pusi
+    if ((m_data[1] & 0x40) == 0x40) {
+        int offset = getPesOffset();
+
+        // pes start code 0x0000001
+        if (m_data[offset] == 0x00 && m_data[offset+1] == 0x00 && m_data[offset+2] == 0x01) {
+            return true;
+        }
+    }
+    return false;
+}
+
+unsigned int packet::getPesOffset(void)
+{
+    // get adaptation field length
+    int offset = 0;
+    if (getAdaptationField() == FOLLOWED_BY_PAYLOAD) {
+        offset = m_data[4]; // adaptation filed length
+        ++offset;           // add adaptation field length byte
+    }
+    return offset+4;
+}
+
+unsigned int packet::getPid(void)
+{
+    return ((m_data[1] & 0x1f) << 8) | m_data[2];
+}
+
+bool packet::hasPcr(void)
+{
+    // check if adaptation field present
+    AdaptationField_t adaptationField = getAdaptationField();
+    if (adaptationField == NO_PAYLOAD || adaptationField == FOLLOWED_BY_PAYLOAD)
+    {
+        // check if pcr flag in adaptation field
+        if ((m_data[5] & 0x10) == 0x10)
+            return true;
+        return false;
+    }
+    return false;
+}
+
+unsigned long long packet::getPcr(void)
+{
+    if (!hasPcr()) return 0;
+
+    // get pcr
+    unsigned long long pcr = 0;
+
+    // unit of 90kHz
+    pcr |= m_data[6] << 25;
+    pcr |= m_data[7] << 17;
+    pcr |= m_data[8] << 9;
+    pcr |= m_data[9] << 1;
+    pcr |= (m_data[10] & 0x80) >> 7;
+
+    // unit of 27MHz
+    pcr *= 300;
+    pcr |= (m_data[10] & 0x01) << 8;
+    pcr |= m_data[11];
+
+    // pcr overlap
+    if (m_pcrprev && ((pcr - m_pcrprev) > PCR_MAX))
+        pcr += PCR_MAX;
+    m_pcrprev = pcr;
+
+    // unit of 27Mhz
+    return pcr;
+}
