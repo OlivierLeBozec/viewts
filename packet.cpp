@@ -67,10 +67,10 @@ unsigned long long packet::getPcr(void)
     unsigned long long pcr = 0;
 
     // unit of 90kHz
-    pcr |= m_data[6] << 25;
-    pcr |= m_data[7] << 17;
-    pcr |= m_data[8] << 9;
-    pcr |= m_data[9] << 1;
+    pcr |= ((unsigned long long)m_data[6] << 25);
+    pcr |= ((unsigned long long)m_data[7] << 17);
+    pcr |= ((unsigned long long)m_data[8] << 9);
+    pcr |= ((unsigned long long)m_data[9] << 1);
     pcr |= (m_data[10] & 0x80) >> 7;
 
     // unit of 27MHz
