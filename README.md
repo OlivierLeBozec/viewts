@@ -65,3 +65,4 @@ DESCRIPTION
     ./tscheck /home/olivier/Dropbox/Code/Qt/tstools/ts/Jitter/6.ts -pid 305 -pts
     ./tscheck /home/olivier/Dropbox/Code/Qt/tstools/ts/Jitter/6.ts -pid 305 -lvl
     ./tscheck /home/olivier/Dropbox/Code/Qt/tstools/ts/Jitter/6.ts -pid 305 -jitter
+    ./tscheck ~/Bureau/MPTS_Txt-Subtitle.ts -pid 3502 -pcr
