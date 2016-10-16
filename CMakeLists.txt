@@ -1,46 +1,61 @@
+project(tstools)
 cmake_minimum_required(VERSION 2.8)
 
-project(tscheck)
-
-#Source files
-set(SOURCE_FILES
+#---------------------------------------------------------------- tscheck lib
+#source lib files
+set(SOURCE_LIB_FILES
     pes.cpp
     timestamp.cpp
     packet.cpp
-    tscheck.cpp
 )
-source_group(sources FILES ${SOURCE_FILES})
 
-#Header files
-set(HEADER_FILES
+#header lib files
+set(HEADER_LIB_FILES
     pes.h
     timestamp.h
     packet.h
 )
-source_group(headers FILES ${HEADER_FILES})
 
-#Binary
-add_executable(tscheck ${SOURCE_FILES} ${HEADER_FILES})
+# generate library
+add_library(_tscheck SHARED ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
 
-#----------------------------------------------------------------
-project(tsmap)
-
-#Source files
+#---------------------------------------------------------------- tscheck
+#source files
 set(SOURCE_FILES
+    tscheck.cpp
+)
+
+#generate binary
+add_executable(tscheck ${SOURCE_FILES})
+
+#build dependencies
+target_link_libraries(tscheck _tscheck)
+
+#---------------------------------------------------------------- tsmap lib
+#source lib files
+set(SOURCE_LIB_FILES
     pidmap.cpp
     packet.cpp
     pes.cpp
-    tsmap.cpp
 )
-source_group(sources FILES ${SOURCE_FILES})
 
-#Header files
-set(HEADER_FILES
+#header lib files
+set(HEADER_LIB_FILES
     pidmap.h
     packet.h
     pes.h
 )
-source_group(headers FILES ${HEADER_FILES})
 
-#Binary
+# generate library
+add_library(_tsmap SHARED ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
+
+#---------------------------------------------------------------- tsmap
+#source files
+set(SOURCE_FILES
+    tsmap.cpp
+)
+
 add_executable(tsmap ${SOURCE_FILES} ${HEADER_FILES})
+
+#build dependencies
+target_link_libraries(tsmap _tsmap)
