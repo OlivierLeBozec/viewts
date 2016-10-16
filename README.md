@@ -4,10 +4,10 @@ To compile use cmake for windows or linux.
 
 ## tsmap
 NAME
-    tscheck - list mpeg ts content
+    tsmap - list mpeg ts content
 
 SYNOPSIS
-    tscheck FILE [-pidlist -pidmap]
+    tsmap FILE [-pidlist -pidmap]
 
 DESCRIPTION
     List mpeg information about the FILE. Without using PSI-SI tables.

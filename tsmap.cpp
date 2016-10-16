@@ -9,10 +9,10 @@
 
 void Usage() {
     std::cout << "NAME" << std::endl;
-    std::cout << "   tscheck - list mpeg ts content" << std::endl;
+    std::cout << "   tsmap - list mpeg ts content" << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
-    std::cout << "   tscheck FILE [-pidlist -pidmap]" << std::endl;
+    std::cout << "   tsmap FILE [-pidlist -pidmap]" << std::endl;
     std::cout << std::endl;
     std::cout << "DESCRIPTION" << std::endl;
     std::cout << "   List mpeg information about the FILE. Without using PSI-SI tables" << std::endl;
