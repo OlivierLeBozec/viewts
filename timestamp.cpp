@@ -271,7 +271,7 @@ void timestamp::OutJitterPcr()
             unsigned long long estimate_pcr = prev_pcr;
             unsigned long long offset = ((*ii).first - prev_index) * 188 * 8;
             offset *= 27000000;
-            offset /= bitrate;
+            offset /= (unsigned long long)bitrate;
             estimate_pcr += offset;
 
             // jitter in ns

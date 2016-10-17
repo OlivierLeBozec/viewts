@@ -59,7 +59,6 @@ int main(int argc, char** argv)
         if (pidm)       pm.OutMap();
     }
 
-end:
     // close
     tsFile.close();
 
