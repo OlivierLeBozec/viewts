@@ -1,7 +1,7 @@
 project(tstools)
 cmake_minimum_required(VERSION 2.8)
 
-#---------------------------------------------------------------- tscheck lib
+#---------------------------------------------------------------- tstoolcheck lib
 #source lib files
 set(SOURCE_LIB_FILES
     pes.cpp
@@ -17,7 +17,7 @@ set(HEADER_LIB_FILES
 )
 
 # generate library
-add_library(_tscheck SHARED ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
+add_library(tstoolcheck ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
 
 #---------------------------------------------------------------- tscheck
 #source files
@@ -29,9 +29,9 @@ set(SOURCE_FILES
 add_executable(tscheck ${SOURCE_FILES})
 
 #build dependencies
-target_link_libraries(tscheck _tscheck)
+target_link_libraries(tscheck tstoolcheck)
 
-#---------------------------------------------------------------- tsmap lib
+#---------------------------------------------------------------- tstoolmap lib
 #source lib files
 set(SOURCE_LIB_FILES
     pidmap.cpp
@@ -47,7 +47,7 @@ set(HEADER_LIB_FILES
 )
 
 # generate library
-add_library(_tsmap SHARED ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
+add_library(tstoolmap ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
 
 #---------------------------------------------------------------- tsmap
 #source files
@@ -58,4 +58,4 @@ set(SOURCE_FILES
 add_executable(tsmap ${SOURCE_FILES} ${HEADER_FILES})
 
 #build dependencies
-target_link_libraries(tsmap _tsmap)
+target_link_libraries(tsmap tstoolmap)
