@@ -59,7 +59,7 @@ bool packet::hasPcr(void)
     return false;
 }
 
-unsigned long long packet::getPcr(void)
+float packet::getPcr(void)
 {
     if (!hasPcr()) return 0;
 
@@ -84,5 +84,5 @@ unsigned long long packet::getPcr(void)
     m_pcrprev = pcr;
 
     // unit of 27Mhz
-    return pcr;
+    return (float)(pcr/27000000);
 }

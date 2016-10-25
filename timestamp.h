@@ -14,15 +14,15 @@ class timestamp
     unsigned int m_packetAfterLastPcr;
 
     // min max pcr and and corresponding index
-    unsigned long long m_min_pcr;
-    unsigned long long m_max_pcr;
+    float m_min_pcr;
+    float m_max_pcr;
     unsigned int m_min_index;
     unsigned int m_max_index;
 
     // pcr pts dts map
-    std::map<unsigned int, unsigned long long> m_pcrMap;
-    std::map<unsigned int, unsigned long long> m_ptsMap;
-    std::map<unsigned int, unsigned long long> m_dtsMap;
+    std::map<unsigned int, float> m_pcrMap;
+    std::map<unsigned int, float> m_ptsMap;
+    std::map<unsigned int, float> m_dtsMap;
 
     float getMaxDeltaPcr();
     float getBitrate();

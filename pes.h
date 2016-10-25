@@ -17,10 +17,10 @@ class pes
     unsigned int        m_pes_length;
 
 public:
-    unsigned long long  getPts(void);
-    unsigned long long  getDts(void);
-    bool                hasPts(void);
-    bool                hasDts(void);
+    float   getPts(void);
+    float   getDts(void);
+    bool    hasPts(void);
+    bool    hasDts(void);
 
     pes(unsigned char* data);
 };

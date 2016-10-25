@@ -103,6 +103,22 @@ int main(int argc, char** argv)
         if (lvl)    ts.OutBufferLevel();
     }
 
+    // pcrpid ptspid
+#if 0
+    {
+        timestamp pidPcr (tsFile, pidpcr);
+        timestamp pidPts (tsFile, pidpts);
+
+        int index = 0;
+        do {
+            unsigned long long pcr = pidPcr.GetPcr(index);
+            unsigned long long pts = pidPts.Get.GetPts(index);
+
+            if (pcr && pts) lvl = pcr - pts;
+
+        }  while (Pcr != );
+    }
+#endif
 end:
     // close
     tsFile.close();
