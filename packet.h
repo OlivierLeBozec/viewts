@@ -20,7 +20,7 @@ class packet
 
 public:
     unsigned int        getPid(void);
-    float               getPcr(void);
+    double              getPcr(void);
     bool                hasPcr(void);
     bool                hasPes(void);
     unsigned int        getPesOffset(void);

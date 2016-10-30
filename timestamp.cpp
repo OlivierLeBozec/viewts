@@ -74,7 +74,7 @@ timestamp::~timestamp()
     }
 }
 
-float timestamp::getMaxDeltaPcr()
+double timestamp::getMaxDeltaPcr()
 {
     // test if pcr found
     if (m_pcrMap.empty()) return 0;
@@ -83,35 +83,35 @@ float timestamp::getMaxDeltaPcr()
     return m_max_pcr-m_min_pcr;
 }
 
-float timestamp::getBitrate()
+double timestamp::getBitrate()
 {
     // test if pcr found
     if (m_pcrMap.empty()) return 0;
 
     // max pcr diff in seconds
-    float delta_pcr =  getMaxDeltaPcr();
+    double delta_pcr =  getMaxDeltaPcr();
 
     // bitrate in byte per second
-    float bitrate = (float)((m_max_index - m_min_index)*188);
+    double bitrate = (double)((m_max_index - m_min_index)*188);
     bitrate /= delta_pcr;
     bitrate *=8;
 
     return bitrate;
 }
 
-float timestamp::getDuration()
+double timestamp::getDuration()
 {
     // test if pcr found
     if (m_pcrMap.empty()) return 0;
 
     // max pcr diff in seconds
-    float delta_pcr = getMaxDeltaPcr();
+    double delta_pcr = getMaxDeltaPcr();
 
     // bitrate in byte per second
-    float bitrate = getBitrate();
+    double bitrate = getBitrate();
 
     // duration in seconds
-    float duration = delta_pcr;
+    double duration = delta_pcr;
     duration += (m_packetBeforeFirstPcr*188*8)/bitrate;   // before first pcr
     duration += (m_packetAfterLastPcr*188*8)/bitrate;     // after last pcr
 
@@ -120,7 +120,7 @@ float timestamp::getDuration()
 
 void timestamp::OutDuration()
 {
-    float duration = getDuration();
+    double duration = getDuration();
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
     std::cout.precision(3);
@@ -137,7 +137,7 @@ void timestamp::OutDuration()
 
 void timestamp::OutBitrate()
 {
-    float bitrate = getBitrate();
+    double bitrate = getBitrate();
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
     std::cout.precision(3);
@@ -171,7 +171,7 @@ void timestamp::OutPcr()
     std::cout.width(10);
     std::cout << "PCR(s)" << std::endl;
 
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
     {
         std::cout.width(10);
@@ -192,7 +192,7 @@ void timestamp::OutPts()
     std::cout.width(10);
     std::cout << "PTS(s)" << std::endl;
 
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_ptsMap.begin(); ii!=m_ptsMap.end(); ++ii)
     {
         std::cout.width(10);
@@ -213,7 +213,7 @@ void timestamp::OutDts()
     std::cout.width(10);
     std::cout << "DTS(s)" << std::endl;
 
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_dtsMap.begin(); ii!=m_dtsMap.end(); ++ii)
     {
         std::cout.width(10);
@@ -233,7 +233,7 @@ void timestamp::OutDeltaPcr()
     std::cout << "Delta PCR(s)" << std::endl;
 
     unsigned long long prev_pcr = 0;
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
     {
         if (prev_pcr != 0) {
@@ -253,26 +253,24 @@ void timestamp::OutJitterPcr()
     std::cout.width(10);
     std::cout << "Index";
     std::cout.width(10);
-    std::cout << "Jitter PCR(ns)" << std::endl;
+    std::cout << "Jitter PCR(µs)" << std::endl;
 
-    float bitrate = getBitrate();
-    unsigned long long prev_pcr = 0;
+    double bitrate = getBitrate();
+    double prev_pcr = 0;
     unsigned int prev_index = 0;
 
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
     {
         if (prev_pcr && prev_index)
         {
             // estimate pcr is compute using 27000000 clock
-            unsigned long long estimate_pcr = prev_pcr;
-            unsigned long long offset = ((*ii).first - prev_index) * 188 * 8;
-            offset *= 27000000;
-            offset /= (unsigned long long)bitrate;
-            estimate_pcr += offset;
+            double estimate_pcr = prev_pcr;
+            double offset = ((*ii).first - prev_index) * 188 * 8;
+            estimate_pcr += offset/bitrate;
 
-            // jitter in ns
-            float jitter = (*ii).second*1000000 - estimate_pcr*1000000;
+            // jitter in µs
+            double jitter = (*ii).second*1000000 - estimate_pcr*1000000;
 
             std::cout.width(10);
             std::cout << (*ii).first;
@@ -287,7 +285,7 @@ void timestamp::OutJitterPcr()
 
 void timestamp::OutBufferLevel()
 {
-    float bitrate = getBitrate();
+    double bitrate = getBitrate();
 
     std::cout.flags ( std::ios_base::fixed | std::ios::left);
     std::cout.precision(10);
@@ -298,11 +296,11 @@ void timestamp::OutBufferLevel()
     std::cout.width(20);
     std::cout << "(Kb)" << std::endl;
 
-    std::map<unsigned int, float>::iterator ii;
+    std::map<unsigned int, double>::iterator ii;
     for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
     {
         if (m_ptsMap[(*ii).first]) {
-            float bufferLevel = m_ptsMap[(*ii).first] - (*ii).second;
+            double bufferLevel = m_ptsMap[(*ii).first] - (*ii).second;
 
             std::cout.width(20);
             std::cout << bufferLevel;

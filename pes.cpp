@@ -25,7 +25,7 @@ bool pes::hasPts(void)
    return false;
 }
 
-float pes::getPts(void)
+double pes::getPts(void)
 {
     unsigned long long pts = 0;
 
@@ -42,7 +42,7 @@ float pes::getPts(void)
     }
 
     // unit of 90Khz -> ms
-    return (float)(pts/90000);
+    return (double)pts/90000;
 }
 
 bool pes::hasDts(void)
@@ -52,7 +52,7 @@ bool pes::hasDts(void)
    return false;
 }
 
-float pes::getDts(void)
+double pes::getDts(void)
 {
     unsigned long long dts = 0;
 
@@ -69,5 +69,5 @@ float pes::getDts(void)
     }
 
     // unit of 90Khz -> ms
-    return (float)(dts/90000);
+    return (double)dts/90000;
 }

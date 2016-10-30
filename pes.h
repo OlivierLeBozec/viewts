@@ -17,8 +17,8 @@ class pes
     unsigned int        m_pes_length;
 
 public:
-    float   getPts(void);
-    float   getDts(void);
+    double  getPts(void);
+    double  getDts(void);
     bool    hasPts(void);
     bool    hasDts(void);
 

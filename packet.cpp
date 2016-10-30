@@ -59,7 +59,7 @@ bool packet::hasPcr(void)
     return false;
 }
 
-float packet::getPcr(void)
+double packet::getPcr(void)
 {
     if (!hasPcr()) return 0;
 
@@ -84,5 +84,5 @@ float packet::getPcr(void)
     m_pcrprev = pcr;
 
     // unit of 27Mhz
-    return (float)(pcr/27000000);
+    return (double)pcr/27000000;
 }

@@ -14,19 +14,19 @@ class timestamp
     unsigned int m_packetAfterLastPcr;
 
     // min max pcr and and corresponding index
-    float m_min_pcr;
-    float m_max_pcr;
+    double m_min_pcr;
+    double m_max_pcr;
     unsigned int m_min_index;
     unsigned int m_max_index;
 
     // pcr pts dts map
-    std::map<unsigned int, float> m_pcrMap;
-    std::map<unsigned int, float> m_ptsMap;
-    std::map<unsigned int, float> m_dtsMap;
+    std::map<unsigned int, double> m_pcrMap;
+    std::map<unsigned int, double> m_ptsMap;
+    std::map<unsigned int, double> m_dtsMap;
 
-    float getMaxDeltaPcr();
-    float getBitrate();
-    float getDuration();
+    double getMaxDeltaPcr();
+    double getBitrate();
+    double getDuration();
 
 public:
     timestamp(std::ifstream& fileIn, unsigned int pid);
