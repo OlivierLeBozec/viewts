@@ -11,7 +11,6 @@
 void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
     std::cout << "   " << pName << " - check timestamp" << std::endl;
-    std::cout << std::endl;
     std::cout << "   Version " << VERSION << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
@@ -21,13 +20,13 @@ void Usage(char *pName) {
     std::cout << "   Display specified timestamp operation" << std::endl;
     std::cout << std::endl;
     std::cout << "   -pidpcr <PID>" << std::endl;
-    std::cout << "          display pcr" << std::endl;
+    std::cout << "          set pcr pid" << std::endl;
     std::cout << std::endl;
     std::cout << "   -pidpts <PID>" << std::endl;
-    std::cout << "          display pts" << std::endl;
+    std::cout << "          set pts pid" << std::endl;
     std::cout << std::endl;
     std::cout << "   -piddts <PID>" << std::endl;
-    std::cout << "          display dts" << std::endl;
+    std::cout << "          set dts pid" << std::endl;
     std::cout << std::endl;
     std::cout << "   Following commands are available only at least one PID is specified" << std::endl;
     std::cout << std::endl;

@@ -365,8 +365,8 @@ void timestamp::DumpDiff()
             for (unsigned int index = prev_index; index < (*ii).first; ++index) {
                 if (diff_map2->find(index) != diff_map2->end()) {
 
-                    printf ("%u - %u\n", index, prev_index);
                     // diff between different timestamp
+                    // should be on the same packet or higher
                     double diff = diff_map2->find(index)->second - prev_value;
 
                     std::cout.width(20);

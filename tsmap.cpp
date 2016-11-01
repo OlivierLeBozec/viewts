@@ -9,7 +9,6 @@
 void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
     std::cout << "   " << pName << " - list mpeg ts content" << std::endl;
-    std::cout << std::endl;
     std::cout << "   Version " << VERSION << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
