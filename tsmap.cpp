@@ -1,18 +1,19 @@
 #include <iostream>
-#include <assert.h>
 #include <string>
 #include <fstream>
 
-#include <stdlib.h> // atoi()
-
 #include "pidmap.h"
 
-void Usage() {
+#define VERSION "1.0"
+
+void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
-    std::cout << "   tsmap - list mpeg ts content" << std::endl;
+    std::cout << "   " << pName << " - list mpeg ts content" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   Version " << VERSION << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
-    std::cout << "   tsmap FILE [-pidlist -pidmap]" << std::endl;
+    std::cout << "   " << pName << " FILE [-pidlist -pidmap]" << std::endl;
     std::cout << std::endl;
     std::cout << "DESCRIPTION" << std::endl;
     std::cout << "   List mpeg information about the FILE. Without using PSI-SI tables" << std::endl;
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
     // help
     if (argc == 1)
     {
-        Usage();
+        Usage(argv[0]);
         return 0;
     }
 

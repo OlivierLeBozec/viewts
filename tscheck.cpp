@@ -1,5 +1,4 @@
 #include <iostream>
-#include <assert.h>
 #include <string>
 #include <fstream>
 
@@ -7,44 +6,48 @@
 
 #include "timestamp.h"
 
-void Usage() {
+#define VERSION "1.0"
+
+void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
-    std::cout << "   tscheck - check timestamp" << std::endl;
+    std::cout << "   " << pName << " - check timestamp" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   Version " << VERSION << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
-    std::cout << "   tscheck FILE -pid <PID> [...]" << std::endl;
+    std::cout << "   " << pName << " FILE -pid <PID> [...]" << std::endl;
     std::cout << std::endl;
     std::cout << "DESCRIPTION" << std::endl;
-    std::cout << "   Display specified timestamp" << std::endl;
+    std::cout << "   Display specified timestamp operation" << std::endl;
     std::cout << std::endl;
-    std::cout << "   -pid <PID>" << std::endl;
-    std::cout << "          pid to check for" << std::endl;
+    std::cout << "   -pidpcr <PID>" << std::endl;
+    std::cout << "          display pcr" << std::endl;
     std::cout << std::endl;
-    std::cout << "   Following commands are available only if the PID is specified" << std::endl;
+    std::cout << "   -pidpts <PID>" << std::endl;
+    std::cout << "          display pts" << std::endl;
     std::cout << std::endl;
-    std::cout << "    -dur" << std::endl;
+    std::cout << "   -piddts <PID>" << std::endl;
+    std::cout << "          display dts" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   Following commands are available only at least one PID is specified" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   -dump" << std::endl;
+    std::cout << "          dump timestamp" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   -dur" << std::endl;
     std::cout << "          get duration of the stream" << std::endl;
     std::cout << std::endl;
     std::cout << "   -rate" << std::endl;
-    std::cout << "          get  bitrate of the stream" << std::endl;
+    std::cout << "          get bitrate of pid" << std::endl;
     std::cout << std::endl;
     std::cout << "   -delta" << std::endl;
-    std::cout << "          diff between consecutive pcr" << std::endl;
-    std::cout << std::endl;
-    std::cout << "   -pcr" << std::endl;
-    std::cout << "          display pcr" << std::endl;
-    std::cout << std::endl;
-    std::cout << "   -pts" << std::endl;
-    std::cout << "          display pts" << std::endl;
-    std::cout << std::endl;
-    std::cout << "   -dts" << std::endl;
-    std::cout << "          display dts" << std::endl;
+    std::cout << "          diff between same consecutive timestamp for pcr, pts or dts" << std::endl;
     std::cout << std::endl;
     std::cout << "   -jitter" << std::endl;
-    std::cout << "          display pcr jitter" << std::endl;
+    std::cout << "          display jitter for pcr" << std::endl;
     std::cout << std::endl;
-    std::cout << "   -lvl" << std::endl;
-    std::cout << "        display input buffer level" << std::endl;
+    std::cout << "   -diff" << std::endl;
+    std::cout << "          diff between 2 timestamps : pts - pcr, dts - pts or pts - dts" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
     // help
     if (argc == 1)
     {
-        Usage();
+        Usage(argv[0]);
         return 0;
     }
 
@@ -65,61 +68,45 @@ int main(int argc, char** argv)
     }
 
     // check options
-    std::string StrBitrate("-rate"), StrDuration("-dur"), StrPid("-pid"), StrPcr("-pcr"), StrPts("-pts"), StrDts("-dts"),
-            StrDelta("-delta"), StrJitter("-jitter"), StrLevel("-lvl");
+    std::string StrDump("-dump"), StrBitrate("-rate"), StrDuration("-dur"), StrPcr("-pidpcr"), StrPts("-pidpts"), StrDts("-piddts"),
+            StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff");
 
-    bool rate = false, dur = false, pcr = false, pts = false, dts = false, delta = false, jitter = false, lvl = false;
-    unsigned int pid = 0xFFFF;
+    unsigned int  pidpcr = TIMESTAMP_NO_PID, pidpts = TIMESTAMP_NO_PID, piddts = TIMESTAMP_NO_PID;
+    bool dump = false, rate = false, dur = false, delta = false, jitter = false, diff = false;
 
     for (int i=2; i<argc; ++i)
     {
         std::string StrOption(argv[i]);
-        if (StrOption == StrBitrate) rate = true;
+        if (StrOption == StrDump) dump = true;
+        else if (StrOption == StrBitrate) rate = true;
         else if (StrOption == StrDuration) dur = true;
-        else if (StrOption == StrPcr) pcr = true;
-        else if (StrOption == StrPts) pts = true;
-        else if (StrOption == StrDts) dts = true;
-        else if (StrOption == StrPid) pid = atoi(argv[++i]);
+        else if (StrOption == StrPcr) pidpcr = atoi(argv[++i]);
+        else if (StrOption == StrPts) pidpts = atoi(argv[++i]);
+        else if (StrOption == StrDts) piddts = atoi(argv[++i]);
         else if (StrOption == StrDelta) delta = true;
         else if (StrOption == StrJitter) jitter = true;
-        else if (StrOption == StrLevel) lvl = true;
+        else if (StrOption == StrDiff) diff = true;
     }
 
-    if ((rate || dur || pcr || pts || dts || delta || jitter) && pid == 0xFFFF) {
-        Usage();
-        goto end;
+    if (pidpcr == TIMESTAMP_NO_PID && pidpts == TIMESTAMP_NO_PID && piddts == TIMESTAMP_NO_PID)
+    {
+        Usage(argv[0]);
+        return 0;
     }
 
     // display timestamp
-    if (rate || dur || pcr || pts || dts || delta || jitter || lvl){
-        timestamp ts(tsFile, pid);
-        if (dur)    ts.OutDuration();
-        if (rate)   ts.OutBitrate();
-        if (pcr)    ts.OutPcr();
-        if (pts)    ts.OutPts();
-        if (dts)    ts.OutDts();
-        if (delta)  ts.OutDeltaPcr();
-        if (jitter) ts.OutJitterPcr();
-        if (lvl)    ts.OutBufferLevel();
+    if (dump || rate || dur || delta || jitter || diff){
+        timestamp ts(tsFile, pidpcr, pidpts, piddts);
+        if (dump && pidpcr != TIMESTAMP_NO_PID) ts.DumpPcr();
+        if (dump && pidpts != TIMESTAMP_NO_PID) ts.DumpPts();
+        if (dump && piddts != TIMESTAMP_NO_PID) ts.DumpDts();
+        if (dur)        ts.DumpDuration();
+        if (rate)       ts.DumpBitrate();
+        if (delta)      ts.DumpDelta();
+        if (jitter)     ts.DumpJitterPcr();
+        if (diff)       ts.DumpDiff();
     }
 
-    // pcrpid ptspid
-#if 0
-    {
-        timestamp pidPcr (tsFile, pidpcr);
-        timestamp pidPts (tsFile, pidpts);
-
-        int index = 0;
-        do {
-            unsigned long long pcr = pidPcr.GetPcr(index);
-            unsigned long long pts = pidPts.Get.GetPts(index);
-
-            if (pcr && pts) lvl = pcr - pts;
-
-        }  while (Pcr != );
-    }
-#endif
-end:
     // close
     tsFile.close();
 

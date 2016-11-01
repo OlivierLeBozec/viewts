@@ -83,6 +83,6 @@ double packet::getPcr(void)
         pcr += PCR_MAX;
     m_pcrprev = pcr;
 
-    // unit of 27Mhz
+    // unit of 27Mhz -> s
     return (double)pcr/27000000;
 }

@@ -18,6 +18,9 @@ class timestamp
     double m_max_pcr;
     unsigned int m_min_index;
     unsigned int m_max_index;
+    unsigned int m_pidpcr;
+    unsigned int m_pidpts;
+    unsigned int m_piddts;
 
     // pcr pts dts map
     std::map<unsigned int, double> m_pcrMap;
@@ -29,17 +32,19 @@ class timestamp
     double getDuration();
 
 public:
-    timestamp(std::ifstream& fileIn, unsigned int pid);
+    timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts);
     ~timestamp();
 
-    void    OutBitrate();
-    void    OutDuration();
-    void    OutPcr();
-    void    OutPts();
-    void    OutDts();
-    void    OutDeltaPcr();
-    void    OutJitterPcr();
-    void    OutBufferLevel();
+    void    DumpBitrate();
+    void    DumpDuration();
+    void    DumpPcr();
+    void    DumpPts();
+    void    DumpDts();
+    void    DumpDelta();
+    void    DumpJitterPcr();
+    void    DumpDiff();
 };
+
+#define TIMESTAMP_NO_PID  -1
 
 #endif // TIMESTAMP_H

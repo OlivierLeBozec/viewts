@@ -41,7 +41,7 @@ double pes::getPts(void)
         pts |= (m_data[13] & 0xFE) >> 1;
     }
 
-    // unit of 90Khz -> ms
+    // unit of 90Khz -> s
     return (double)pts/90000;
 }
 
@@ -68,6 +68,6 @@ double pes::getDts(void)
         dts |= (m_data[18] & 0xFE) >> 1;
     }
 
-    // unit of 90Khz -> ms
+    // unit of 90Khz -> s
     return (double)dts/90000;
 }
