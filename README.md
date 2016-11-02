@@ -33,13 +33,13 @@ DESCRIPTION
     Display specified timestamp operation
 
     -pidpcr <PID>
-           display pcr
+           set pcr pid
 
     -pidpts <PID>
-           display pts
+           set pts pid
 
     -piddts <PID>
-           display dts
+           set dts pid
 
 Following commands are available only at least one PID is specified
 
