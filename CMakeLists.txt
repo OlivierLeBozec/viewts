@@ -2,17 +2,5 @@ project(tstools CXX)
 cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory(src)
-add_subdirectory(test/ext)
-
-#---------------------------------------------------------------- target test
-#source files
-set(SOURCE_FILES
-    test/test.cpp
-)
-
-include_directories(${GTEST_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
-add_executable(tstool_tests ${SOURCE_FILES})
-target_link_libraries(tstool_tests ${GTEST_LIBS_DIR}/libgtest.a ${GTEST_LIBS_DIR}/libgtest_main.a tstoolcheck)
-
-#---------------------------------------------------------------- test
+add_subdirectory(test)
 
