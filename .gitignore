@@ -1,4 +1,5 @@
-*.txt
 *.a
 cmake*
 CMake*
+Makefile
+*.cbp
