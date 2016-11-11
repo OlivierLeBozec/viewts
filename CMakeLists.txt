@@ -1,76 +1,18 @@
-project(tstools)
+project(tstools CXX)
 cmake_minimum_required(VERSION 2.8)
 
-#---------------------------------------------------------------- tstoolcheck lib
-#source lib files
-set(SOURCE_LIB_FILES
-    pes.cpp
-    timestamp.cpp
-    packet.cpp
-)
+add_subdirectory(src)
+add_subdirectory(test/ext)
 
-#header lib files
-set(HEADER_LIB_FILES
-    pes.h
-    timestamp.h
-    packet.h
-)
-
-# generate library
-add_library(tstoolcheck ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
-
-#---------------------------------------------------------------- tscheck
+#---------------------------------------------------------------- target test
 #source files
 set(SOURCE_FILES
-    tscheck.cpp
+    test/test.cpp
 )
 
-#generate binary
-add_executable(tscheck ${SOURCE_FILES})
+include_directories(${GTEST_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
+add_executable(tstool_tests ${SOURCE_FILES})
+target_link_libraries(tstool_tests ${GTEST_LIBS_DIR}/libgtest.a ${GTEST_LIBS_DIR}/libgtest_main.a tstoolcheck)
 
-#build dependencies
-target_link_libraries(tscheck tstoolcheck)
+#---------------------------------------------------------------- test
 
-#---------------------------------------------------------------- tstoolmap lib
-#source lib files
-set(SOURCE_LIB_FILES
-    pidmap.cpp
-    packet.cpp
-    pes.cpp
-)
-
-#header lib files
-set(HEADER_LIB_FILES
-    pidmap.h
-    packet.h
-    pes.h
-)
-
-# generate library
-add_library(tstoolmap ${SOURCE_LIB_FILES} ${HEADER_LIB_FILES})
-
-#---------------------------------------------------------------- tsmap
-#source files
-set(SOURCE_FILES
-    tsmap.cpp
-)
-
-add_executable(tsmap ${SOURCE_FILES} ${HEADER_FILES})
-
-#build dependencies
-target_link_libraries(tsmap tstoolmap)
-
-#---------------------------------------------------------------- tscut
-#source files
-set(SOURCE_FILES
-    tscut.cpp
-)
-
-add_executable(tscut ${SOURCE_FILES})
-
-#---------------------------------------------------------------- install
-if (NOT WIN32)
-    install(TARGETS tscut tsmap tscheck RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin/linux)
-else()
-    install(TARGETS tscut tsmap tscheck RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin/windows)
-endif()

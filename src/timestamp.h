@@ -35,6 +35,14 @@ public:
     timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts);
     ~timestamp();
 
+    double getPcr(int index);
+    double getPts(int index);
+    double getDts(int index);
+
+/*  double  PopPcr();
+    double  PopPts();
+    double  PopDts();*/
+
     void    DumpBitrate();
     void    DumpDuration();
     void    DumpPcr();

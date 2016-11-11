@@ -2,6 +2,8 @@
 #include "packet.h"
 #include "pes.h"
 
+#define DUMP_PRECISION 12
+
 timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
@@ -126,6 +128,69 @@ double timestamp::getDuration()
     return duration;
 }
 
+/*double timestamp::PopPcr() {
+
+    // test if pcr found
+    if (m_pcrMap.empty()) return 0;
+
+    std::map<unsigned int, double>::iterator ii = m_pcrMap.begin();
+    m_pcrMap.erase(ii);
+
+    return (*ii).second;
+}
+*/
+
+double timestamp::getPcr(int index) {
+
+    double pcr = 0;
+
+    // test if pcr found
+    if (m_pcrMap.empty()) return 0;
+
+    try {
+        pcr = m_pcrMap[index];
+    }
+    catch(...) {
+        pcr = 0;
+    }
+
+    return pcr;
+}
+
+double timestamp::getPts(int index) {
+
+    double pts = 0;
+
+    // test if pcr found
+    if (m_ptsMap.empty()) return 0;
+
+    try {
+        pts = m_ptsMap[index];
+    }
+    catch(...) {
+        pts = 0;
+    }
+
+    return pts;
+}
+
+double timestamp::getDts(int index) {
+
+    double dts = 0;
+
+    // test if pcr found
+    if (m_dtsMap.empty()) return 0;
+
+    try {
+        dts = m_dtsMap[index];
+    }
+    catch(...) {
+        dts = 0;
+    }
+
+    return dts;
+}
+
 void timestamp::DumpDuration()
 {
     double duration = getDuration();
@@ -176,10 +241,10 @@ void timestamp::DumpPcr()
     if (m_pcrMap.empty()) return;
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(10);
+    std::cout.width(DUMP_PRECISION);
     std::cout << "PCR(s)" << std::endl;
 
     std::map<unsigned int, double>::iterator ii;
@@ -187,7 +252,7 @@ void timestamp::DumpPcr()
     {
         std::cout.width(10);
         std::cout << (*ii).first;
-        std::cout.width(10);
+        std::cout.width(DUMP_PRECISION);
         std::cout << (*ii).second << std::endl;
     }
 
@@ -200,10 +265,10 @@ void timestamp::DumpPts()
     if (m_ptsMap.empty()) return;
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(10);
+    std::cout.width(DUMP_PRECISION);
     std::cout << "PTS(s)" << std::endl;
 
     std::map<unsigned int, double>::iterator ii;
@@ -211,7 +276,7 @@ void timestamp::DumpPts()
     {
         std::cout.width(10);
         std::cout << (*ii).first;
-        std::cout.width(10);
+        std::cout.width(DUMP_PRECISION);
         std::cout << (*ii).second << std::endl;
     }
 
@@ -224,10 +289,10 @@ void timestamp::DumpDts()
     if (m_dtsMap.empty()) return;
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(10);
+    std::cout.width(DUMP_PRECISION);
     std::cout << "DTS(s)" << std::endl;
 
     std::map<unsigned int, double>::iterator ii;
@@ -235,7 +300,7 @@ void timestamp::DumpDts()
     {
         std::cout.width(10);
         std::cout << (*ii).first;
-        std::cout.width(10);
+        std::cout.width(DUMP_PRECISION);
         std::cout << (*ii).second << std::endl;
     }
 }
@@ -260,10 +325,10 @@ void timestamp::DumpDelta()
     if (delta_map->empty()) return;
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(10);
+    std::cout.width(DUMP_PRECISION);
     std::cout << "Delta (s)" << std::endl;
 
     double prev_val = 0;
@@ -273,7 +338,7 @@ void timestamp::DumpDelta()
         if (prev_val != 0) {
             std::cout.width(10);
             std::cout << (*ii).first;
-            std::cout.width(10);
+            std::cout.width(DUMP_PRECISION);
             std::cout << (*ii).second - prev_val << std::endl;
         }
         prev_val = (*ii).second;
@@ -283,10 +348,10 @@ void timestamp::DumpDelta()
 void timestamp::DumpJitterPcr()
 {
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(10);
+    std::cout.width(DUMP_PRECISION);
     std::cout << "Jitter PCR(µs)" << std::endl;
 
     double bitrate = getBitrate();
@@ -308,7 +373,7 @@ void timestamp::DumpJitterPcr()
 
             std::cout.width(10);
             std::cout << (*ii).first;
-            std::cout.width(10);
+            std::cout.width(DUMP_PRECISION);
             std::cout << jitter << std::endl;
         }
 
@@ -323,7 +388,7 @@ void timestamp::DumpDiff()
     std::map<unsigned int, double> *diff_map1, *diff_map2;
 
     std::cout.flags ( std::ios_base::fixed | std::ios::left);
-    std::cout.precision(10);
+    std::cout.precision(DUMP_PRECISION);
 
     std::cout << std::endl;
     std::cout.width(20);
