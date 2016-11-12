@@ -3,7 +3,7 @@
 
 TEST(pcr, check_PCR_values_on_audio)
 {
-    std::ifstream tsFile("../ts/audio.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
 
     timestamp ts(tsFile, 305, 0, 0);
     EXPECT_DOUBLE_EQ(ts.getPcr(0), 0);
@@ -13,7 +13,7 @@ TEST(pcr, check_PCR_values_on_audio)
 
 TEST(pcr, check_PCR_values_on_video_dvbSub)
 {
-    std::ifstream tsFile("../ts/video_dvbSub.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/video_dvbSub.ts", std::ios::binary);
 
     timestamp ts(tsFile, 220, 0, 0);
     EXPECT_DOUBLE_EQ(ts.getPcr(0), 0);
@@ -23,7 +23,7 @@ TEST(pcr, check_PCR_values_on_video_dvbSub)
 
 TEST(pts, check_PTS_values_on_audio)
 {
-    std::ifstream tsFile("../ts/audio.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
 
     timestamp ts(tsFile, 0, 305, 0);
     EXPECT_DOUBLE_EQ(ts.getPts(0), 0);
@@ -33,7 +33,7 @@ TEST(pts, check_PTS_values_on_audio)
 
 TEST(pts, check_PTS_values_on_video_dvbSub)
 {
-    std::ifstream tsFile("../ts/video_dvbSub.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/video_dvbSub.ts", std::ios::binary);
 
     timestamp ts(tsFile, 0, 220, 0);
     EXPECT_DOUBLE_EQ(ts.getPts(0), 0);
@@ -43,7 +43,7 @@ TEST(pts, check_PTS_values_on_video_dvbSub)
 
 TEST(dts, check_DTS_values_on_video_dvbSub)
 {
-    std::ifstream tsFile("../ts/video_dvbSub.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/video_dvbSub.ts", std::ios::binary);
 
     timestamp ts(tsFile, 0, 0, 220);
     EXPECT_DOUBLE_EQ(ts.getDts(0), 0);

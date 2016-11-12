@@ -1,7 +1,12 @@
 project(tstools CXX)
 cmake_minimum_required(VERSION 2.8)
 
-add_subdirectory(src)
+#exe path
 if (NOT WIN32)
-    add_subdirectory(test)
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/linux)
+else()
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/windows)
 endif()
+
+add_subdirectory(src)
+add_subdirectory(test)

@@ -67,10 +67,3 @@ set(SOURCE_FILES
 )
 
 add_executable(tscut ${SOURCE_FILES})
-
-#---------------------------------------------------------------- install
-if (NOT WIN32)
-    install(TARGETS tscut tsmap tscheck RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin/linux)
-else()
-    install(TARGETS tscut tsmap tscheck RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin/windows)
-endif()
