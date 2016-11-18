@@ -2,7 +2,7 @@
 Tools for MPEG-TS streams.
 To compile use cmake for windows or linux.
 
-For debug add -DCMAKE_BUILD_TYPE=Debug to cmake
+[![Coverage Status](https://coveralls.io/repos/github/OlivierLeBozec/tstools/badge.svg?branch=master)](https://coveralls.io/github/OlivierLeBozec/tstools?branch=master)
 
 ## tsmap
 NAME
