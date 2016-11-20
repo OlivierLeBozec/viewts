@@ -5,6 +5,8 @@
 #include <fstream>
 #include <map>
 
+#define TIMESTAMP_NO_PID  0xFFFF
+
 class timestamp
 {
     // number packets before the first pcr
@@ -27,32 +29,54 @@ class timestamp
     std::map<unsigned int, double> m_ptsMap;
     std::map<unsigned int, double> m_dtsMap;
 
+    // pcr next
+    unsigned int m_pcr_prev_val;
+    std::map<unsigned int, double>::iterator m_pcr_ii;
+
+    // pts next
+    unsigned int m_pts_prev_val;
+    std::map<unsigned int, double>::iterator m_pts_ii;
+
+    // dts next
+    unsigned int m_dts_prev_val;
+    std::map<unsigned int, double>::iterator m_dts_ii;
+
+    // pcr pts dts delta next
+    std::map<unsigned int, double> *m_delta_map;
+    std::map<unsigned int, double>::iterator m_delta_ii;
+    double m_delta_prev_val;
+
+    // pcr jitter next
+    std::map<unsigned int, double>::iterator m_jitter_ii;
+    unsigned int m_jitter_prev_index;
+    double m_jitter_prev_val;
+
+    // timestamp diff
+    std::map<unsigned int, double> *m_diff_map1, *m_diff_map2;
+    std::map<unsigned int, double>::iterator m_diff_ii;
+    unsigned int m_diff_prev_index;
+    double m_diff_prev_value;
+
+
     double getMaxDeltaPcr();
-    double getBitrate();
-    double getDuration();
 
 public:
-    timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts);
+
+    timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
     ~timestamp();
 
-    double getPcr(int index);
-    double getPts(int index);
-    double getDts(int index);
-
-/*  double  PopPcr();
-    double  PopPts();
-    double  PopDts();*/
-
-    void    DumpBitrate();
-    void    DumpDuration();
-    void    DumpPcr();
-    void    DumpPts();
-    void    DumpDts();
-    void    DumpDelta();
-    void    DumpJitterPcr();
-    void    DumpDiff();
+    double  getBitrate();
+    double  getDuration();
+    double  getPcr(unsigned int index);
+    double  getPts(unsigned int index);
+    double  getDts(unsigned int index);
+    bool    getNextPcr(unsigned int& index, double& pcr);
+    bool    getNextPts(unsigned int& index, double& pts);
+    bool    getNextDts(unsigned int& index, double& dts);
+    bool    getNextDelta(unsigned int& index, double& delta);
+    bool    getNextJitterPcr(unsigned int& index, double& jitter);
+    bool    getNextDiff(unsigned int& index, double& diff);
 };
 
-#define TIMESTAMP_NO_PID  -1
 
 #endif // TIMESTAMP_H

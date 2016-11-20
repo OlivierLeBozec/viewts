@@ -2,8 +2,6 @@
 #include "packet.h"
 #include "pes.h"
 
-#define DUMP_PRECISION 12
-
 timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
@@ -13,7 +11,13 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_max_index(0),
     m_pidpcr(pidpcr),
     m_pidpts(pidpts),
-    m_piddts(piddts)
+    m_piddts(piddts),
+    m_pcr_prev_val(-1),
+    m_delta_prev_val(-1),
+    m_jitter_prev_index(-1),
+    m_jitter_prev_val(-1),
+    m_diff_prev_index(-1),
+    m_diff_prev_value(-1)
 {
     unsigned int nbPacket = 0;
 
@@ -128,19 +132,7 @@ double timestamp::getDuration()
     return duration;
 }
 
-/*double timestamp::PopPcr() {
-
-    // test if pcr found
-    if (m_pcrMap.empty()) return 0;
-
-    std::map<unsigned int, double>::iterator ii = m_pcrMap.begin();
-    m_pcrMap.erase(ii);
-
-    return (*ii).second;
-}
-*/
-
-double timestamp::getPcr(int index) {
+double timestamp::getPcr(unsigned int index) {
 
     double pcr = 0;
 
@@ -157,7 +149,7 @@ double timestamp::getPcr(int index) {
     return pcr;
 }
 
-double timestamp::getPts(int index) {
+double timestamp::getPts(unsigned int index) {
 
     double pts = 0;
 
@@ -174,7 +166,7 @@ double timestamp::getPts(int index) {
     return pts;
 }
 
-double timestamp::getDts(int index) {
+double timestamp::getDts(unsigned int index) {
 
     double dts = 0;
 
@@ -191,259 +183,191 @@ double timestamp::getDts(int index) {
     return dts;
 }
 
-void timestamp::DumpDuration()
+bool timestamp::getNextPcr(unsigned int& index, double& pcr)
 {
-    double duration = getDuration();
+    if (m_pcr_prev_val == -1) {
 
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(3);
-
-    if (duration) {
-        std::cout << "Duration(s)" << std::endl;
-        std::cout << duration << std::endl;
+        m_pcr_ii = m_pcrMap.begin();
+        m_pcr_prev_val = (*m_pcr_ii).second;
     }
-    else
-        std::cerr << "Timestamp issue" << std::endl;
 
-    std::cout << std::endl;
+    if (m_pcr_ii != m_pcrMap.end()) {
+
+        // next
+        ++m_pcr_ii;
+        index = (*m_pcr_ii).first;
+        pcr = (*m_pcr_ii).second - m_pcr_prev_val;
+
+        return true;
+    }
+
+    return false;
 }
 
-void timestamp::DumpBitrate()
+bool timestamp::getNextPts(unsigned int& index, double& pts)
 {
-    double bitrate = getBitrate();
+    if (m_dts_prev_val == -1) {
 
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(3);
-
-    if (bitrate) {
-        std::cout.width(20);
-        std::cout << "Bitrate(b/s)";
-        std::cout.width(20);
-        std::cout << "(Kb/s)";
-        std::cout.width(20);
-        std::cout << "(Mb/s)" << std::endl;
-        std::cout.width(20);
-        std::cout << bitrate;
-        std::cout.width(20);
-        std::cout << bitrate/1024;
-        std::cout.width(20);
-        std::cout << bitrate/1024/1024 << std::endl;
+        m_pts_ii = m_ptsMap.begin();
+        m_pts_prev_val = (*m_pts_ii).second;
     }
-    else
-        std::cerr << "Timestamp issue" << std::endl;
 
-    std::cout << std::endl;
+    if (m_pts_ii != m_ptsMap.end()) {
+
+        // next
+        ++m_pts_ii;
+        index = (*m_pts_ii).first;
+        pts = (*m_pts_ii).second - m_pts_prev_val;
+
+        return true;
+    }
+
+    return false;
 }
 
-void timestamp::DumpPcr()
+bool timestamp::getNextDts(unsigned int& index, double& dts)
 {
-    // test if pcr found
-    if (m_pcrMap.empty()) return;
+    if (m_dts_prev_val == -1) {
 
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-    std::cout.width(10);
-    std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
-    std::cout << "PCR(s)" << std::endl;
-
-    std::map<unsigned int, double>::iterator ii;
-    for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
-    {
-        std::cout.width(10);
-        std::cout << (*ii).first;
-        std::cout.width(DUMP_PRECISION);
-        std::cout << (*ii).second << std::endl;
+        m_dts_ii = m_dtsMap.begin();
+        m_dts_prev_val = (*m_dts_ii).second;
     }
 
-    std::cout << std::endl;
+    if (m_dts_ii != m_dtsMap.end()) {
+
+        // next
+        ++m_dts_ii;
+        index = (*m_dts_ii).first;
+        dts = (*m_dts_ii).second - m_dts_prev_val;
+
+        return true;
+    }
+
+    return false;
 }
 
-void timestamp::DumpPts()
+bool timestamp::getNextDelta(unsigned int& index, double& delta)
 {
-    // test if pcr found
-    if (m_ptsMap.empty()) return;
+    if (m_delta_prev_val == -1) {
 
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-    std::cout.width(10);
-    std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
-    std::cout << "PTS(s)" << std::endl;
-
-    std::map<unsigned int, double>::iterator ii;
-    for (ii=m_ptsMap.begin(); ii!=m_ptsMap.end(); ++ii)
-    {
-        std::cout.width(10);
-        std::cout << (*ii).first;
-        std::cout.width(DUMP_PRECISION);
-        std::cout << (*ii).second << std::endl;
-    }
-
-    std::cout << std::endl;
-}
-
-void timestamp::DumpDts()
-{
-    // test if pcr found
-    if (m_dtsMap.empty()) return;
-
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-    std::cout.width(10);
-    std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
-    std::cout << "DTS(s)" << std::endl;
-
-    std::map<unsigned int, double>::iterator ii;
-    for (ii=m_dtsMap.begin(); ii!=m_dtsMap.end(); ++ii)
-    {
-        std::cout.width(10);
-        std::cout << (*ii).first;
-        std::cout.width(DUMP_PRECISION);
-        std::cout << (*ii).second << std::endl;
-    }
-}
-
-void timestamp::DumpDelta()
-{
-    std::map<unsigned int, double> *delta_map;
-
-    if (m_pidpcr != TIMESTAMP_NO_PID) {
-        delta_map = &m_pcrMap;
-    }
-    else if(m_pidpts != TIMESTAMP_NO_PID) {
-        delta_map = &m_ptsMap;
-    }
-    else if(m_piddts != TIMESTAMP_NO_PID) {
-        delta_map = &m_dtsMap;
-    }
-    else
-        return;
-
-    // test if there are some data
-    if (delta_map->empty()) return;
-
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-    std::cout.width(10);
-    std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
-    std::cout << "Delta (s)" << std::endl;
-
-    double prev_val = 0;
-    std::map<unsigned int, double>::iterator ii;
-    for (ii=delta_map->begin(); ii!=delta_map->end(); ++ii)
-    {
-        if (prev_val != 0) {
-            std::cout.width(10);
-            std::cout << (*ii).first;
-            std::cout.width(DUMP_PRECISION);
-            std::cout << (*ii).second - prev_val << std::endl;
+        if (m_pidpcr != TIMESTAMP_NO_PID) {
+            m_delta_map = &m_pcrMap;
         }
-        prev_val = (*ii).second;
-    }
-}
-
-void timestamp::DumpJitterPcr()
-{
-    std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-    std::cout.width(10);
-    std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
-    std::cout << "Jitter PCR(µs)" << std::endl;
-
-    double bitrate = getBitrate();
-    double prev_pcr = 0;
-    unsigned int prev_index = 0;
-
-    std::map<unsigned int, double>::iterator ii;
-    for (ii=m_pcrMap.begin(); ii!=m_pcrMap.end(); ++ii)
-    {
-        if (prev_pcr && prev_index)
-        {
-            // estimate pcr is compute using 27000000 clock
-            double estimate_pcr = prev_pcr;
-            double offset = ((*ii).first - prev_index) * 188 * 8;
-            estimate_pcr += offset/bitrate;
-
-            // jitter in µs
-            double jitter = (*ii).second*1000000 - estimate_pcr*1000000;
-
-            std::cout.width(10);
-            std::cout << (*ii).first;
-            std::cout.width(DUMP_PRECISION);
-            std::cout << jitter << std::endl;
-        }
-
-        prev_index = (*ii).first;
-        prev_pcr = (*ii).second;
-    }
-}
-
-void timestamp::DumpDiff()
-{
-    double bitrate = getBitrate();
-    std::map<unsigned int, double> *diff_map1, *diff_map2;
-
-    std::cout.flags ( std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
-
-    std::cout << std::endl;
-    std::cout.width(20);
-    std::cout << "Buffer Level(s)";
-    std::cout.width(20);
-    std::cout << "(Kb)" << std::endl;
-
-    if (m_pidpcr != TIMESTAMP_NO_PID) {
-        diff_map1 = &m_pcrMap;
-
-        // dts - pcr
-        if(m_piddts != TIMESTAMP_NO_PID) {
-            diff_map2 = &m_dtsMap;
-        }
-        // pts - pcr
         else if(m_pidpts != TIMESTAMP_NO_PID) {
-            diff_map2 = &m_ptsMap;
+            m_delta_map = &m_ptsMap;
         }
-        else return;
-    }
-    else if(m_piddts != TIMESTAMP_NO_PID) {
-        diff_map1 = &m_dtsMap;
-
-        // pts - dts
-        if(m_pidpts != TIMESTAMP_NO_PID) {
-            diff_map2 = &m_ptsMap;
+        else if(m_piddts != TIMESTAMP_NO_PID) {
+            m_delta_map = &m_dtsMap;
         }
-        else return;
+        else
+            return false;
+
+        m_delta_ii = m_delta_map->begin();
+        m_delta_prev_val = (*m_delta_ii).second;
     }
-    else return;
 
+    if (m_delta_ii != --m_delta_map->end())
+    {
+        // next
+        ++m_delta_ii;
 
-    std::map<unsigned int, double>::iterator ii;
-    unsigned int prev_index = 0;
-    double prev_value = 0;
-    for (ii = diff_map1->begin(); ii != diff_map1->end(); ++ii) {
+        // delta in seconds
+        delta = (*m_delta_ii).second - m_delta_prev_val;
+        index = (*m_delta_ii).first;
 
-        if (prev_index != 0) {
-            for (unsigned int index = prev_index; index < (*ii).first; ++index) {
-                if (diff_map2->find(index) != diff_map2->end()) {
+        m_delta_prev_val = (*m_delta_ii).second;
+        return true;
+    }
 
-                    // diff between different timestamp
-                    // should be on the same packet or higher
-                    double diff = diff_map2->find(index)->second - prev_value;
+    return false;
+}
 
-                    std::cout.width(20);
-                    std::cout << diff;
-                    std::cout.width(20);
-                    std::cout << diff*bitrate/1024;
-                    std::cout << std::endl;
-                 }
+bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
+{
+    if (m_jitter_prev_val == -1 && m_jitter_prev_index == -1) {
+
+        m_jitter_ii = m_pcrMap.begin();
+        m_jitter_prev_index = (*m_jitter_ii).first;
+        m_jitter_prev_val = (*m_jitter_ii).second;
+    }
+
+    if (m_jitter_ii != m_pcrMap.end()) {
+
+        // next
+        ++m_jitter_ii;
+
+        // estimated pcr is compute using bitrate and number of bit
+        double offset = ((*m_jitter_ii).first - m_jitter_prev_index) * 188 * 8;
+        double estimate_pcr = m_jitter_prev_val;
+        estimate_pcr += offset/getBitrate();
+
+        // jitter in s
+        jitter = (*m_jitter_ii).second - estimate_pcr;
+        index = (*m_jitter_ii).first;
+
+        m_jitter_prev_index = (*m_jitter_ii).first;
+        m_jitter_prev_val = (*m_jitter_ii).second;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool timestamp::getNextDiff(unsigned int& index, double& diff)
+{
+    if (m_diff_prev_index == -1 && m_diff_prev_value == -1) {
+
+        if (m_pidpcr != TIMESTAMP_NO_PID) {
+            m_diff_map1 = &m_pcrMap;
+
+            // dts - pcr
+            if(m_piddts != TIMESTAMP_NO_PID) {
+                m_diff_map2 = &m_dtsMap;
+            }
+            // pts - pcr
+            else if(m_pidpts != TIMESTAMP_NO_PID) {
+                m_diff_map2 = &m_ptsMap;
+            }
+            else return false;
+        }
+        else if(m_piddts != TIMESTAMP_NO_PID) {
+            m_diff_map1 = &m_dtsMap;
+
+            // pts - dts
+            if(m_pidpts != TIMESTAMP_NO_PID) {
+                m_diff_map2 = &m_ptsMap;
+            }
+        }
+        else return false;
+
+        // init value
+        m_diff_ii = m_diff_map1->begin();
+        m_diff_prev_index = (*m_diff_ii).first;
+        m_diff_prev_value = (*m_diff_ii).second;
+    }
+
+    while (m_diff_ii != --m_diff_map1->end()) {
+
+        ++m_diff_ii;
+        for (unsigned int _index = m_diff_prev_index; _index < (*m_diff_ii).first; ++_index)
+        {
+            if (m_diff_map2->find(_index) != m_diff_map2->end())
+            {
+                // diff between different timestamp
+                // should be on the same packet or higher
+                diff = m_diff_map2->find(_index)->second - m_diff_prev_value;
+                index = _index;
+
+                m_diff_prev_index = (*m_diff_ii).first;
+                m_diff_prev_value = (*m_diff_ii).second;
+                return true;
             }
         }
 
-        prev_index = (*ii).first;
-        prev_value = (*ii).second;
+        m_diff_prev_index = (*m_diff_ii).first;
+        m_diff_prev_value = (*m_diff_ii).second;
     }
+
+    return false;
 }
