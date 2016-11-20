@@ -7,6 +7,181 @@
 #include "timestamp.h"
 
 #define VERSION "1.0"
+#define DUMP_PRECISION 12
+
+void DumpDuration(timestamp& ts)
+{
+    double duration = ts.getDuration();
+
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(3);
+
+    if (duration) {
+        std::cout << "Duration(s)" << std::endl;
+        std::cout << duration << std::endl;
+    }
+    else
+        std::cerr << "Timestamp issue" << std::endl;
+
+    std::cout << std::endl;
+}
+
+void DumpBitrate(timestamp& ts)
+{
+    double bitrate = ts.getBitrate();
+
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(3);
+
+    if (bitrate) {
+        std::cout.width(20);
+        std::cout << "Bitrate(b/s)";
+        std::cout.width(20);
+        std::cout << "(Kb/s)";
+        std::cout.width(20);
+        std::cout << "(Mb/s)" << std::endl;
+        std::cout.width(20);
+        std::cout << bitrate;
+        std::cout.width(20);
+        std::cout << bitrate/1024;
+        std::cout.width(20);
+        std::cout << bitrate/1024/1024 << std::endl;
+    }
+    else
+        std::cerr << "Timestamp issue" << std::endl;
+
+    std::cout << std::endl;
+}
+
+void DumpPcr(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "PCR(s)" << std::endl;
+
+    unsigned int index;
+    double pcr;
+    while (ts.getNextPcr(index, pcr) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << pcr << std::endl;
+    }
+
+    std::cout << std::endl;
+}
+
+void DumpPts(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "PTS(s)" << std::endl;
+
+    unsigned int index;
+    double pts;
+    while (ts.getNextPts(index, pts) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << pts << std::endl;
+    }
+
+    std::cout << std::endl;
+}
+
+void DumpDts(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "DTS(s)" << std::endl;
+
+    unsigned int index;
+    double dts;
+    while (ts.getNextDts(index, dts) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << dts << std::endl;
+    }
+}
+
+void DumpDelta(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "Delta (s)" << std::endl;
+
+    unsigned int index;
+    double delta;
+    while (ts.getNextDelta(index, delta) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << delta << std::endl;
+    }
+}
+
+void DumpJitterPcr(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "Jitter PCR (s)" << std::endl;
+
+    unsigned int index;
+    double jitter;
+    while (ts.getNextJitterPcr(index, jitter) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << jitter << std::endl;
+    }
+}
+
+void DumpDiff(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "timestamp diff (s)" << std::endl;
+
+    unsigned int index;
+    double diff;
+    while (ts.getNextDiff(index, diff) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << diff << std::endl;
+    }
+}
 
 void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
@@ -96,14 +271,14 @@ int main(int argc, char** argv)
     // display timestamp
     if (dump || rate || dur || delta || jitter || diff){
         timestamp ts(tsFile, pidpcr, pidpts, piddts);
-        if (dump && pidpcr != TIMESTAMP_NO_PID) ts.DumpPcr();
-        if (dump && pidpts != TIMESTAMP_NO_PID) ts.DumpPts();
-        if (dump && piddts != TIMESTAMP_NO_PID) ts.DumpDts();
-        if (dur)        ts.DumpDuration();
-        if (rate)       ts.DumpBitrate();
-        if (delta)      ts.DumpDelta();
-        if (jitter)     ts.DumpJitterPcr();
-        if (diff)       ts.DumpDiff();
+        if (dump && pidpcr != TIMESTAMP_NO_PID) DumpPcr(ts);
+        if (dump && pidpts != TIMESTAMP_NO_PID) DumpPts(ts);
+        if (dump && piddts != TIMESTAMP_NO_PID) DumpDts(ts);
+        if (dur)    DumpDuration(ts);
+        if (rate)   DumpBitrate(ts);
+        if (delta)  DumpDelta(ts);
+        if (jitter) DumpJitterPcr(ts);
+        if (diff)   DumpDiff(ts);
     }
 
     // close
