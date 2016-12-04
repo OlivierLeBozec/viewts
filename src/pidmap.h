@@ -27,6 +27,10 @@ public:
     pidmap(std::ifstream& fileIn);
     ~pidmap();
 
+    void getPcrPid(std::vector<unsigned int>& pidVector);
+    void getPtsPid(std::vector<unsigned int>& pidVector);
+    void getDtsPid(std::vector<unsigned int>& pidVector);
+
     void OutPid();
     void OutMap();
 };
