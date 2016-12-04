@@ -1,5 +1,18 @@
 #include "../src/timestamp.h"
+#include "../src/pidmap.h"
 #include "gtest/gtest.h"
+
+
+TEST(pid, check_PCR_pid_on_audio)
+{
+    std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
+
+    pidmap pm(tsFile);
+    std::vector<unsigned int> pcrPid;
+    pm.getPcrPid(pcrPid);
+
+    EXPECT_EQ(pcrPid[0], 305);
+}
 
 TEST(pcr, check_PCR_values_on_audio)
 {

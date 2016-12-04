@@ -11,5 +11,5 @@ set(SOURCE_FILES
 
 include_directories(${GTEST_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
 add_executable(tstool_tests ${SOURCE_FILES})
-target_link_libraries(tstool_tests ${GTEST_LIBS_DIR}/libgtest.a ${GTEST_LIBS_DIR}/libgtest_main.a tstoolcheck)
+target_link_libraries(tstool_tests ${GTEST_LIBS_DIR}/libgtest.a ${GTEST_LIBS_DIR}/libgtest_main.a tstoolcheck tstoolmap)
 add_dependencies(tstool_tests googletest tstoolcheck)
