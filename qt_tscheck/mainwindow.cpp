@@ -14,10 +14,13 @@ MainWindow::MainWindow() :
 
     // create layout
     QLabel *pcrLabel = new QLabel(tr("Pcr:"));
+    pcrLabel->setFixedHeight(20);
     m_pcrComboBox = new QComboBox;
     QLabel *ptsLabel = new QLabel(tr("Pts:"));
+    ptsLabel->setFixedHeight(20);
     m_ptsComboBox = new QComboBox;
     QLabel *dtsLabel = new QLabel(tr("Dts:"));
+    dtsLabel->setFixedHeight(20);
     m_dtsComboBox = new QComboBox;
 
     QAbstractButton *PcrButton = new QPushButton(tr("Pcr"));
@@ -131,6 +134,9 @@ void MainWindow::openFile()
 
 void MainWindow::Pcr()
 {
+    // protection
+    if (m_pcrComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -151,6 +157,9 @@ void MainWindow::Pcr()
 
 void MainWindow::Pts()
 {
+    // protection
+    if (m_ptsComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -171,6 +180,9 @@ void MainWindow::Pts()
 
 void MainWindow::Dts()
 {
+    // protection
+    if (m_dtsComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -191,6 +203,9 @@ void MainWindow::Dts()
 
 void MainWindow::deltaPcr()
 {
+    // protection
+    if (m_pcrComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -211,6 +226,9 @@ void MainWindow::deltaPcr()
 
 void MainWindow::deltaPts()
 {
+    // protection
+    if (m_ptsComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -231,6 +249,9 @@ void MainWindow::deltaPts()
 
 void MainWindow::deltaDts()
 {
+    // protection
+    if (m_dtsComboBox->count() == 0) return;
+
     // new drawing
     QLineSeries *series = new QLineSeries();
 
@@ -252,7 +273,6 @@ void MainWindow::deltaDts()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> example demonstrates how to "
-               "write modern GUI applications using Qt, with a menu bar, "
-               "toolbars, and a status bar."));
+            tr("The <b>Application</b> display pcr, pts, dts "
+               "and various opreation on these timestamps "));
 }
