@@ -11,6 +11,7 @@ pidmap::pidmap(std::ifstream& fileIn)
     // TODO: thread
 
     // loop on packet
+    fileIn.clear();
     fileIn.seekg(0);    // TODO
     while (fileIn.read((char*)data, 188))
     {
@@ -53,6 +54,36 @@ pidmap::~pidmap()
     }
     if (!m_pidVec.empty()) {
         m_pidVec.clear();
+    }
+}
+
+void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector) {
+
+    std::map<unsigned int, pidinfo>::iterator ii;
+    for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
+    {
+        if((*ii).second.has_pcr)
+            pidVector.push_back((*ii).first);
+    }
+}
+
+void pidmap::getPtsPid(std::vector<unsigned int>&  pidVector) {
+
+    std::map<unsigned int, pidinfo>::iterator ii;
+    for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
+    {
+        if((*ii).second.has_pts)
+            pidVector.push_back((*ii).first);
+    }
+}
+
+void pidmap::getDtsPid(std::vector<unsigned int>&  pidVector) {
+
+    std::map<unsigned int, pidinfo>::iterator ii;
+    for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
+    {
+        if((*ii).second.has_dts)
+            pidVector.push_back((*ii).first);
     }
 }
 
