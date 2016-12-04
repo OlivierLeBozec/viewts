@@ -13,6 +13,8 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_pidpts(pidpts),
     m_piddts(piddts),
     m_pcr_prev_val(-1),
+    m_pts_prev_val(-1),
+    m_dts_prev_val(-1),
     m_delta_prev_val(-1),
     m_jitter_prev_index(-1),
     m_jitter_prev_val(-1),
@@ -27,7 +29,9 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     // TODO: find first start byte (repeated 0x47 every 188)
 
     // loop on packet
+    fileIn.clear();
     fileIn.seekg(0); // TODO
+
     while (fileIn.read((char*)data, 188))
     {
         // create packet from buffer
@@ -196,7 +200,7 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
         // next
         ++m_pcr_ii;
         index = (*m_pcr_ii).first;
-        pcr = (*m_pcr_ii).second - m_pcr_prev_val;
+        pcr = (*m_pcr_ii).second;
 
         return true;
     }
@@ -206,7 +210,7 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
 
 bool timestamp::getNextPts(unsigned int& index, double& pts)
 {
-    if (m_dts_prev_val == -1) {
+    if (m_pts_prev_val == -1) {
 
         m_pts_ii = m_ptsMap.begin();
         m_pts_prev_val = (*m_pts_ii).second;
@@ -217,7 +221,7 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
         // next
         ++m_pts_ii;
         index = (*m_pts_ii).first;
-        pts = (*m_pts_ii).second - m_pts_prev_val;
+        pts = (*m_pts_ii).second;
 
         return true;
     }
@@ -238,7 +242,7 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
         // next
         ++m_dts_ii;
         index = (*m_dts_ii).first;
-        dts = (*m_dts_ii).second - m_dts_prev_val;
+        dts = (*m_dts_ii).second;
 
         return true;
     }
@@ -266,7 +270,7 @@ bool timestamp::getNextDelta(unsigned int& index, double& delta)
         m_delta_prev_val = (*m_delta_ii).second;
     }
 
-    if (m_delta_ii != --m_delta_map->end())
+    if (!m_delta_map->empty() && m_delta_ii != --m_delta_map->end())
     {
         // next
         ++m_delta_ii;
