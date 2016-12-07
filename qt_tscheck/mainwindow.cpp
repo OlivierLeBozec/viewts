@@ -11,18 +11,28 @@ MainWindow::MainWindow() :
     setCentralWidget(main_widget);
 
     createMenu();
+    createLayout(main_widget);
+}
 
-    // create layout
+MainWindow::~MainWindow()
+{
+    if (m_tsFile) delete m_tsFile;
+}
+
+void MainWindow::createLayout(QWidget *widget)
+{
+    // label
     QLabel *pcrLabel = new QLabel(tr("Pcr:"));
-    pcrLabel->setFixedHeight(20);
+    pcrLabel->setFixedHeight(10);
     m_pcrComboBox = new QComboBox;
     QLabel *ptsLabel = new QLabel(tr("Pts:"));
-    ptsLabel->setFixedHeight(20);
+    ptsLabel->setFixedHeight(10);
     m_ptsComboBox = new QComboBox;
     QLabel *dtsLabel = new QLabel(tr("Dts:"));
-    dtsLabel->setFixedHeight(20);
+    dtsLabel->setFixedHeight(10);
     m_dtsComboBox = new QComboBox;
 
+    // button
     QAbstractButton *PcrButton = new QPushButton(tr("Pcr"));
     connect(PcrButton, SIGNAL(clicked()), this, SLOT(Pcr()));
     QAbstractButton *deltaPcrButton = new QPushButton(tr("Delta Pcr"));
@@ -36,10 +46,12 @@ MainWindow::MainWindow() :
     QAbstractButton *deltaDtsButton = new QPushButton(tr("Delta Dts"));
     connect(deltaDtsButton, SIGNAL(clicked()), this, SLOT(deltaDts()));
 
+    // graph
     Chart *chart = new Chart;
     m_chartView = new ChartView(chart);
     m_chartView->setRenderHint(QPainter::Antialiasing);
 
+    // vertical layout
     QBoxLayout *controlLayout = new QVBoxLayout;
     controlLayout->addWidget(pcrLabel);
     controlLayout->addWidget(m_pcrComboBox);
@@ -54,29 +66,13 @@ MainWindow::MainWindow() :
     controlLayout->addWidget(DtsButton);
     controlLayout->addWidget(deltaDtsButton);
 
+    // horizontal layout
     QBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addLayout(controlLayout);
     hlayout->addWidget(m_chartView);
 
-    // set layout
-    main_widget->setLayout(hlayout);
-}
-
-MainWindow::~MainWindow()
-{
-    if (m_tsFile) delete m_tsFile;
-}
-
-void MainWindow::UpdateChart(QLineSeries* Series)
-{
-    Chart *chart = (Chart*)m_chartView->chart();
-    chart->addSeries(Series);
-    chart->setTitle("");
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-    chart->legend()->hide();
-    chart->createDefaultAxes();
-
-    m_chartView->setChart(chart);
+    // apply
+    widget->setLayout(hlayout);
 }
 
 void MainWindow::createMenu()
@@ -88,10 +84,34 @@ void MainWindow::createMenu()
     connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
     fileMenu->addAction(openAct);
 
+    QMenu *graphMenu = menuBar()->addMenu(tr("&Graph"));
+    QAction *clearAllAct = new QAction(tr("&Clear All"), this);
+    clearAllAct->setShortcuts(QKeySequence::Delete);
+    clearAllAct->setStatusTip(tr("Clear all data"));
+    connect(clearAllAct, &QAction::triggered, this, &MainWindow::clearAllChart);
+    graphMenu->addAction(clearAllAct);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&About"));
     QAction *aboutAct = helpMenu->addAction(tr("&About..."), this, &MainWindow::about);
     aboutAct->setStatusTip(tr("Show the application About box"));
+}
+
+void MainWindow::UpdateChart(QLineSeries* Series)
+{
+    Chart *chart = (Chart*)m_chartView->chart();
+    chart->addSeries(Series);
+    chart->setTitle("");
+    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+    chart->legend()->hide();
+    chart->createDefaultAxes();
+
+    //m_chartView->setChart(chart);
+}
+
+void MainWindow::clearAllChart()
+{
+    Chart *chart = (Chart*)m_chartView->chart();
+    chart->removeAllSeries();
 }
 
 void MainWindow::openFile()
@@ -148,6 +168,7 @@ void MainWindow::Pcr()
     double pcr;
     while(ts.getNextPcr(index, pcr) == true)
     {
+        //std::cout << "index" << index << " - " << pcr << std::endl;
         QPointF p( index, (qreal)pcr);
         *series << p;
     }

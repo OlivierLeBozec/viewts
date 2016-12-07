@@ -30,6 +30,7 @@ public:
 
 private slots:
     void openFile();
+    void clearAllChart();
     void Pcr();
     void Pts();
     void Dts();
@@ -47,8 +48,9 @@ private:
     QComboBox *m_dtsComboBox;
 
     void createMenu();
-    void UpdateChart(QLineSeries* Series);
+    void createLayout(QWidget *widget);
 
+    void UpdateChart(QLineSeries* Series);
 };
 
 #endif // MAINWINDOW_H
