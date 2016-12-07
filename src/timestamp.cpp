@@ -197,10 +197,9 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
 
     if (m_pcr_ii != m_pcrMap.end()) {
 
-        // next
-        ++m_pcr_ii;
         index = (*m_pcr_ii).first;
         pcr = (*m_pcr_ii).second;
+        ++m_pcr_ii;
 
         return true;
     }
@@ -218,10 +217,9 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
 
     if (m_pts_ii != m_ptsMap.end()) {
 
-        // next
-        ++m_pts_ii;
         index = (*m_pts_ii).first;
         pts = (*m_pts_ii).second;
+        ++m_pts_ii;
 
         return true;
     }
@@ -239,10 +237,9 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
 
     if (m_dts_ii != m_dtsMap.end()) {
 
-        // next
-        ++m_dts_ii;
         index = (*m_dts_ii).first;
         dts = (*m_dts_ii).second;
+        ++m_dts_ii;
 
         return true;
     }
@@ -295,7 +292,7 @@ bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
         m_jitter_prev_val = (*m_jitter_ii).second;
     }
 
-    if (m_jitter_ii != m_pcrMap.end()) {
+    if (m_jitter_ii != --m_pcrMap.end()) {
 
         // next
         ++m_jitter_ii;
