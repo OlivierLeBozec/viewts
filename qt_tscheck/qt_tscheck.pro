@@ -4,14 +4,15 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts widgets
+QT      += core gui charts widgets
+CONFIG  += static
 
 TARGET = qt_tscheck
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     chart.cpp \
     chartview.cpp
 
