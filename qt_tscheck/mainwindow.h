@@ -38,13 +38,18 @@ private slots:
     void deltaDts(int state);
 
     void openFile();
-    void clearAllChart();
+    void clearAllSeries();
+    void erasePcrSeries(int);
+    void erasePtsSeries(int);
+    void eraseDtsSeries(int);
     void about();
 
 private:
     std::ifstream* m_tsFile;
 
     ChartView *m_chartView;
+
+    QString m_legend;
 
     QComboBox *m_pcrComboBox;
     QComboBox *m_ptsComboBox;
@@ -74,7 +79,7 @@ private:
     void createLayout(QWidget *widget);
 
     void drawSeries(QLineSeries* Series, const QString legend);
-    void eraseSeries(QLineSeries* Series);
+    void eraseSeries(QLineSeries* Series, const QString legend);
 };
 
 #endif // MAINWINDOW_H
