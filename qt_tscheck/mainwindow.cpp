@@ -6,7 +6,6 @@
 
 MainWindow::MainWindow() :
     m_tsFile(NULL),
-    m_legend(""),
     m_pcrSeries(NULL),
     m_ptsSeries(NULL),
     m_dtsSeries(NULL),
@@ -139,30 +138,29 @@ void MainWindow::createMenu()
     aboutAct->setStatusTip(tr("Show the application About box"));
 }
 
-void MainWindow::drawSeries(QLineSeries* Series, const QString legend)
+void MainWindow::drawSeries(QLineSeries* pSeries)
 {
-    Chart *chart = (Chart*)m_chartView->chart();
-    chart->addSeries(Series);
-    m_legend += legend;
-    chart->setTitle(m_legend);
+    if (pSeries != NULL)
+    {
+        Chart *chart = (Chart*)m_chartView->chart();
+        chart->addSeries(pSeries);
+    }
 }
 
-void MainWindow::eraseSeries(QLineSeries* Series, const QString legend)
+void MainWindow::eraseSeries(QLineSeries* pSeries)
 {
-    Chart *chart = (Chart*)m_chartView->chart();
-    chart->removeSeries(Series);
-    m_legend.replace(legend, QString(""));
-    chart->setTitle(m_legend);
+    if (pSeries != NULL)
+    {
+        Chart *chart = (Chart*)m_chartView->chart();
+        chart->removeSeries(pSeries);
+
+        delete pSeries;
+        pSeries = NULL;
+    }
 }
 
 void MainWindow::erasePcrSeries(int)
 {
-    Chart *chart = (Chart*)m_chartView->chart();
-    m_legend.replace(QString("Pcr "), QString(""));
-    m_legend.replace(QString("Delta_pcr "), QString(""));
-    m_legend.replace(QString("Jitter_pcr "), QString(""));
-    chart->setTitle(m_legend);
-
     m_pcrBox->setChecked(false);
     m_deltaPcrBox->setChecked(false);
     m_jitterPcrBox->setChecked(false);
@@ -170,32 +168,18 @@ void MainWindow::erasePcrSeries(int)
 
 void MainWindow::erasePtsSeries(int)
 {
-    Chart *chart = (Chart*)m_chartView->chart();
-    m_legend.replace(QString("Pts "), QString(""));
-    m_legend.replace(QString("Delta_pts "), QString(""));
-    chart->setTitle(m_legend);
-
     m_ptsBox->setChecked(false);
     m_deltaPtsBox->setChecked(false);
 }
 
 void MainWindow::eraseDtsSeries(int)
 {
-    Chart *chart = (Chart*)m_chartView->chart();
-    m_legend.replace(QString("Dts "), QString(""));
-    m_legend.replace(QString("Delta_dts "), QString(""));
-    chart->setTitle(m_legend);
-
     m_dtsBox->setChecked(false);
     m_deltaDtsBox->setChecked(false);
 }
 
 void MainWindow::clearAllSeries()
 {
-    m_legend = "";
-    Chart *chart = (Chart*)m_chartView->chart();
-    chart->setTitle(m_legend);
-
     m_pcrBox->setChecked(false);
     m_deltaPcrBox->setChecked(false);
     m_jitterPcrBox->setChecked(false);
@@ -261,6 +245,7 @@ void MainWindow::Pcr(int state)
     {
         // new drawing
         m_pcrSeries = new QLineSeries();
+        m_pcrSeries->setName(QString("Pcr"));
 
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
@@ -275,16 +260,11 @@ void MainWindow::Pcr(int state)
             *m_pcrSeries << p;
         }
 
-        drawSeries(m_pcrSeries, "Pcr ");
+        drawSeries(m_pcrSeries);
     }
     else
     {
-        if (m_pcrSeries != NULL)
-        {
-            eraseSeries(m_pcrSeries, "Pcr ");
-            delete m_pcrSeries;
-            m_pcrSeries = NULL;
-        }
+        eraseSeries(m_pcrSeries);
     }
 }
 
@@ -294,6 +274,7 @@ void MainWindow::Pts(int state)
     {
         // new drawing
         m_ptsSeries = new QLineSeries();
+        m_ptsSeries->setName(QString("Pts"));
 
         // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
@@ -307,16 +288,11 @@ void MainWindow::Pts(int state)
             *m_ptsSeries << p;
         }
 
-        drawSeries(m_ptsSeries, "Pts ");
+        drawSeries(m_ptsSeries);
     }
     else
     {
-        if (m_ptsSeries != NULL)
-        {
-            eraseSeries(m_ptsSeries, "Pts ");
-            delete m_ptsSeries;
-            m_ptsSeries = NULL;
-        }
+        eraseSeries(m_ptsSeries);
     }
 }
 
@@ -326,6 +302,7 @@ void MainWindow::Dts(int state)
     {
         // new drawing
         m_dtsSeries = new QLineSeries();
+        m_dtsSeries->setName(QString("Dts"));
 
         // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
@@ -339,16 +316,11 @@ void MainWindow::Dts(int state)
             *m_dtsSeries << p;
         }
 
-        drawSeries(m_dtsSeries, "Dts ");
+        drawSeries(m_dtsSeries);
     }
     else
     {
-        if (m_dtsSeries != NULL)
-        {
-            eraseSeries(m_dtsSeries, "Dts ");
-            delete m_dtsSeries;
-            m_dtsSeries = NULL;
-        }
+        eraseSeries(m_dtsSeries);
     }
 }
 
@@ -358,6 +330,7 @@ void MainWindow::deltaPcr(int state)
     {
         // new drawing
         m_pcrDeltaSeries = new QLineSeries();
+        m_pcrDeltaSeries->setName(QString("Delta Pcr"));
 
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
@@ -371,16 +344,11 @@ void MainWindow::deltaPcr(int state)
             *m_pcrDeltaSeries << p;
         }
 
-        drawSeries(m_pcrDeltaSeries, "Delta_pcr ");
+        drawSeries(m_pcrDeltaSeries);
     }
     else
     {
-        if (m_pcrDeltaSeries != NULL)
-        {
-            eraseSeries(m_pcrDeltaSeries, "Delta_pcr ");
-            delete m_pcrDeltaSeries;
-            m_pcrDeltaSeries = NULL;
-        }
+        eraseSeries(m_pcrDeltaSeries);
     }
 }
 
@@ -390,6 +358,7 @@ void MainWindow::deltaPts(int state)
     {
         // new drawing
         m_ptsDeltaSeries = new QLineSeries();
+        m_ptsDeltaSeries->setName(QString("Delta Pts"));
 
         // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
@@ -403,16 +372,11 @@ void MainWindow::deltaPts(int state)
             *m_ptsDeltaSeries << p;
         }
 
-        drawSeries(m_ptsDeltaSeries, "Delta_pts ");
+        drawSeries(m_ptsDeltaSeries);
     }
     else
     {
-        if (m_ptsDeltaSeries != NULL)
-        {
-            eraseSeries(m_ptsDeltaSeries, "Delta_pts ");
-            delete m_ptsDeltaSeries;
-            m_ptsDeltaSeries = NULL;
-        }
+        eraseSeries(m_ptsDeltaSeries);
     }
 }
 
@@ -422,6 +386,7 @@ void MainWindow::deltaDts(int state)
     {
         // new drawing
         m_dtsDeltaSeries = new QLineSeries();
+        m_dtsDeltaSeries->setName(QString("Delta Dts"));
 
         // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
@@ -435,16 +400,11 @@ void MainWindow::deltaDts(int state)
             *m_dtsDeltaSeries << p;
         }
 
-        drawSeries(m_dtsDeltaSeries, "Delta_dts ");
+        drawSeries(m_dtsDeltaSeries);
     }
     else
     {
-        if (m_dtsDeltaSeries != NULL)
-        {
-            eraseSeries(m_dtsDeltaSeries, "Delta_dts ");
-            delete m_dtsDeltaSeries;
-            m_dtsDeltaSeries = NULL;
-        }
+        eraseSeries(m_dtsDeltaSeries);
     }
 }
 
@@ -454,6 +414,7 @@ void MainWindow::jitterPcr(int state)
     {
         // new drawing
         m_pcrJitterSeries = new QLineSeries();
+        m_pcrJitterSeries->setName(QString("Pcr jitter"));
 
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
@@ -467,16 +428,11 @@ void MainWindow::jitterPcr(int state)
             *m_pcrJitterSeries << p;
         }
 
-        drawSeries(m_pcrJitterSeries, "Jitter_pcr ");
+        drawSeries(m_pcrJitterSeries);
     }
     else
     {
-        if (m_pcrJitterSeries != NULL)
-        {
-            eraseSeries(m_pcrJitterSeries, "Jitter_pcr ");
-            delete m_pcrJitterSeries;
-            m_pcrJitterSeries = NULL;
-        }
+        eraseSeries(m_pcrJitterSeries);
     }
 }
 

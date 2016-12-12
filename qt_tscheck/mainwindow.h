@@ -49,8 +49,6 @@ private:
 
     ChartView *m_chartView;
 
-    QString m_legend;
-
     QComboBox *m_pcrComboBox;
     QComboBox *m_ptsComboBox;
     QComboBox *m_dtsComboBox;
@@ -78,8 +76,8 @@ private:
     void createMenu();
     void createLayout(QWidget *widget);
 
-    void drawSeries(QLineSeries* Series, const QString legend);
-    void eraseSeries(QLineSeries* Series, const QString legend);
+    void drawSeries(QLineSeries* Series);
+    void eraseSeries(QLineSeries* Series);
 };
 
 #endif // MAINWINDOW_H
