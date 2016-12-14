@@ -11,7 +11,10 @@ MainWindow::MainWindow() :
     m_dtsSeries(NULL),
     m_pcrDeltaSeries(NULL),
     m_ptsDeltaSeries(NULL),
-    m_dtsDeltaSeries(NULL)
+    m_dtsDeltaSeries(NULL),
+    m_pcrPtsDiffSeries(NULL),
+    m_ptsDtsDiffSeries(NULL),
+    m_pcrDtsDiffSeries(NULL)
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
@@ -86,27 +89,46 @@ void MainWindow::createLayout(QWidget *widget)
     m_dtsGroupBox->setLayout(dtsGroupBoxLayout);
     m_dtsGroupBox->setEnabled(false);
 
-
     connect(m_dtsBox, SIGNAL(stateChanged(int)), this, SLOT(Dts(int)));
     connect(m_deltaDtsBox, SIGNAL(stateChanged(int)), this, SLOT(deltaDts(int)));
     connect(m_dtsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(eraseDtsSeries(int)));
+
+    // diff
+    m_diffGroupBox = new QGroupBox(tr("Diff"));
+    m_diffPcrPtsBox = new QCheckBox(tr("Display Pts-Pcr"));
+    m_diffPtsDtsBox = new QCheckBox(tr("Display Dts-Pts"));
+    m_diffPcrDtsBox = new QCheckBox(tr("Display Dts-Pcr"));
+
+    QGridLayout *diffGroupBoxLayout = new QGridLayout;
+    diffGroupBoxLayout->addWidget(m_diffPcrPtsBox, 0, 0, Qt::AlignTop);
+    diffGroupBoxLayout->addWidget(m_diffPtsDtsBox, 1, 0, Qt::AlignTop);
+    diffGroupBoxLayout->addWidget(m_diffPcrDtsBox, 2, 0, Qt::AlignTop);
+    diffGroupBoxLayout->setVerticalSpacing(0);
+    m_diffGroupBox->setLayout(diffGroupBoxLayout);
+    m_diffGroupBox->setEnabled(false);
+
+    connect(m_diffPcrPtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrPts(int)));
+    connect(m_diffPcrDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrDts(int)));
+    connect(m_diffPtsDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPtsDts(int)));
 
     // graph
     Chart *chart = new Chart;
     chart->setTitle("");
     chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
     chart->createDefaultAxes();
+    //chart->setAxisX();
 
     m_chartView = new ChartView(chart);
     m_chartView->setRenderHint(QPainter::Antialiasing);
 
-    // vertical layout
+    // vertical layout on left hand side
     QBoxLayout *controlLayout = new QVBoxLayout;
     controlLayout->setSizeConstraint(QLayout::SetNoConstraint);
     controlLayout->addWidget(m_pcrGroupBox);
     controlLayout->addWidget(m_ptsGroupBox);
     controlLayout->addWidget(m_dtsGroupBox);
-    controlLayout->addStretch();
+    controlLayout->addWidget(m_diffGroupBox);
+    controlLayout->addStretch(); // to add space when resize
 
     // horizontal layout
     QBoxLayout *hlayout = new QHBoxLayout;
@@ -187,6 +209,9 @@ void MainWindow::clearAllSeries()
     m_deltaPtsBox->setChecked(false);
     m_dtsBox->setChecked(false);
     m_deltaDtsBox->setChecked(false);
+    m_diffPcrPtsBox->setChecked(false);
+    m_diffPtsDtsBox->setChecked(false);
+    m_diffPcrDtsBox->setChecked(false);
 }
 
 void MainWindow::openFile()
@@ -207,35 +232,61 @@ void MainWindow::openFile()
         m_pcrGroupBox->setEnabled(false);
         m_ptsGroupBox->setEnabled(false);
         m_dtsGroupBox->setEnabled(false);
+        m_diffGroupBox->setEnabled(false);
         clearAllSeries();
 
         // update pcr/pts/dts pid
         std::vector<unsigned int>::iterator it;
         std::vector<unsigned int> pidVect;
 
+        bool hasPcr = false;
         pm.getPcrPid(pidVect);
         for (it = pidVect.begin(); it < pidVect.end(); it++)
         {
+            hasPcr = true;
             m_pcrComboBox->addItem(QString::number(*it), *it);
             m_pcrGroupBox->setEnabled(true);
         }
         pidVect.clear();
 
+        bool hasPts = false;
         pm.getPtsPid(pidVect);
         for (it = pidVect.begin(); it < pidVect.end(); it++)
         {
+            hasPts = true;
             m_ptsComboBox->addItem(QString::number(*it), *it);
             m_ptsGroupBox->setEnabled(true);
         }
         pidVect.clear();
 
+        bool hasDts = false;
         pm.getDtsPid(pidVect);
         for (it = pidVect.begin(); it < pidVect.end(); it++)
         {
+            hasDts = true;
             m_dtsComboBox->addItem(QString::number(*it), *it);
             m_dtsGroupBox->setEnabled(true);
         }
         pidVect.clear();
+
+        if (hasPcr && hasPts && hasDts)
+        {
+            m_diffGroupBox->setEnabled(true);
+        }
+        else if (hasPcr && hasPts)
+        {
+            // no Dts
+            m_diffGroupBox->setEnabled(true);
+            m_diffPtsDtsBox->setEnabled(false);
+            m_diffPcrDtsBox->setEnabled(false);
+        }
+        else if (hasDts && hasPts)
+        {
+            // no Pcr
+            m_diffGroupBox->setEnabled(true);
+            m_diffPcrPtsBox->setEnabled(false);
+            m_diffPcrDtsBox->setEnabled(false);
+        }
     }
 }
 
@@ -433,6 +484,93 @@ void MainWindow::jitterPcr(int state)
     else
     {
         eraseSeries(m_pcrJitterSeries);
+    }
+}
+
+void MainWindow::diffPcrPts(int state)
+{
+    if (state == Qt::Checked)
+    {
+        // new drawing
+        m_pcrPtsDiffSeries = new QLineSeries();
+        m_pcrPtsDiffSeries->setName(QString("(Pts-Pcr)"));
+
+        // update series
+        unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+        unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+        timestamp ts(*m_tsFile, pidPcr, pidPts);
+
+        unsigned int index;
+        double diff;
+        while(ts.getNextDiff(index, diff) == true)
+        {
+            QPointF p( index, (qreal)diff);
+            *m_pcrPtsDiffSeries << p;
+        }
+
+        drawSeries(m_pcrPtsDiffSeries);
+    }
+    else
+    {
+        eraseSeries(m_pcrPtsDiffSeries);
+    }
+}
+
+void MainWindow::diffPtsDts(int state)
+{
+    if (state == Qt::Checked)
+    {
+        // new drawing
+        m_ptsDtsDiffSeries = new QLineSeries();
+        m_ptsDtsDiffSeries->setName(QString("(Pts-Pcr)"));
+
+        // update series
+        unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+        unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
+
+        unsigned int index;
+        double diff;
+        while(ts.getNextDiff(index, diff) == true)
+        {
+            QPointF p( index, (qreal)diff);
+            *m_ptsDtsDiffSeries << p;
+        }
+
+        drawSeries(m_ptsDtsDiffSeries);
+    }
+    else
+    {
+        eraseSeries(m_ptsDtsDiffSeries);
+    }
+}
+
+void MainWindow::diffPcrDts(int state)
+{
+    if (state == Qt::Checked)
+    {
+        // new drawing
+        m_pcrDtsDiffSeries = new QLineSeries();
+        m_pcrDtsDiffSeries->setName(QString("(Dts-Pcr)"));
+
+        // update series
+        unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+        unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+        timestamp ts(*m_tsFile, pidPcr, TIMESTAMP_NO_PID, pidDts);
+
+        unsigned int index;
+        double diff;
+        while(ts.getNextDiff(index, diff) == true)
+        {
+            QPointF p( index, (qreal)diff);
+            *m_pcrDtsDiffSeries << p;
+        }
+
+        drawSeries(m_pcrDtsDiffSeries);
+    }
+    else
+    {
+        eraseSeries(m_pcrDtsDiffSeries);
     }
 }
 

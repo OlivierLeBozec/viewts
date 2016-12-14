@@ -36,6 +36,9 @@ private slots:
     void deltaPts(int state);
     void Dts(int state);
     void deltaDts(int state);
+    void diffPcrPts(int state);
+    void diffPtsDts(int state);
+    void diffPcrDts(int state);
 
     void openFile();
     void clearAllSeries();
@@ -56,6 +59,7 @@ private:
     QGroupBox* m_pcrGroupBox;
     QGroupBox* m_ptsGroupBox;
     QGroupBox* m_dtsGroupBox;
+    QGroupBox* m_diffGroupBox;
 
     QCheckBox* m_pcrBox;
     QCheckBox* m_deltaPcrBox;
@@ -64,6 +68,9 @@ private:
     QCheckBox* m_deltaPtsBox;
     QCheckBox* m_dtsBox;
     QCheckBox* m_deltaDtsBox;
+    QCheckBox* m_diffPcrPtsBox;
+    QCheckBox* m_diffPtsDtsBox;
+    QCheckBox* m_diffPcrDtsBox;
 
     QLineSeries *m_pcrSeries;
     QLineSeries *m_ptsSeries;
@@ -72,6 +79,9 @@ private:
     QLineSeries *m_ptsDeltaSeries;
     QLineSeries *m_dtsDeltaSeries;
     QLineSeries *m_pcrJitterSeries;
+    QLineSeries *m_pcrPtsDiffSeries;
+    QLineSeries *m_ptsDtsDiffSeries;
+    QLineSeries *m_pcrDtsDiffSeries;
 
     void createMenu();
     void createLayout(QWidget *widget);
