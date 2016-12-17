@@ -3,6 +3,7 @@
 #include "pes.h"
 
 timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
+    m_fileIn(fileIn),
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
     m_min_pcr(0xFFFFFFFFFFFFFFFF),
@@ -12,6 +13,7 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_pidpcr(pidpcr),
     m_pidpts(pidpts),
     m_piddts(piddts),
+    m_nbPacket(0),
     m_pcr_prev_val(-1),
     m_pts_prev_val(-1),
     m_dts_prev_val(-1),
@@ -21,62 +23,12 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_diff_prev_index(-1),
     m_diff_prev_value(-1)
 {
-    unsigned int nbPacket = 0;
-
-    // fill the output file with PCR
-    unsigned char data[188];
-
     // TODO: find first start byte (repeated 0x47 every 188)
 
     // loop on packet
-    fileIn.clear();
-    fileIn.seekg(0); // TODO
+    m_fileIn.clear();
+    m_fileIn.seekg(0); // TODO
 
-    while (fileIn.read((char*)data, 188))
-    {
-        // create packet from buffer
-        packet packet(data);
-
-        // update number of packet and store pcr
-        if (packet.getPid() == pidpcr)
-        {
-            if (packet.hasPcr()) {
-                m_pcrMap[nbPacket] = packet.getPcr();
-                m_packetAfterLastPcr=0;
-
-                // store min pcr and corresponding index
-                if (m_pcrMap[nbPacket] < m_min_pcr) {
-                    m_min_pcr = m_pcrMap[nbPacket];
-                    m_min_index = nbPacket;
-                }
-
-                // store max pcr and corresponding index
-                if (m_pcrMap[nbPacket] > m_max_pcr) {
-                    m_max_pcr = m_pcrMap[nbPacket];
-                    m_max_index = nbPacket;
-                }
-            }
-            else { /* pid without pcr */
-                if (m_pcrMap.empty()) m_packetBeforeFirstPcr++;
-                m_packetAfterLastPcr++;
-            }
-        }
-
-        if (packet.getPid() == pidpts && packet.hasPes()) {
-                // create pes from buffer
-                pes pes(&data[packet.getPesOffset()]);
-                if(pes.hasPts()) m_ptsMap[nbPacket] = pes.getPts();
-        }
-
-        if (packet.getPid() == piddts && packet.hasPes()) {
-                // create pes from buffer
-                pes pes(&data[packet.getPesOffset()]);
-                if(pes.hasDts()) m_dtsMap[nbPacket] = pes.getDts();
-        }
-
-        // next packet
-        ++nbPacket;
-    }
 }
 
 timestamp::~timestamp()
@@ -90,6 +42,64 @@ timestamp::~timestamp()
     if (!m_dtsMap.empty()) {
         m_dtsMap.clear();
     }
+}
+
+// Cpu consuming function
+bool timestamp::run(unsigned int nbPacketToRead)
+{
+    unsigned char data[188];
+
+    while (m_fileIn.read((char*)data, 188) && nbPacketToRead)
+    {
+        // create packet from buffer
+        packet packet(data);
+
+        // update number of packet and store pcr
+        if (packet.getPid() == m_pidpcr)
+        {
+            if (packet.hasPcr()) {
+                m_pcrMap[m_nbPacket] = packet.getPcr();
+                m_packetAfterLastPcr=0;
+
+                // store min pcr and corresponding index
+                if (m_pcrMap[m_nbPacket] < m_min_pcr) {
+                    m_min_pcr = m_pcrMap[m_nbPacket];
+                    m_min_index = m_nbPacket;
+                }
+
+                // store max pcr and corresponding index
+                if (m_pcrMap[m_nbPacket] > m_max_pcr) {
+                    m_max_pcr = m_pcrMap[m_nbPacket];
+                    m_max_index = m_nbPacket;
+                }
+            }
+            else { /* pid without pcr */
+                if (m_pcrMap.empty()) m_packetBeforeFirstPcr++;
+                m_packetAfterLastPcr++;
+            }
+        }
+
+        if (packet.getPid() == m_pidpts && packet.hasPes()) {
+                // create pes from buffer
+                pes pes(&data[packet.getPesOffset()]);
+                if(pes.hasPts()) m_ptsMap[m_nbPacket] = pes.getPts();
+        }
+
+        if (packet.getPid() == m_piddts && packet.hasPes()) {
+                // create pes from buffer
+                pes pes(&data[packet.getPesOffset()]);
+                if(pes.hasDts()) m_dtsMap[m_nbPacket] = pes.getDts();
+        }
+
+        // next packet
+        ++m_nbPacket;
+        --nbPacketToRead;
+    }
+
+    // return true if all expected packets are read
+    if (nbPacketToRead == 0)
+        return true;
+    return false;
 }
 
 double timestamp::getMaxDeltaPcr()

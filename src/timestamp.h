@@ -9,6 +9,8 @@
 
 class timestamp
 {
+    std::ifstream& m_fileIn;
+
     // number packets before the first pcr
     unsigned int m_packetBeforeFirstPcr;
 
@@ -23,6 +25,7 @@ class timestamp
     unsigned int m_pidpcr;
     unsigned int m_pidpts;
     unsigned int m_piddts;
+    unsigned int m_nbPacket;
 
     // pcr pts dts map
     std::map<unsigned int, double> m_pcrMap;
@@ -76,6 +79,7 @@ public:
     bool    getNextDelta(unsigned int& index, double& delta);
     bool    getNextJitterPcr(unsigned int& index, double& jitter);
     bool    getNextDiff(unsigned int& index, double& diff);
+    bool    run(unsigned int NbPacket = (unsigned int)-1);
 };
 
 

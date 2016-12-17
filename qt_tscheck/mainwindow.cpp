@@ -301,6 +301,7 @@ void MainWindow::Pcr(int state)
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, pid);
+        ts.run();
 
         unsigned int index;
         double pcr;
@@ -330,6 +331,7 @@ void MainWindow::Pts(int state)
         // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pid);
+        ts.run();
 
         unsigned int index;
         double pts;
@@ -358,6 +360,7 @@ void MainWindow::Dts(int state)
         // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
+        ts.run();
 
         unsigned int index;
         double dts;
@@ -386,6 +389,7 @@ void MainWindow::deltaPcr(int state)
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, pid);
+        ts.run();
 
         unsigned int index;
         double delta;
@@ -414,6 +418,7 @@ void MainWindow::deltaPts(int state)
         // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pid);
+        ts.run();
 
         unsigned int index;
         double delta;
@@ -442,6 +447,7 @@ void MainWindow::deltaDts(int state)
         // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
+        ts.run();
 
         unsigned int index;
         double delta;
@@ -470,6 +476,7 @@ void MainWindow::jitterPcr(int state)
         // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, pid);
+        ts.run();
 
         unsigned int index;
         double jitter;
@@ -499,6 +506,7 @@ void MainWindow::diffPcrPts(int state)
         unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, pidPcr, pidPts);
+        ts.run();
 
         unsigned int index;
         double diff;
@@ -528,6 +536,7 @@ void MainWindow::diffPtsDts(int state)
         unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
         unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
+        ts.run();
 
         unsigned int index;
         double diff;
@@ -557,6 +566,7 @@ void MainWindow::diffPcrDts(int state)
         unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
         timestamp ts(*m_tsFile, pidPcr, TIMESTAMP_NO_PID, pidDts);
+        ts.run();
 
         unsigned int index;
         double diff;
