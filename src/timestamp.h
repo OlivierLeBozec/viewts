@@ -70,9 +70,6 @@ public:
 
     double  getBitrate();
     double  getDuration();
-    double  getPcr(unsigned int index);
-    double  getPts(unsigned int index);
-    double  getDts(unsigned int index);
     bool    getNextPcr(unsigned int& index, double& pcr);
     bool    getNextPts(unsigned int& index, double& pts);
     bool    getNextDts(unsigned int& index, double& dts);

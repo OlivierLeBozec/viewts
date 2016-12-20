@@ -48,9 +48,14 @@ timestamp::~timestamp()
 bool timestamp::run(unsigned int nbPacketToRead)
 {
     unsigned char data[188];
+    bool isDataInFile = false;
 
-    while (m_fileIn.read((char*)data, 188) && nbPacketToRead)
+    while (nbPacketToRead)
     {
+        // leave if no more data
+        isDataInFile = m_fileIn.read((char*)data, 188);
+        if (!isDataInFile) break;
+
         // create packet from buffer
         packet packet(data);
 
@@ -96,10 +101,8 @@ bool timestamp::run(unsigned int nbPacketToRead)
         --nbPacketToRead;
     }
 
-    // return true if all expected packets are read
-    if (nbPacketToRead == 0)
-        return true;
-    return false;
+    // return true if some data are uptated
+    return isDataInFile;
 }
 
 double timestamp::getMaxDeltaPcr()
@@ -144,57 +147,6 @@ double timestamp::getDuration()
     duration += (m_packetAfterLastPcr*188*8)/bitrate;     // after last pcr
 
     return duration;
-}
-
-double timestamp::getPcr(unsigned int index) {
-
-    double pcr = 0;
-
-    // test if pcr found
-    if (m_pcrMap.empty()) return 0;
-
-    try {
-        pcr = m_pcrMap[index];
-    }
-    catch(...) {
-        pcr = 0;
-    }
-
-    return pcr;
-}
-
-double timestamp::getPts(unsigned int index) {
-
-    double pts = 0;
-
-    // test if pcr found
-    if (m_ptsMap.empty()) return 0;
-
-    try {
-        pts = m_ptsMap[index];
-    }
-    catch(...) {
-        pts = 0;
-    }
-
-    return pts;
-}
-
-double timestamp::getDts(unsigned int index) {
-
-    double dts = 0;
-
-    // test if pcr found
-    if (m_dtsMap.empty()) return 0;
-
-    try {
-        dts = m_dtsMap[index];
-    }
-    catch(...) {
-        dts = 0;
-    }
-
-    return dts;
 }
 
 bool timestamp::getNextPcr(unsigned int& index, double& pcr)
