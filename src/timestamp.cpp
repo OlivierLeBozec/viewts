@@ -151,18 +151,24 @@ double timestamp::getDuration()
 
 bool timestamp::getNextPcr(unsigned int& index, double& pcr)
 {
+    // protection
+    if (m_pcrMap.empty())
+        return false;
+
+    // init iterator
     if (m_pcr_prev_val == -1) {
 
         m_pcr_ii = m_pcrMap.begin();
-        m_pcr_prev_val = (*m_pcr_ii).second;
+        index = (*m_pcr_ii).first;
+        m_pcr_prev_val = pcr = (*m_pcr_ii).second;
+        return true;
     }
 
-    if (m_pcr_ii != m_pcrMap.end()) {
+    if (m_pcr_ii != --m_pcrMap.end()) {
 
-        index = (*m_pcr_ii).first;
-        pcr = (*m_pcr_ii).second;
         ++m_pcr_ii;
-
+        index = (*m_pcr_ii).first;
+        m_pcr_prev_val = pcr = (*m_pcr_ii).second;
         return true;
     }
 
@@ -171,18 +177,24 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
 
 bool timestamp::getNextPts(unsigned int& index, double& pts)
 {
+    // protection
+    if (m_ptsMap.empty())
+        return false;
+
+    // init iterator
     if (m_pts_prev_val == -1) {
 
         m_pts_ii = m_ptsMap.begin();
-        m_pts_prev_val = (*m_pts_ii).second;
+        index = (*m_pts_ii).first;
+        m_pts_prev_val = pts = (*m_pts_ii).second;
+        return true;
     }
 
-    if (m_pts_ii != m_ptsMap.end()) {
+    if (m_pts_ii != --m_ptsMap.end()) {
 
-        index = (*m_pts_ii).first;
-        pts = (*m_pts_ii).second;
         ++m_pts_ii;
-
+        index = (*m_pts_ii).first;
+        m_pts_prev_val = pts = (*m_pts_ii).second;
         return true;
     }
 
@@ -191,18 +203,24 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
 
 bool timestamp::getNextDts(unsigned int& index, double& dts)
 {
+    // protection
+    if (m_dtsMap.empty())
+        return false;
+
+    // init iterator
     if (m_dts_prev_val == -1) {
 
         m_dts_ii = m_dtsMap.begin();
-        m_dts_prev_val = (*m_dts_ii).second;
+        index = (*m_dts_ii).first;
+        m_dts_prev_val = dts = (*m_dts_ii).second;
+        return true;
     }
 
-    if (m_dts_ii != m_dtsMap.end()) {
+    if (m_dts_ii != --m_dtsMap.end()) {
 
-        index = (*m_dts_ii).first;
-        dts = (*m_dts_ii).second;
         ++m_dts_ii;
-
+        index = (*m_dts_ii).first;
+        m_dts_prev_val = dts = (*m_dts_ii).second;
         return true;
     }
 
