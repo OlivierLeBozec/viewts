@@ -1,14 +1,8 @@
-#include <QtWidgets>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QValueAxis>
-
 #include "mainwindow.h"
+#include "thread.h"
 
 MainWindow::MainWindow() :
     m_tsFile(NULL),
-    m_pcrSeries(NULL),
-    m_ptsSeries(NULL),
-    m_dtsSeries(NULL),
     m_pcrDeltaSeries(NULL),
     m_ptsDeltaSeries(NULL),
     m_dtsDeltaSeries(NULL),
@@ -21,6 +15,8 @@ MainWindow::MainWindow() :
 
     createMenu();
     createLayout(main_widget);
+
+    m_pthreadPool = QThreadPool::globalInstance();
 }
 
 MainWindow::~MainWindow()
@@ -164,8 +160,7 @@ void MainWindow::drawSeries(QLineSeries* pSeries)
 {
     if (pSeries != NULL)
     {
-        Chart *chart = (Chart*)m_chartView->chart();
-        chart->addSeries(pSeries);
+        m_chartView->chart()->addSeries(pSeries);
     }
 }
 
@@ -173,8 +168,7 @@ void MainWindow::eraseSeries(QLineSeries* pSeries)
 {
     if (pSeries != NULL)
     {
-        Chart *chart = (Chart*)m_chartView->chart();
-        chart->removeSeries(pSeries);
+        m_chartView->chart()->removeSeries(pSeries);
 
         delete pSeries;
         pSeries = NULL;
@@ -217,6 +211,7 @@ void MainWindow::clearAllSeries()
 void MainWindow::openFile()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Ts"),QDir::homePath());
+    //QString fileName = "C:\\Users\\Olivier\\github\\tstools\\ts\\video_dvbSub.ts";
 
     if (!fileName.isEmpty())
     {
@@ -294,58 +289,35 @@ void MainWindow::Pcr(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_pcrSeries = new QLineSeries();
-        m_pcrSeries->setName(QString("Pcr"));
-
-        // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, pid);
-        ts.run();
+        m_pcrWorker = new pcrWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+        //connect(m_pcrWorker, SIGNAL(updated()), this, SLOT(updatePcr()));
 
-        unsigned int index;
-        double pcr;
-        while(ts.getNextPcr(index, pcr) == true)
-        {
-            //std::cout << "index" << index << " - " << pcr << std::endl;
-            QPointF p( index, (qreal)pcr);
-            *m_pcrSeries << p;
-        }
-
-        drawSeries(m_pcrSeries);
+        m_pthreadPool->start(m_pcrWorker);
     }
     else
     {
-        eraseSeries(m_pcrSeries);
+        m_pthreadPool->cancel(m_pcrWorker);
+        delete m_pcrWorker;
     }
 }
+
+/*void MainWindow::updatePcr()
+{
+}*/
 
 void MainWindow::Pts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_ptsSeries = new QLineSeries();
-        m_ptsSeries->setName(QString("Pts"));
-
-        // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pid);
-        ts.run();
-
-        unsigned int index;
-        double pts;
-        while(ts.getNextPts(index, pts) == true)
-        {
-            QPointF p( index, (qreal)pts);
-            *m_ptsSeries << p;
-        }
-
-        drawSeries(m_ptsSeries);
+        m_ptsWorker = new ptsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+        m_pthreadPool->start(m_ptsWorker);
     }
     else
     {
-        eraseSeries(m_ptsSeries);
+        m_pthreadPool->cancel(m_ptsWorker);
+        delete m_ptsWorker;
     }
 }
 
@@ -353,28 +325,14 @@ void MainWindow::Dts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_dtsSeries = new QLineSeries();
-        m_dtsSeries->setName(QString("Dts"));
-
-        // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
-        ts.run();
-
-        unsigned int index;
-        double dts;
-        while(ts.getNextDts(index, dts) == true)
-        {
-            QPointF p( index, (qreal)dts);
-            *m_dtsSeries << p;
-        }
-
-        drawSeries(m_dtsSeries);
+        m_dtsWorker = new dtsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+        m_pthreadPool->start(m_dtsWorker);
     }
     else
     {
-        eraseSeries(m_dtsSeries);
+        m_pthreadPool->cancel(m_dtsWorker);
+        delete m_dtsWorker;
     }
 }
 

@@ -3,22 +3,15 @@
 
 #include <QtWidgets>
 #include <QtCharts/QLineSeries>
-#include <QtCharts/QValueAxis>
+//#include <QtCharts/QValueAxis>
 #include <QMainWindow>
 
 #include "chart.h"
 #include "chartview.h"
+#include "thread.h"
 
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"
-
-QT_BEGIN_NAMESPACE
-//class QAction;
-//class QComboBox;
-//class QMenu;
-//class QLabel;
-//class QChart;
-QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +23,7 @@ public:
 
 private slots:
     void Pcr(int state);
+    //void updatePcr();
     void deltaPcr(int state);
     void jitterPcr(int state);
     void Pts(int state);
@@ -49,6 +43,8 @@ private slots:
 
 private:
     std::ifstream* m_tsFile;
+
+    QThreadPool *m_pthreadPool;
 
     ChartView *m_chartView;
 
@@ -72,9 +68,6 @@ private:
     QCheckBox* m_diffPtsDtsBox;
     QCheckBox* m_diffPcrDtsBox;
 
-    QLineSeries *m_pcrSeries;
-    QLineSeries *m_ptsSeries;
-    QLineSeries *m_dtsSeries;
     QLineSeries *m_pcrDeltaSeries;
     QLineSeries *m_ptsDeltaSeries;
     QLineSeries *m_dtsDeltaSeries;
@@ -82,6 +75,10 @@ private:
     QLineSeries *m_pcrPtsDiffSeries;
     QLineSeries *m_ptsDtsDiffSeries;
     QLineSeries *m_pcrDtsDiffSeries;
+
+    pcrWorker    *m_pcrWorker;
+    ptsWorker    *m_ptsWorker;
+    dtsWorker    *m_dtsWorker;
 
     void createMenu();
     void createLayout(QWidget *widget);
