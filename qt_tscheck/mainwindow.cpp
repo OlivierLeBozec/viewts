@@ -2,26 +2,25 @@
 #include "thread.h"
 
 MainWindow::MainWindow() :
-    m_tsFile(NULL),
-    m_pcrDeltaSeries(NULL),
-    m_ptsDeltaSeries(NULL),
-    m_dtsDeltaSeries(NULL),
-    m_pcrPtsDiffSeries(NULL),
-    m_ptsDtsDiffSeries(NULL),
-    m_pcrDtsDiffSeries(NULL)
+    m_tsFile(NULL), m_pthreadPool(QThreadPool::globalInstance())
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
 
     createMenu();
     createLayout(main_widget);
-
-    m_pthreadPool = QThreadPool::globalInstance();
 }
 
 MainWindow::~MainWindow()
 {
     if (m_tsFile) delete m_tsFile;
+}
+
+void MainWindow::about()
+{
+   QMessageBox::about(this, tr("About Application"),
+            tr("The <b>Application</b> display pcr, pts, dts "
+               "and various opreation on these timestamps "));
 }
 
 void MainWindow::createLayout(QWidget *widget)
@@ -110,12 +109,13 @@ void MainWindow::createLayout(QWidget *widget)
     // graph
     Chart *chart = new Chart;
     chart->setTitle("");
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-    chart->createDefaultAxes();
+    chart->setAnimationOptions(QChart::NoAnimation);
+    chart->setTheme(QChart::ChartThemeDark);
+    //chart->createDefaultAxes();
     //chart->setAxisX();
 
     m_chartView = new ChartView(chart);
-    m_chartView->setRenderHint(QPainter::Antialiasing);
+    //m_chartView->setRenderHint(QPainter::Antialiasing);
 
     // vertical layout on left hand side
     QBoxLayout *controlLayout = new QVBoxLayout;
@@ -154,25 +154,6 @@ void MainWindow::createMenu()
     QMenu *helpMenu = menuBar()->addMenu(tr("&About"));
     QAction *aboutAct = helpMenu->addAction(tr("&About..."), this, &MainWindow::about);
     aboutAct->setStatusTip(tr("Show the application About box"));
-}
-
-void MainWindow::drawSeries(QLineSeries* pSeries)
-{
-    if (pSeries != NULL)
-    {
-        m_chartView->chart()->addSeries(pSeries);
-    }
-}
-
-void MainWindow::eraseSeries(QLineSeries* pSeries)
-{
-    if (pSeries != NULL)
-    {
-        m_chartView->chart()->removeSeries(pSeries);
-
-        delete pSeries;
-        pSeries = NULL;
-    }
 }
 
 void MainWindow::erasePcrSeries(int)
@@ -290,8 +271,8 @@ void MainWindow::Pcr(int state)
     if (state == Qt::Checked)
     {
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-        m_pcrWorker = new pcrWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
-        //connect(m_pcrWorker, SIGNAL(updated()), this, SLOT(updatePcr()));
+        m_pcrWorker = new pcrWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_pcrWorker, SIGNAL(finished()), this, SLOT(updatePcr()));
 
         m_pthreadPool->start(m_pcrWorker);
     }
@@ -302,16 +283,19 @@ void MainWindow::Pcr(int state)
     }
 }
 
-/*void MainWindow::updatePcr()
+void  MainWindow::updatePcr()
 {
-}*/
+    // should be done in parent thread
+    m_pcrWorker->updateChart();
+}
 
 void MainWindow::Pts(int state)
 {
     if (state == Qt::Checked)
     {
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-        m_ptsWorker = new ptsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+        m_ptsWorker = new ptsWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_ptsWorker, SIGNAL(finished()), this, SLOT(updatePts()));
         m_pthreadPool->start(m_ptsWorker);
     }
     else
@@ -321,12 +305,19 @@ void MainWindow::Pts(int state)
     }
 }
 
+void  MainWindow::updatePts()
+{
+    // should be done in parent thread
+    m_ptsWorker->updateChart();
+}
+
 void MainWindow::Dts(int state)
 {
     if (state == Qt::Checked)
     {
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-        m_dtsWorker = new dtsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+        m_dtsWorker = new dtsWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_dtsWorker, SIGNAL(finished()), this, SLOT(updateDts()));
         m_pthreadPool->start(m_dtsWorker);
     }
     else
@@ -336,215 +327,168 @@ void MainWindow::Dts(int state)
     }
 }
 
+void  MainWindow::updateDts()
+{
+    // should be done in parent thread
+    m_dtsWorker->updateChart();
+}
+
 void MainWindow::deltaPcr(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_pcrDeltaSeries = new QLineSeries();
-        m_pcrDeltaSeries->setName(QString("Delta Pcr"));
-
-        // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, pid);
-        ts.run();
-
-        unsigned int index;
-        double delta;
-        while(ts.getNextDelta(index, delta) == true)
-        {
-            QPointF p( index, (qreal)delta);
-            *m_pcrDeltaSeries << p;
-        }
-
-        drawSeries(m_pcrDeltaSeries);
+        m_deltaPcrWorker = new pcrDeltaWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_deltaPcrWorker, SIGNAL(finished()), this, SLOT(updateDeltaPcr()));
+        m_pthreadPool->start(m_deltaPcrWorker);
     }
     else
     {
-        eraseSeries(m_pcrDeltaSeries);
+        m_pthreadPool->cancel(m_deltaPcrWorker);
+        delete m_deltaPcrWorker;
     }
+}
+
+void MainWindow::updateDeltaPcr()
+{
+    // should be done in parent thread
+    m_deltaPcrWorker->updateChart();
 }
 
 void MainWindow::deltaPts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_ptsDeltaSeries = new QLineSeries();
-        m_ptsDeltaSeries->setName(QString("Delta Pts"));
-
-        // update series
         unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pid);
-        ts.run();
-
-        unsigned int index;
-        double delta;
-        while(ts.getNextDelta(index, delta) == true)
-        {
-            QPointF p( index, (qreal)delta);
-            *m_ptsDeltaSeries << p;
-        }
-
-        drawSeries(m_ptsDeltaSeries);
+        m_ptsDeltaWorker = new ptsDeltaWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_ptsDeltaWorker, SIGNAL(finished()), this, SLOT(updatePtsDelta()));
+        m_pthreadPool->start(m_ptsDeltaWorker);
     }
     else
     {
-        eraseSeries(m_ptsDeltaSeries);
+        m_pthreadPool->cancel(m_ptsDeltaWorker);
+        delete m_ptsDeltaWorker;
     }
 }
+
+void  MainWindow::updatePtsDelta()
+{
+    // should be done in parent thread
+    m_ptsDeltaWorker->updateChart();
+}
+
 
 void MainWindow::deltaDts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_dtsDeltaSeries = new QLineSeries();
-        m_dtsDeltaSeries->setName(QString("Delta Dts"));
-
-        // update series
         unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
-        ts.run();
-
-        unsigned int index;
-        double delta;
-        while(ts.getNextDelta(index, delta) == true)
-        {
-            QPointF p( index, (qreal)delta);
-            *m_dtsDeltaSeries << p;
-        }
-
-        drawSeries(m_dtsDeltaSeries);
+        m_dtsDeltaWorker = new dtsDeltaWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_dtsDeltaWorker, SIGNAL(finished()), this, SLOT(updateDtsDelta()));
+        m_pthreadPool->start(m_dtsDeltaWorker);
     }
     else
     {
-        eraseSeries(m_dtsDeltaSeries);
+        m_pthreadPool->cancel(m_dtsDeltaWorker);
+        delete m_dtsDeltaWorker;
     }
+}
+
+void  MainWindow::updateDtsDelta()
+{
+    // should be done in parent thread
+    m_dtsDeltaWorker->updateChart();
 }
 
 void MainWindow::jitterPcr(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_pcrJitterSeries = new QLineSeries();
-        m_pcrJitterSeries->setName(QString("Pcr jitter"));
-
-        // update series
         unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, pid);
-        ts.run();
-
-        unsigned int index;
-        double jitter;
-        while(ts.getNextJitterPcr(index, jitter) == true)
-        {
-            QPointF p( index, (qreal)jitter);
-            *m_pcrJitterSeries << p;
-        }
-
-        drawSeries(m_pcrJitterSeries);
+        m_jitterPcrWorker = new pcrJitterWorker(*m_tsFile, pid, (Chart*)m_chartView->chart());
+        connect(m_jitterPcrWorker, SIGNAL(finished()), this, SLOT(updateJitterPcr()));
+        m_pthreadPool->start(m_jitterPcrWorker);
     }
     else
     {
-        eraseSeries(m_pcrJitterSeries);
+        m_pthreadPool->cancel(m_jitterPcrWorker);
+        delete m_jitterPcrWorker;
     }
+}
+
+void MainWindow::updateJitterPcr()
+{
+    // should be done in parent thread
+    m_jitterPcrWorker->updateChart();
 }
 
 void MainWindow::diffPcrPts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_pcrPtsDiffSeries = new QLineSeries();
-        m_pcrPtsDiffSeries->setName(QString("(Pts-Pcr)"));
-
-        // update series
         unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
         unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, pidPcr, pidPts);
-        ts.run();
-
-        unsigned int index;
-        double diff;
-        while(ts.getNextDiff(index, diff) == true)
-        {
-            QPointF p( index, (qreal)diff);
-            *m_pcrPtsDiffSeries << p;
-        }
-
-        drawSeries(m_pcrPtsDiffSeries);
+        m_diffPcrPtsWorker = new diffPcrPtsWorker(*m_tsFile, pidPcr, pidPts, (Chart*)m_chartView->chart());
+        connect(m_diffPcrPtsWorker, SIGNAL(finished()), this, SLOT(updateDiffPcrPts()));
+        m_pthreadPool->start(m_diffPcrPtsWorker);
     }
     else
     {
-        eraseSeries(m_pcrPtsDiffSeries);
+        m_pthreadPool->cancel(m_diffPcrPtsWorker);
+        delete m_diffPcrPtsWorker;
     }
+}
+
+void MainWindow::updateDiffPcrPts()
+{
+    // should be done in parent thread
+    m_diffPcrPtsWorker->updateChart();
+}
+
+
+void MainWindow::diffPcrDts(int state)
+{
+    if (state == Qt::Checked)
+    {
+        unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+        unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+        m_diffPcrDtsWorker = new diffPcrDtsWorker(*m_tsFile, pidPcr, pidDts, (Chart*)m_chartView->chart());
+        connect(m_diffPcrDtsWorker, SIGNAL(finished()), this, SLOT(updateDiffPcrDts()));
+        m_pthreadPool->start(m_diffPcrDtsWorker);
+    }
+    else
+    {
+        m_pthreadPool->cancel(m_diffPcrDtsWorker);
+        delete m_diffPcrDtsWorker;
+    }
+}
+
+void MainWindow::updateDiffPcrDts()
+{
+    // should be done in parent thread
+    m_diffPcrDtsWorker->updateChart();
 }
 
 void MainWindow::diffPtsDts(int state)
 {
     if (state == Qt::Checked)
     {
-        // new drawing
-        m_ptsDtsDiffSeries = new QLineSeries();
-        m_ptsDtsDiffSeries->setName(QString("(Pts-Pcr)"));
-
-        // update series
         unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
         unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
-        ts.run();
-
-        unsigned int index;
-        double diff;
-        while(ts.getNextDiff(index, diff) == true)
-        {
-            QPointF p( index, (qreal)diff);
-            *m_ptsDtsDiffSeries << p;
-        }
-
-        drawSeries(m_ptsDtsDiffSeries);
+        m_diffPtsDtsWorker = new diffPtsDtsWorker(*m_tsFile, pidPts, pidDts, (Chart*)m_chartView->chart());
+        connect(m_diffPtsDtsWorker, SIGNAL(finished()), this, SLOT(updateDiffPtsDts()));
+        m_pthreadPool->start(m_diffPtsDtsWorker);
     }
     else
     {
-        eraseSeries(m_ptsDtsDiffSeries);
+        m_pthreadPool->cancel(m_diffPtsDtsWorker);
+        delete m_diffPtsDtsWorker;
     }
 }
 
-void MainWindow::diffPcrDts(int state)
+void MainWindow::updateDiffPtsDts()
 {
-    if (state == Qt::Checked)
-    {
-        // new drawing
-        m_pcrDtsDiffSeries = new QLineSeries();
-        m_pcrDtsDiffSeries->setName(QString("(Dts-Pcr)"));
-
-        // update series
-        unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-        unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-        timestamp ts(*m_tsFile, pidPcr, TIMESTAMP_NO_PID, pidDts);
-        ts.run();
-
-        unsigned int index;
-        double diff;
-        while(ts.getNextDiff(index, diff) == true)
-        {
-            QPointF p( index, (qreal)diff);
-            *m_pcrDtsDiffSeries << p;
-        }
-
-        drawSeries(m_pcrDtsDiffSeries);
-    }
-    else
-    {
-        eraseSeries(m_pcrDtsDiffSeries);
-    }
+    // should be done in parent thread
+    m_diffPtsDtsWorker->updateChart();
 }
 
-void MainWindow::about()
-{
-   QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> display pcr, pts, dts "
-               "and various opreation on these timestamps "));
-}

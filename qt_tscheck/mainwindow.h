@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets>
-#include <QtCharts/QLineSeries>
-//#include <QtCharts/QValueAxis>
 #include <QMainWindow>
 
 #include "chart.h"
@@ -23,16 +21,28 @@ public:
 
 private slots:
     void Pcr(int state);
-    //void updatePcr();
+    void updatePcr();
     void deltaPcr(int state);
+    void updateDeltaPcr();
     void jitterPcr(int state);
+    void updateJitterPcr();
+
     void Pts(int state);
+    void updatePts();
     void deltaPts(int state);
+    void updatePtsDelta();
+
     void Dts(int state);
+    void updateDts();
     void deltaDts(int state);
+    void updateDtsDelta();
+
     void diffPcrPts(int state);
-    void diffPtsDts(int state);
+    void updateDiffPcrPts();
     void diffPcrDts(int state);
+    void updateDiffPcrDts();
+    void diffPtsDts(int state);
+    void updateDiffPtsDts();
 
     void openFile();
     void clearAllSeries();
@@ -68,23 +78,19 @@ private:
     QCheckBox* m_diffPtsDtsBox;
     QCheckBox* m_diffPcrDtsBox;
 
-    QLineSeries *m_pcrDeltaSeries;
-    QLineSeries *m_ptsDeltaSeries;
-    QLineSeries *m_dtsDeltaSeries;
-    QLineSeries *m_pcrJitterSeries;
-    QLineSeries *m_pcrPtsDiffSeries;
-    QLineSeries *m_ptsDtsDiffSeries;
-    QLineSeries *m_pcrDtsDiffSeries;
-
     pcrWorker    *m_pcrWorker;
     ptsWorker    *m_ptsWorker;
     dtsWorker    *m_dtsWorker;
+    pcrDeltaWorker  *m_deltaPcrWorker;
+    pcrJitterWorker *m_jitterPcrWorker;
+    ptsDeltaWorker  *m_ptsDeltaWorker;
+    dtsDeltaWorker  *m_dtsDeltaWorker;
+    diffPcrPtsWorker *m_diffPcrPtsWorker;
+    diffPcrDtsWorker *m_diffPcrDtsWorker;
+    diffPtsDtsWorker *m_diffPtsDtsWorker;
 
-    void createMenu();
     void createLayout(QWidget *widget);
-
-    void drawSeries(QLineSeries* Series);
-    void eraseSeries(QLineSeries* Series);
+    void createMenu();
 };
 
 #endif // MAINWINDOW_H
