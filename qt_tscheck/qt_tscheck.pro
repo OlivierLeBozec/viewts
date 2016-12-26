@@ -22,8 +22,6 @@ HEADERS  += mainwindow.h \
     chartview.h \
     thread.h
 
-FORMS    += mainwindow.ui
-
 win32 {
   DESTDIR = $$PWD/../bin/windows/
 }
