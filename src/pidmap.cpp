@@ -2,19 +2,38 @@
 #include "packet.h"
 #include "pes.h"
 
-pidmap::pidmap(std::ifstream& fileIn)
+pidmap::pidmap(std::ifstream& fileIn) :
+    m_fileIn(fileIn)
 {
-    // fill the output file with PCR
-    unsigned char data[188];
-
     // TODO: find first start byte (repeated 0x47 every 188)
-    // TODO: thread
 
     // loop on packet
-    fileIn.clear();
-    fileIn.seekg(0);    // TODO
-    while (fileIn.read((char*)data, 188))
+    m_fileIn.clear();
+    m_fileIn.seekg(0);    // TODO
+}
+
+pidmap::~pidmap()
+{
+    if (!m_pidMap.empty()) {
+        m_pidMap.clear();
+    }
+    if (!m_pidVec.empty()) {
+        m_pidVec.clear();
+    }
+}
+
+// Cpu consuming function
+bool pidmap::run(unsigned int nbPacketToRead)
+{
+    unsigned char data[188];
+    bool isDataInFile = false;
+
+    while (nbPacketToRead)
     {
+        // leave if no more data
+        isDataInFile = m_fileIn.read((char*)data, 188);
+        if (!isDataInFile) break;
+
         // create packet from buffer
         packet packet(data);
         unsigned int pid = packet.getPid();
@@ -45,16 +64,9 @@ pidmap::pidmap(std::ifstream& fileIn)
         (*ii).second.percent = static_cast<float>((*ii).second.nb_packet)*100;
         (*ii).second.percent /= m_pidVec.size();
     }
-}
 
-pidmap::~pidmap()
-{
-    if (!m_pidMap.empty()) {
-        m_pidMap.clear();
-    }
-    if (!m_pidVec.empty()) {
-        m_pidVec.clear();
-    }
+    // return true if some data are uptated
+    return isDataInFile;
 }
 
 void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector) {

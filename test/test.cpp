@@ -3,15 +3,28 @@
 #include "gtest/gtest.h"
 
 
-TEST(pid, check_PCR_pid_on_audio)
+TEST(pid, check_pid_on_video_dvbSub)
 {
-    std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
+    std::ifstream tsFile("../../ts/video_dvbSub.ts", std::ios::binary);
 
     pidmap pm(tsFile);
-    std::vector<unsigned int> pcrPid;
-    pm.getPcrPid(pcrPid);
 
-    EXPECT_EQ(pcrPid[0], 305);
+    // check first 10000 packet
+    EXPECT_EQ(pm.run(10000), false);
+
+    std::vector<unsigned int> Pid;
+    pm.getPcrPid(Pid);
+    EXPECT_EQ(Pid[0], 220);
+
+    Pid.clear();
+    pm.getPtsPid(Pid);
+    EXPECT_EQ(Pid[0], 220);
+    EXPECT_EQ(Pid[1], 230);
+    EXPECT_EQ(Pid[2], 231);
+
+    Pid.clear();
+    pm.getDtsPid(Pid);
+    EXPECT_EQ(Pid[0], 220);
 }
 
 TEST(pcr, check_PCR_values_on_audio)

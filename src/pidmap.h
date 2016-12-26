@@ -23,9 +23,13 @@ class pidmap
     // pid vec
     std::vector<unsigned int> m_pidVec;
 
+    std::ifstream& m_fileIn;
+
 public:
     pidmap(std::ifstream& fileIn);
     ~pidmap();
+
+    bool run(unsigned int NbPacket = (unsigned int)-1);
 
     void getPcrPid(std::vector<unsigned int>& pidVector);
     void getPtsPid(std::vector<unsigned int>& pidVector);
