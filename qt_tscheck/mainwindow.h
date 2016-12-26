@@ -44,6 +44,8 @@ private slots:
     void diffPtsDts(int state);
     void updateDiffPtsDts();
 
+    void updateStatusBar(int);
+
     void openFile();
     void clearAllSeries();
     void erasePcrSeries(int);

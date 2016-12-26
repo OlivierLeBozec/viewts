@@ -24,17 +24,23 @@ protected:
     unsigned int m_nbProgress;
     unsigned int m_progress;
 
+    // number of packet read by library before run() returns
+    const unsigned int m_WindowPacket = 5000;
+
 public:
-    timeStampWorker(std::ifstream& tsFile, Chart * chart);
+    timeStampWorker(std::ifstream *tsFile, Chart *chart);
     ~timeStampWorker();
 
     void updateChart();
+    void hideChart();
     void updateProgress();
+    void serializeSerie();
 
     virtual void run() = 0;
 
 signals:
      void finished();
+     void updated(int);
 };
 
 
@@ -43,7 +49,7 @@ signals:
 class pcrWorker : public timeStampWorker
 {
 public:
-    pcrWorker(std::ifstream& tsFile, unsigned int pid, Chart * chart);
+    pcrWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -51,7 +57,7 @@ public:
 class pcrDeltaWorker : public timeStampWorker
 {
 public:
-    pcrDeltaWorker(std::ifstream& tsFile, unsigned int pid, Chart * chart);
+    pcrDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -59,7 +65,7 @@ public:
 class pcrJitterWorker : public timeStampWorker
 {
 public:
-    pcrJitterWorker(std::ifstream& tsFile, unsigned int pid, Chart * chart);
+    pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -69,7 +75,7 @@ public:
 class ptsWorker : public timeStampWorker
 {
 public:
-    ptsWorker(std::ifstream& m_tsFile, unsigned int pid, Chart * chart);
+    ptsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -77,7 +83,7 @@ public:
 class ptsDeltaWorker : public timeStampWorker
 {
 public:
-    ptsDeltaWorker(std::ifstream& m_tsFile, unsigned int pid, Chart * chart);
+    ptsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -87,7 +93,7 @@ public:
 class dtsWorker : public timeStampWorker
 {
 public:
-    dtsWorker(std::ifstream& m_tsFile, unsigned int pid, Chart * chart);
+    dtsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -95,7 +101,7 @@ public:
 class dtsDeltaWorker : public timeStampWorker
 {
 public:
-    dtsDeltaWorker(std::ifstream& m_tsFile, unsigned int pid, Chart * chart);
+    dtsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
     virtual void run();
 };
 
@@ -104,7 +110,7 @@ public:
 class diffPcrPtsWorker : public timeStampWorker
 {
 public:
-    diffPcrPtsWorker(std::ifstream& m_tsFile, unsigned int pidPcr, unsigned int pidPts, Chart * chart);
+    diffPcrPtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     virtual void run();
 };
 
@@ -112,7 +118,7 @@ public:
 class diffPcrDtsWorker : public timeStampWorker
 {
 public:
-    diffPcrDtsWorker(std::ifstream& m_tsFile, unsigned int pidPcr, unsigned int pidPts, Chart * chart);
+    diffPcrDtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     virtual void run();
 };
 
@@ -120,7 +126,7 @@ public:
 class diffPtsDtsWorker : public timeStampWorker
 {
 public:
-    diffPtsDtsWorker(std::ifstream& m_tsFile, unsigned int pidPts, unsigned int pidDts, Chart * chart);
+    diffPtsDtsWorker(std::ifstream *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart);
     virtual void run();
 };
 
