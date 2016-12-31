@@ -1,13 +1,14 @@
 #include "thread.h"
 
 timeStampWorker::timeStampWorker(std::ifstream *tsFile, Chart *chart) :
-    m_chart(chart), m_nbProgress(0), m_progress(0)
+   m_nbProgress(0), m_progress(0),  m_chart(chart), m_isRunning(false)
 
 {
     // new drawing
     m_Series = new QLineSeries();
 
     // don't do that otherwise QChart is slow when updating the series
+    // series must be updated at the end
     //m_chart->addSeries(m_Series);
 
     // do not erase series when worker is completed
@@ -28,7 +29,8 @@ timeStampWorker::~timeStampWorker()
 }
 
 void timeStampWorker::updateProgress()
-{    
+{
+    // update percent
     m_nbProgress += m_WindowPacket;
     if (m_fileSize)
     {
@@ -39,15 +41,36 @@ void timeStampWorker::updateProgress()
     }
 }
 
-void timeStampWorker::updateChart()
+void timeStampWorker::showSeries()
 {
     m_chart->addSeries(m_Series);
     m_chart->createDefaultAxes();
 }
 
-void timeStampWorker::hideChart()
+void timeStampWorker::hideSeries()
 {
     m_chart->removeSeries(m_Series);
+}
+
+void timeStampWorker::run()
+{
+    m_isRunning = true;
+
+    while (m_timestamp->run(m_WindowPacket) == true)
+    {
+        unsigned int index;
+        double val;
+        while((m_timestamp->*m_func)(index, val) == true)
+        {
+            //qDebug() << m_Series->name() << " - index " << index << " - " << val;
+            m_Series->append( index, (qreal)val);
+        }
+        updateProgress();
+    }
+
+    m_isRunning = false;
+    emit updated(100);
+    emit finished();
 }
 
 ////////////////////
@@ -59,27 +82,9 @@ pcrWorker::pcrWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     // customize base class
     m_timestamp = new timestamp(*tsFile, pid);
     m_Series->setName(QString("Pcr in seconds"));
+    m_func = &(m_timestamp->getNextPcr);
 }
 
-void pcrWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double pcr;
-        while(m_timestamp->getNextPcr(index, pcr) == true)
-        {
-            //qDebug() << "index " << index << " - " << pcr;
-            m_Series->append( index, (qreal)pcr);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// Delta PCR worker
 pcrDeltaWorker::pcrDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -87,27 +92,9 @@ pcrDeltaWorker::pcrDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *c
     // customize base class
     m_timestamp = new timestamp(*tsFile, pid);
     m_Series->setName(QString("Delta Pcr in seconds"));
+    m_func = &(m_timestamp->getNextDelta);
 }
 
-void pcrDeltaWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double delta;
-        while(m_timestamp->getNextDelta(index, delta) == true)
-        {
-            //qDebug() << "index " << index << " - " << delta;
-            m_Series->append( index, (qreal)delta);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// Jitter PCR worker
 pcrJitterWorker::pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -115,24 +102,7 @@ pcrJitterWorker::pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart 
     // customize base class
     m_timestamp = new timestamp(*tsFile, pid);
     m_Series->setName(QString("Jitter Pcr in sceonds"));
-}
-
-void pcrJitterWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double jitter;
-        while(m_timestamp->getNextJitterPcr(index, jitter) == true)
-        {
-            //qDebug() << "index " << index << " - " << jitter;
-            m_Series->append( index, (qreal)jitter);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
+    m_func = &(m_timestamp->getNextJitterPcr);
 }
 
 ////////////////////
@@ -144,27 +114,9 @@ ptsWorker::ptsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     // customize base class
     m_timestamp = new timestamp(*tsFile, TIMESTAMP_NO_PID, pid);
     m_Series->setName(QString("Pts in seconds"));
+    m_func = &(m_timestamp->getNextPts);
 }
 
-void ptsWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double pts;
-        while(m_timestamp->getNextPts(index, pts) == true)
-        {
-            //qDebug() << "index " << index << " - " << pts;
-            m_Series->append( index, (qreal)pts);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// PTS Delta worker
 ptsDeltaWorker::ptsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -172,24 +124,7 @@ ptsDeltaWorker::ptsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *c
     // customize base class
     m_timestamp = new timestamp(*tsFile, TIMESTAMP_NO_PID, pid);
     m_Series->setName(QString("Pts delta in seconds"));
-}
-
-void ptsDeltaWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double delta;
-        while(m_timestamp->getNextDelta(index, delta) == true)
-        {
-            //qDebug() << "index " << index << " - " << delta;
-            m_Series->append( index, (qreal)delta);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
+    m_func = &(m_timestamp->getNextDelta);
 }
 
 ////////////////////
@@ -201,27 +136,9 @@ dtsWorker::dtsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     // customize base class
     m_timestamp = new timestamp(*tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
     m_Series->setName(QString("Dts in seconds"));
+    m_func = &(m_timestamp->getNextDts);
 }
 
-void dtsWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double dts;
-        while(m_timestamp->getNextDts(index, dts) == true)
-        {
-            //qDebug() << "index " << index << " - " << dts;
-            m_Series->append( index, (qreal)dts);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// DTS worker
 dtsDeltaWorker::dtsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -229,28 +146,11 @@ dtsDeltaWorker::dtsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *c
     // customize base class
     m_timestamp = new timestamp(*tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
     m_Series->setName(QString("Dts delta in seconds"));
-}
-
-void dtsDeltaWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double delta;
-        while(m_timestamp->getNextDelta(index, delta) == true)
-        {
-            //qDebug() << "index " << index << " - " << delta;
-            m_Series->append( index, (qreal)delta);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
+    m_func = &(m_timestamp->getNextDelta);
 }
 
 ////////////////
-// Diff PCR PTS worker
+// Diff worker
 diffPcrPtsWorker::diffPcrPtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -258,27 +158,9 @@ diffPcrPtsWorker::diffPcrPtsWorker(std::ifstream *tsFile, unsigned int pidPcr, u
     // customize base class
     m_timestamp = new timestamp(*tsFile, pidPcr, pidPts);
     m_Series->setName(QString("Pts-Pcr in seconds"));
+    m_func = &(m_timestamp->getNextDiff);
 }
 
-void diffPcrPtsWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double diff;
-        while(m_timestamp->getNextDiff(index, diff) == true)
-        {
-            //qDebug() << "index " << index << " - " << diff;
-            m_Series->append( index, (qreal)diff);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// Diff PCR DTS worker
 diffPcrDtsWorker::diffPcrDtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -286,27 +168,9 @@ diffPcrDtsWorker::diffPcrDtsWorker(std::ifstream *tsFile, unsigned int pidPcr, u
     // customize base class
     m_timestamp = new timestamp(*tsFile, pidPcr, TIMESTAMP_NO_PID, pidDts);
     m_Series->setName(QString("Dts-Pcr in seconds"));
+    m_func = &(m_timestamp->getNextDiff);
 }
 
-void diffPcrDtsWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double diff;
-        while(m_timestamp->getNextDiff(index, diff) == true)
-        {
-            //qDebug() << "index " << index << " - " << diff;
-            m_Series->append( index, (qreal)diff);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
-}
-
-// Diff PTS DTS worker
 diffPtsDtsWorker::diffPtsDtsWorker(std::ifstream *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
@@ -314,22 +178,5 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::ifstream *tsFile, unsigned int pidPts, u
     // customize base class
     m_timestamp = new timestamp(*tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
     m_Series->setName(QString("Dts-Pts in seconds"));
-}
-
-void diffPtsDtsWorker::run()
-{
-    while (m_timestamp->run(m_WindowPacket) == true)
-    {
-        unsigned int index;
-        double diff;
-        while(m_timestamp->getNextDiff(index, diff) == true)
-        {
-            //qDebug() << "index " << index << " - " << diff;
-            m_Series->append( index, (qreal)diff);
-        }
-        updateProgress();
-    }
-
-    emit updated(100);
-    emit finished();
+    m_func = &(m_timestamp->getNextDiff);
 }
