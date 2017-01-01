@@ -35,6 +35,9 @@ protected:
     // series of data to draw
     QLineSeries* m_Series;
 
+    // function used in thread - factorize the code
+    bool (timestamp::*m_func)(unsigned int& index, double& val);
+
 public:
     timeStampWorker(std::ifstream *tsFile, Chart *chart);
     ~timeStampWorker();
@@ -51,9 +54,6 @@ public:
 
     // run function from QRunnable
     void run();
-
-    // function used in thread - factorize the code
-    bool (timestamp::*m_func)(unsigned int& index, double& val);
 
 signals:
      void finished();
