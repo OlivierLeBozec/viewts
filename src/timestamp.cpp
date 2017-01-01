@@ -23,12 +23,16 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_diff_prev_index(-1),
     m_diff_prev_value(-1)
 {
-    // TODO: find first start byte (repeated 0x47 every 188)
+    // align file on first 0x47
+    char start[512];
+    int index = 0;
+
+    m_fileIn.read((char*)start, 512);
+    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
 
     // loop on packet
     m_fileIn.clear();
-    m_fileIn.seekg(0); // TODO
-
+    m_fileIn.seekg(index);
 }
 
 timestamp::~timestamp()
@@ -48,13 +52,13 @@ timestamp::~timestamp()
 bool timestamp::run(unsigned int nbPacketToRead)
 {
     unsigned char data[188];
-    bool isDataInFile = false;
+    bool isDatatoRead = false;
 
     while (nbPacketToRead)
     {
         // leave if no more data
-        isDataInFile = m_fileIn.read((char*)data, 188);
-        if (!isDataInFile) break;
+        if (!m_fileIn.read((char*)data, 188)) break;
+        isDatatoRead = true;
 
         // create packet from buffer
         packet packet(data);
@@ -102,7 +106,7 @@ bool timestamp::run(unsigned int nbPacketToRead)
     }
 
     // return true if some data are uptated
-    return isDataInFile;
+    return isDatatoRead;
 }
 
 double timestamp::getMaxDeltaPcr()
