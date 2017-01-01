@@ -15,34 +15,36 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    void cleanAll();
+
 public:
     explicit MainWindow();
     ~MainWindow();
 
 private slots:
     void Pcr(int state);
-    void updatePcr();
+    void showPcr();
     void deltaPcr(int state);
-    void updateDeltaPcr();
+    void showDeltaPcr();
     void jitterPcr(int state);
-    void updateJitterPcr();
+    void showJitterPcr();
 
     void Pts(int state);
-    void updatePts();
+    void showPts();
     void deltaPts(int state);
-    void updatePtsDelta();
+    void showPtsDelta();
 
     void Dts(int state);
     void updateDts();
     void deltaDts(int state);
-    void updateDtsDelta();
+    void showDtsDelta();
 
     void diffPcrPts(int state);
-    void updateDiffPcrPts();
+    void showDiffPcrPts();
     void diffPcrDts(int state);
-    void updateDiffPcrDts();
+    void showDiffPcrDts();
     void diffPtsDts(int state);
-    void updateDiffPtsDts();
+    void showDiffPtsDts();
 
     void updateStatusBar(int);
 
@@ -83,7 +85,7 @@ private:
     pcrWorker    *m_pcrWorker;
     ptsWorker    *m_ptsWorker;
     dtsWorker    *m_dtsWorker;
-    pcrDeltaWorker  *m_deltaPcrWorker;
+    pcrDeltaWorker  *m_pcrDeltaWorker;
     pcrJitterWorker *m_jitterPcrWorker;
     ptsDeltaWorker  *m_ptsDeltaWorker;
     dtsDeltaWorker  *m_dtsDeltaWorker;
@@ -93,6 +95,10 @@ private:
 
     void createLayout(QWidget *widget);
     void createMenu();
+
+    void showSeries(timeStampWorker *pWorker);
+    void hideSeries(timeStampWorker *pWorker);
+    void buildSeries(timeStampWorker *pWorker);
 };
 
 #endif // MAINWINDOW_H
