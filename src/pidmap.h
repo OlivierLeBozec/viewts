@@ -5,23 +5,27 @@
 #include <map>
 #include <vector>
 
+class pidinfo {
+public:
+    unsigned int nb_packet;
+    bool has_pcr;
+    bool has_pts;
+    bool has_dts;
+    char pattern;
+    float percent;
+};
+
 class pidmap
 {
-    class pidinfo {
-    public:
-        unsigned int nb_packet;
-        bool has_pcr;
-        bool has_pts;
-        bool has_dts;
-        char pattern;
-        float percent;
-    };
-
     // pid map
+    std::map<unsigned int, pidinfo>::iterator m_pidMap_ii;
     std::map<unsigned int, pidinfo> m_pidMap;
+    unsigned int m_prev_pid;
 
     // pid vec
+    std::vector<unsigned int>::iterator m_pidVec_ii;
     std::vector<unsigned int> m_pidVec;
+    unsigned char m_prev_pattern;
 
     std::ifstream& m_fileIn;
 
@@ -34,9 +38,8 @@ public:
     void getPcrPid(std::vector<unsigned int>& pidVector);
     void getPtsPid(std::vector<unsigned int>& pidVector);
     void getDtsPid(std::vector<unsigned int>& pidVector);
-
-    void OutPid();
-    void OutMap();
+    bool GetNextPidInfo(unsigned int& pid, pidinfo& pidInfo);
+    bool GetNextPattern(unsigned char& pattern);
 };
 
 #endif // PIDMAP_H

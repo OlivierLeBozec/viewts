@@ -3,13 +3,18 @@
 #include "pes.h"
 
 pidmap::pidmap(std::ifstream& fileIn) :
-    m_fileIn(fileIn)
+    m_fileIn(fileIn), m_prev_pid(-1), m_prev_pattern(255)
 {
-    // TODO: find first start byte (repeated 0x47 every 188)
+    // align file on first 0x47
+    char start[512];
+    int index = 0;
+
+    m_fileIn.read((char*)start, 512);
+    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
 
     // loop on packet
     m_fileIn.clear();
-    m_fileIn.seekg(0);    // TODO
+    m_fileIn.seekg(index);
 }
 
 pidmap::~pidmap()
@@ -26,13 +31,13 @@ pidmap::~pidmap()
 bool pidmap::run(unsigned int nbPacketToRead)
 {
     unsigned char data[188];
-    bool isDataInFile = false;
+    bool isDataToRead = false;
 
     while (nbPacketToRead)
     {
         // leave if no more data
-        isDataInFile = m_fileIn.read((char*)data, 188);
-        if (!isDataInFile) break;
+        if (! m_fileIn.read((char*)data, 188)) break;
+        isDataToRead = true;
 
         // create packet from buffer
         packet packet(data);
@@ -66,7 +71,7 @@ bool pidmap::run(unsigned int nbPacketToRead)
     }
 
     // return true if some data are uptated
-    return isDataInFile;
+    return isDataToRead;
 }
 
 void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector) {
@@ -99,60 +104,52 @@ void pidmap::getDtsPid(std::vector<unsigned int>&  pidVector) {
     }
 }
 
-void pidmap::OutPid() {
+bool pidmap::GetNextPidInfo(unsigned int& pid, pidinfo& pidInfo)
+{
+    // protection
+    if (m_pidMap.empty())
+        return false;
 
-    std::cout.flags ( std::ios_base::fixed | std::ios::left | std::ios_base::showbase);
-    std::cout.precision(3);
+    // init iterator
+    if (m_prev_pid == -1) {
 
-    std::cout << std::endl;
-    std::cout.width(10);
-    std::cout << "PID";
-    std::cout.width(10);
-    std::cout << "PID hex";
-    std::cout.width(10);
-    std::cout << "Nb packet";
-    std::cout.width(10);
-    std::cout << "Percent";
-    std::cout.width(10);
-    std::cout << "has Pcr";
-    std::cout.width(10);
-    std::cout << "has Pts";
-    std::cout.width(10);
-    std::cout << "has Dts";
-    std::cout.width(10);
-    std::cout << "Pattern" << std::endl;
-
-    std::map<unsigned int, pidinfo>::iterator ii;
-    for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
-    {
-        std::cout.width(10);
-        std::cout << (*ii).first;
-        std::cout.width(10);
-        std::cout << std::hex << (*ii).first << std::dec;
-        std::cout.width(10);
-        std::cout << (*ii).second.nb_packet;
-        std::cout.width(10);
-        std::cout << (*ii).second.percent;
-        std::cout.width(10);
-        if((*ii).second.has_pcr) std::cout << "Yes"; else std::cout << "No";
-        std::cout.width(10);
-        if((*ii).second.has_pts) std::cout << "Yes"; else std::cout << "No";
-        std::cout.width(10);
-        if((*ii).second.has_dts) std::cout << "Yes"; else std::cout << "No";
-        std::cout.width(10);
-        std::cout << (*ii).second.pattern << std::endl;
+        m_pidMap_ii = m_pidMap.begin();
+        m_prev_pid = pid = (*m_pidMap_ii).first;
+        pidInfo = (*m_pidMap_ii).second;
+        return true;
     }
+
+    if (m_pidMap_ii != --m_pidMap.end()) {
+
+        ++m_pidMap_ii;
+        m_prev_pid = pid = (*m_pidMap_ii).first;
+        pidInfo = (*m_pidMap_ii).second;
+        return true;
+    }
+
+    return false;
 }
 
-void pidmap::OutMap() {
+bool pidmap::GetNextPattern(unsigned char& pattern)
+{
+    // protection
+    if (m_pidVec.empty() || m_pidMap.empty())
+        return false;
 
-    std::cout << "Map of PIDs" << std::endl;
+    // init iterator
+    if (m_prev_pattern == 255) {
 
-    std::vector<unsigned int>::iterator ii;
-    for (ii=m_pidVec.begin(); ii!=m_pidVec.end(); ++ii)
-    {
-        std::cout << m_pidMap[*ii].pattern;
+        m_pidVec_ii = m_pidVec.begin();
+        m_prev_pattern = pattern = m_pidMap[*m_pidVec_ii].pattern;
+        return true;
     }
 
-    std::cout << std::endl;
+    if (m_pidVec_ii != --m_pidVec.end()) {
+
+        ++m_pidVec_ii;
+        m_prev_pattern = pattern = m_pidMap[*m_pidVec_ii].pattern;
+        return true;
+    }
+
+    return false;
 }

@@ -10,7 +10,7 @@ TEST(pid, check_pid_on_video_dvbSub)
     pidmap pm(tsFile);
 
     // check first 10000 packet
-    EXPECT_EQ(pm.run(10000), false);
+    EXPECT_EQ(pm.run(10000), true);
 
     std::vector<unsigned int> Pid;
     pm.getPcrPid(Pid);
@@ -36,7 +36,7 @@ TEST(pcr, check_PCR_values_on_audio)
     timestamp ts(tsFile, 305);
 
     // run leave when completed
-    EXPECT_EQ(ts.run(), false);
+    EXPECT_EQ(ts.run(), true);
 
     // first value
     EXPECT_EQ(ts.getNextPcr(index, pcr), true);
@@ -83,7 +83,7 @@ TEST(pts, check_PTS_values_on_audio)
     std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
     timestamp ts(tsFile, TIMESTAMP_NO_PID, 305);
 
-    EXPECT_EQ(ts.run(), false);
+    EXPECT_EQ(ts.run(), true);
 
     // first value
     EXPECT_EQ(ts.getNextPts(index, pts), true);
@@ -223,7 +223,7 @@ TEST(diff, check_diffPcrPts_values_on_audio)
 
     std::ifstream tsFile("../../ts/audio.ts", std::ios::binary);
     timestamp ts(tsFile, 305, 305);
-    ts.run();
+    EXPECT_EQ(ts.run(), true);
 
     // first value
     EXPECT_EQ(ts.getNextDiff(index, diff), true);

@@ -24,6 +24,65 @@ void Usage(char *pName) {
     std::cout << "          map of the pid in the file" << std::endl;
 }
 
+void dumpPidmap(pidmap& pm)
+{
+    std::cout.flags ( std::ios_base::fixed | std::ios::left | std::ios_base::showbase);
+    std::cout.precision(3);
+
+    std::cout << std::endl;
+    std::cout.width(10);
+    std::cout << "PID";
+    std::cout.width(10);
+    std::cout << "PID hex";
+    std::cout.width(10);
+    std::cout << "Nb packet";
+    std::cout.width(10);
+    std::cout << "Percent";
+    std::cout.width(10);
+    std::cout << "has Pcr";
+    std::cout.width(10);
+    std::cout << "has Pts";
+    std::cout.width(10);
+    std::cout << "has Dts";
+    std::cout.width(10);
+    std::cout << "Pattern" << std::endl;
+
+    unsigned int pid;
+    pidinfo pidInfo;
+    while (pm.GetNextPidInfo(pid, pidInfo) == true)
+    {
+        std::cout.width(10);
+        std::cout << pid;
+        std::cout.width(10);
+        std::cout << std::hex << pid << std::dec;
+        std::cout.width(10);
+        std::cout << pidInfo.nb_packet;
+        std::cout.width(10);
+        std::cout << pidInfo.percent;
+        std::cout.width(10);
+        if(pidInfo.has_pcr) std::cout << "Yes"; else std::cout << "No";
+        std::cout.width(10);
+        if(pidInfo.has_pts) std::cout << "Yes"; else std::cout << "No";
+        std::cout.width(10);
+        if(pidInfo.has_dts) std::cout << "Yes"; else std::cout << "No";
+        std::cout.width(10);
+        std::cout << pidInfo.pattern << std::endl;
+    }
+}
+
+void dumpMap(pidmap& pm)
+{
+    std::cout << "Map of PIDs" << std::endl;
+
+    unsigned char pattern;
+    while (pm.GetNextPattern(pattern) == true)
+    {
+        std::cout << pattern;
+    }
+
+    std::cout << std::endl;
+}
+
 int main(int argc, char** argv)
 {
     // help
@@ -55,8 +114,10 @@ int main(int argc, char** argv)
     // display pid info
     if (pidlist || pidm){
         pidmap pm(tsFile);
-        if (pidlist)    pm.OutPid();
-        if (pidm)       pm.OutMap();
+
+        while (pm.run() == true);
+        if (pidlist)    dumpPidmap(pm);
+        if (pidm)       dumpMap(pm);
     }
 
     // close
