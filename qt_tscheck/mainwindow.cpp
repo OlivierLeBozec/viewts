@@ -24,18 +24,16 @@ MainWindow::~MainWindow()
 void MainWindow::cleanAll()
 {
     if (m_tsFile) delete m_tsFile;
+    cleanPcr();
+    cleanDts();
+    cleanPts();
+}
 
+void MainWindow::cleanPcr()
+{
     if (m_pcrWorker) {
         m_pthreadPool->cancel(m_pcrWorker);
         delete m_pcrWorker; m_pcrWorker = Q_NULLPTR;
-    }
-    if (m_ptsWorker) {
-        m_pthreadPool->cancel(m_ptsWorker);
-        delete m_ptsWorker; m_ptsWorker = Q_NULLPTR;
-    }
-    if (m_dtsWorker) {
-        m_pthreadPool->cancel(m_dtsWorker);
-        delete m_dtsWorker; m_dtsWorker = Q_NULLPTR;
     }
     if (m_pcrDeltaWorker) {
         m_pthreadPool->cancel(m_pcrDeltaWorker);
@@ -45,17 +43,45 @@ void MainWindow::cleanAll()
         m_pthreadPool->cancel(m_jitterPcrWorker);
         delete m_jitterPcrWorker; m_jitterPcrWorker = Q_NULLPTR;
     }
+    if (m_diffPcrPtsWorker) {
+        m_pthreadPool->cancel(m_diffPcrPtsWorker);
+        delete m_diffPcrPtsWorker; m_diffPcrPtsWorker = Q_NULLPTR;
+    }
+    if (m_diffPcrDtsWorker) {
+        m_pthreadPool->cancel(m_diffPcrDtsWorker);
+        delete m_diffPcrDtsWorker; m_diffPcrDtsWorker = Q_NULLPTR;
+    }
+}
+
+void MainWindow::cleanPts()
+{
+    if (m_ptsWorker) {
+        m_pthreadPool->cancel(m_ptsWorker);
+        delete m_ptsWorker; m_ptsWorker = Q_NULLPTR;
+    }
     if (m_ptsDeltaWorker) {
         m_pthreadPool->cancel(m_ptsDeltaWorker);
         delete m_ptsDeltaWorker; m_ptsDeltaWorker = Q_NULLPTR;
     }
-    if (m_dtsDeltaWorker) {
-        m_pthreadPool->cancel(m_dtsDeltaWorker);
-        delete m_dtsDeltaWorker; m_dtsDeltaWorker = Q_NULLPTR;
-    }
     if (m_diffPcrPtsWorker) {
         m_pthreadPool->cancel(m_diffPcrPtsWorker);
         delete m_diffPcrPtsWorker; m_diffPcrPtsWorker = Q_NULLPTR;
+    }
+    if (m_diffPtsDtsWorker) {
+        m_pthreadPool->cancel(m_diffPtsDtsWorker);
+        delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
+    }
+}
+
+void MainWindow::cleanDts()
+{
+    if (m_dtsWorker) {
+        m_pthreadPool->cancel(m_dtsWorker);
+        delete m_dtsWorker; m_dtsWorker = Q_NULLPTR;
+    }
+    if (m_dtsDeltaWorker) {
+        m_pthreadPool->cancel(m_dtsDeltaWorker);
+        delete m_dtsDeltaWorker; m_dtsDeltaWorker = Q_NULLPTR;
     }
     if (m_diffPcrDtsWorker) {
         m_pthreadPool->cancel(m_diffPcrDtsWorker);
@@ -70,8 +96,10 @@ void MainWindow::cleanAll()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> display pcr, pts, dts "
-               "and various opreation on these timestamps "));
+            tr("blasTs version 0.90 for Windows and Linux\n"
+               "    Source code : https://github.com/OlivierLeBozec/tstools\n"
+               "    Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
+               "    Icon from http://www.flaticon.com/authors/gregor-cresnar\n"));
 }
 
 void MainWindow::updateStatusBar(int percent)
@@ -223,32 +251,34 @@ void MainWindow::erasePcrSeries(int)
     m_pcrBox->setChecked(false);
     m_deltaPcrBox->setChecked(false);
     m_jitterPcrBox->setChecked(false);
+    m_diffPcrPtsBox->setChecked(false);
+    m_diffPcrDtsBox->setChecked(false);
+    cleanPcr();
 }
 
 void MainWindow::erasePtsSeries(int)
 {
     m_ptsBox->setChecked(false);
     m_deltaPtsBox->setChecked(false);
+    m_diffPcrPtsBox->setChecked(false);
+    m_diffPtsDtsBox->setChecked(false);
+    cleanPts();
 }
 
 void MainWindow::eraseDtsSeries(int)
 {
     m_dtsBox->setChecked(false);
     m_deltaDtsBox->setChecked(false);
+    m_diffPtsDtsBox->setChecked(false);
+    m_diffPcrDtsBox->setChecked(false);
+    cleanDts();
 }
 
 void MainWindow::clearAllSeries()
 {
-    m_pcrBox->setChecked(false);
-    m_deltaPcrBox->setChecked(false);
-    m_jitterPcrBox->setChecked(false);
-    m_ptsBox->setChecked(false);
-    m_deltaPtsBox->setChecked(false);
-    m_dtsBox->setChecked(false);
-    m_deltaDtsBox->setChecked(false);
-    m_diffPcrPtsBox->setChecked(false);
-    m_diffPtsDtsBox->setChecked(false);
-    m_diffPcrDtsBox->setChecked(false);
+    erasePcrSeries(0);
+    eraseDtsSeries(0);
+    erasePtsSeries(0);
 }
 
 void MainWindow::openFile()

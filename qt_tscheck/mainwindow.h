@@ -15,8 +15,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    void cleanAll();
-
 public:
     explicit MainWindow();
     ~MainWindow();
@@ -99,6 +97,11 @@ private:
     void showSeries(timeStampWorker *pWorker);
     void hideSeries(timeStampWorker *pWorker);
     void buildSeries(timeStampWorker *pWorker);
+
+    void cleanAll();
+    void cleanPcr();
+    void cleanPts();
+    void cleanDts();
 };
 
 #endif // MAINWINDOW_H
