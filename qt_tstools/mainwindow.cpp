@@ -23,7 +23,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::cleanAll()
 {
-    if (m_tsFile) delete m_tsFile;
+    if (m_tsFile) {
+        m_tsFile->close();
+        delete m_tsFile;
+    }
     cleanPcr();
     cleanDts();
     cleanPts();
@@ -96,10 +99,10 @@ void MainWindow::cleanDts()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About Application"),
-            tr("blasTs version 0.90 for Windows and Linux\n"
-               "    Source code : https://github.com/OlivierLeBozec/tstools\n"
-               "    Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
-               "    Icon from http://www.flaticon.com/authors/gregor-cresnar\n"));
+            tr("viewTs version 0.90 for Windows and Linux\n\n"
+               "Source code : https://github.com/OlivierLeBozec/tstools\n"
+               "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
+               "Icon from http://www.flaticon.com/authors/gregor-cresnar\n"));
 }
 
 void MainWindow::updateStatusBar(int percent)
@@ -221,7 +224,7 @@ void MainWindow::createLayout(QWidget *widget)
     hlayout->addLayout(controlLayout);
     hlayout->addWidget(m_chartView);
 
-    // apply
+    // apply layout
     widget->setLayout(hlayout);
 }
 
@@ -233,6 +236,12 @@ void MainWindow::createMenu()
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
     fileMenu->addAction(openAct);
+
+    QAction *saveAsAct = new QAction(tr("&SaveAs..."), this);
+    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setStatusTip(tr("Save series in file"));
+    connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFile);
+    fileMenu->addAction(saveAsAct);
 
     QMenu *graphMenu = menuBar()->addMenu(tr("&Graph"));
     QAction *clearAllAct = new QAction(tr("&Clear All"), this);
@@ -283,7 +292,7 @@ void MainWindow::clearAllSeries()
 
 void MainWindow::openFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Ts"),QDir::homePath());
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Ts"), NULL);
     if (!fileName.isEmpty())
     {
         // delete previous allocations
@@ -359,6 +368,20 @@ void MainWindow::openFile()
     }
 }
 
+void MainWindow::saveAsFile()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save series"), NULL, NULL /*tr("*.txt")*/);
+    if (!fileName.isEmpty())
+    {
+        // overwrite all in the file
+        std::ofstream* outFile = new std::ofstream(fileName.toStdString().c_str(), std::ofstream::out | std::ofstream::trunc);
+
+        *outFile << "toto" << std::endl;
+        *outFile << "tata" << std::endl;
+
+        outFile->close();
+    }
+}
 void MainWindow::showSeries(timeStampWorker *pWorker)
 {
     if (pWorker->m_isRunning) {

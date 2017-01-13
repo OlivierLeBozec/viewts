@@ -47,6 +47,7 @@ private slots:
     void updateStatusBar(int);
 
     void openFile();
+    void saveAsFile();
     void clearAllSeries();
     void erasePcrSeries(int);
     void erasePtsSeries(int);

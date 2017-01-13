@@ -7,7 +7,7 @@
 QT      += core gui charts widgets
 CONFIG  += static
 
-TARGET = qt_tscheck
+TARGET = viewTS
 TEMPLATE = app
 
 
