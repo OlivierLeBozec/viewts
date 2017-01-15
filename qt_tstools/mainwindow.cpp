@@ -107,7 +107,7 @@ void MainWindow::about()
 
 void MainWindow::updateStatusBar(int percent)
 {
-    qDebug() << "updateStatusBar " << percent;
+    //qDebug() << "updateStatusBar " << percent;
 
     if (percent == 100) {
         statusBar()->showMessage(tr("Done..."), 5000);
@@ -296,10 +296,14 @@ void MainWindow::openFile()
     if (!fileName.isEmpty())
     {
         // delete previous allocations
-        cleanAll();
+        //statusBar()->showMessage(tr("Clean all..."));
+        //cleanAll();
+        clearAllSeries();
 
+        statusBar()->showMessage(tr("Loading file..."));
         m_tsFile = new std::ifstream(fileName.toStdString().c_str(), std::ios::binary);
 
+        statusBar()->showMessage(tr("Parsing first 5000 packets..."));
         pidmap pm(*m_tsFile);
         pm.run(5000);
 
@@ -311,7 +315,6 @@ void MainWindow::openFile()
         m_ptsGroupBox->setEnabled(false);
         m_dtsGroupBox->setEnabled(false);
         m_diffGroupBox->setEnabled(false);
-        clearAllSeries();
 
         // update pcr/pts/dts pid
         std::vector<unsigned int>::iterator it;
@@ -365,6 +368,8 @@ void MainWindow::openFile()
             m_diffPcrPtsBox->setEnabled(false);
             m_diffPcrDtsBox->setEnabled(false);
         }
+
+        statusBar()->showMessage(tr("Done..."), 1000);
     }
 }
 
@@ -374,6 +379,7 @@ void MainWindow::saveAsFile()
     if (!fileName.isEmpty())
     {
         // overwrite all in the file
+        statusBar()->showMessage(tr("Saving file..."));
         std::ofstream* outFile = new std::ofstream(fileName.toStdString().c_str(), std::ofstream::out | std::ofstream::trunc);
 
         serializeSeries(outFile, m_pcrWorker);
@@ -388,6 +394,7 @@ void MainWindow::saveAsFile()
         serializeSeries(outFile, m_diffPtsDtsWorker);
 
         outFile->close();
+        statusBar()->showMessage(tr("Done..."), 1000);
     }
 }
 
@@ -429,7 +436,7 @@ void MainWindow::serializeSeries(std::ofstream* outFile, timeStampWorker *pWorke
     if (pWorker == NULL || pWorker->m_isRunning == true)
         return;
 
-    // redraw serie only
+    // serialize serie in file
     pWorker->serializeSeries(outFile);
 }
 
