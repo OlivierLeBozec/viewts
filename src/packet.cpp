@@ -51,6 +51,10 @@ bool packet::hasPcr(void)
     AdaptationField_t adaptationField = getAdaptationField();
     if (adaptationField == NO_PAYLOAD || adaptationField == FOLLOWED_BY_PAYLOAD)
     {
+        // adaptation field length
+        if (m_data[4] == 0)
+            return false;
+
         // check if pcr flag in adaptation field
         if ((m_data[5] & 0x10) == 0x10)
             return true;
@@ -66,6 +70,10 @@ double packet::getPcr(void)
     // get pcr
     unsigned long long pcr = 0;
 
+    /*printf("%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
+           m_data[0], m_data[1], m_data[2], m_data[3], m_data[4],
+           m_data[5], m_data[6], m_data[7], m_data[8], m_data[9]);*/
+
     // unit of 90kHz
     pcr |= ((unsigned long long)m_data[6] << 25);
     pcr |= ((unsigned long long)m_data[7] << 17);
@@ -78,10 +86,10 @@ double packet::getPcr(void)
     pcr |= (m_data[10] & 0x01) << 8;
     pcr |= m_data[11];
 
-    // pcr overlap
-    if (m_pcrprev && ((pcr - m_pcrprev) > PCR_MAX))
+    // pcr overlap - not handle
+    /*if (m_pcrprev && ((pcr - m_pcrprev) > PCR_MAX))
         pcr += PCR_MAX;
-    m_pcrprev = pcr;
+    m_pcrprev = pcr;*/
 
     // unit of 27Mhz -> s
     return (double)pcr/27000000;
