@@ -270,12 +270,12 @@ TEST(jitter, check_jitterPcr_values_on_video_dvbSub)
     // first value
     EXPECT_EQ(ts.getNextJitterPcr(index, jitter), true);
     EXPECT_EQ(index, 56);
-    EXPECT_DOUBLE_EQ(jitter, 0.023075623888871633);
+    EXPECT_DOUBLE_EQ(jitter, 0.023075623888075825);
 
     // last value
     while (ts.getNextJitterPcr(index, jitter) == true);
     EXPECT_EQ(index, 9970);
-    EXPECT_DOUBLE_EQ(jitter, 0.022117092819826212);
+    EXPECT_DOUBLE_EQ(jitter, 0.022117092818120909);
 
     EXPECT_EQ(ts.getNextJitterPcr(index, jitter), false);
 }
