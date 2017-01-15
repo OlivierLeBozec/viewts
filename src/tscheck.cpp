@@ -271,6 +271,7 @@ int main(int argc, char** argv)
     // display timestamp
     if (dump || rate || dur || delta || jitter || diff){
         timestamp ts(tsFile, pidpcr, pidpts, piddts);
+        ts.run();
         if (dump && pidpcr != TIMESTAMP_NO_PID) DumpPcr(ts);
         if (dump && pidpts != TIMESTAMP_NO_PID) DumpPts(ts);
         if (dump && piddts != TIMESTAMP_NO_PID) DumpDts(ts);
