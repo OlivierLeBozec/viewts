@@ -52,6 +52,16 @@ void timeStampWorker::hideSeries()
     m_chart->removeSeries(m_Series);
 }
 
+void timeStampWorker::serializeSeries(std::ofstream *outFile)
+{
+    *outFile << m_Series->name().toStdString().c_str() << std::endl;
+    for (int i = 0; i < m_Series->count(); i++)
+    {
+        QString line = QString::number(m_Series->at(i).x(), 'f', 0) + ", " + QString::number(m_Series->at(i).y(), 'f', 9);
+        *outFile << line.toStdString().c_str() << std::endl;
+    }
+}
+
 void timeStampWorker::run()
 {
     m_isRunning = true;

@@ -376,12 +376,21 @@ void MainWindow::saveAsFile()
         // overwrite all in the file
         std::ofstream* outFile = new std::ofstream(fileName.toStdString().c_str(), std::ofstream::out | std::ofstream::trunc);
 
-        *outFile << "toto" << std::endl;
-        *outFile << "tata" << std::endl;
+        serializeSeries(outFile, m_pcrWorker);
+        serializeSeries(outFile, m_ptsWorker);
+        serializeSeries(outFile, m_dtsWorker);
+        serializeSeries(outFile, m_pcrDeltaWorker);
+        serializeSeries(outFile, m_jitterPcrWorker);
+        serializeSeries(outFile, m_ptsDeltaWorker);
+        serializeSeries(outFile, m_dtsDeltaWorker);
+        serializeSeries(outFile, m_diffPcrPtsWorker);
+        serializeSeries(outFile, m_diffPcrDtsWorker);
+        serializeSeries(outFile, m_diffPtsDtsWorker);
 
         outFile->close();
     }
 }
+
 void MainWindow::showSeries(timeStampWorker *pWorker)
 {
     if (pWorker->m_isRunning) {
@@ -413,6 +422,15 @@ void MainWindow::buildSeries(timeStampWorker *pWorker)
 
     // start thread
     m_pthreadPool->start(pWorker);
+}
+
+void MainWindow::serializeSeries(std::ofstream* outFile, timeStampWorker *pWorker)
+{
+    if (pWorker == NULL || pWorker->m_isRunning == true)
+        return;
+
+    // redraw serie only
+    pWorker->serializeSeries(outFile);
 }
 
 /////////////////////////////////////////////// Chart

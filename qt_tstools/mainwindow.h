@@ -98,6 +98,7 @@ private:
     void showSeries(timeStampWorker *pWorker);
     void hideSeries(timeStampWorker *pWorker);
     void buildSeries(timeStampWorker *pWorker);
+    void serializeSeries(std::ofstream* outFile, timeStampWorker *pWorker);
 
     void cleanAll();
     void cleanPcr();

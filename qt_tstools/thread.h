@@ -49,8 +49,8 @@ public:
     void showSeries();
     void hideSeries();
 
-    // write the serie of points in file - TODO
-    void serializeSerie();
+    // write the serie of points in file
+    void serializeSeries(std::ofstream *outFile);
 
     // run function from QRunnable
     void run();
