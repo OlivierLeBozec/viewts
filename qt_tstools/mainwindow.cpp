@@ -5,9 +5,9 @@ MainWindow::MainWindow() :
     m_tsFile(Q_NULLPTR),
     m_pthreadPool(QThreadPool::globalInstance()),
     m_pcrWorker(Q_NULLPTR), m_ptsWorker(Q_NULLPTR), m_dtsWorker(Q_NULLPTR),
-    m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_ptsDeltaWorker(Q_NULLPTR),
-    m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR), m_diffPcrDtsWorker(Q_NULLPTR),
-    m_diffPtsDtsWorker(Q_NULLPTR)
+    m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
+    m_ptsDeltaWorker(Q_NULLPTR), m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR),
+    m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR)
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
@@ -45,6 +45,10 @@ void MainWindow::cleanPcr()
     if (m_jitterPcrWorker) {
         m_pthreadPool->cancel(m_jitterPcrWorker);
         delete m_jitterPcrWorker; m_jitterPcrWorker = Q_NULLPTR;
+    }
+    if (m_bitratePcrWorker) {
+        m_pthreadPool->cancel(m_bitratePcrWorker);
+        delete m_bitratePcrWorker; m_bitratePcrWorker = Q_NULLPTR;
     }
     if (m_diffPcrPtsWorker) {
         m_pthreadPool->cancel(m_diffPcrPtsWorker);
@@ -101,8 +105,7 @@ void MainWindow::about()
    QMessageBox::about(this, tr("About Application"),
             tr("viewTs version 0.90 for Windows and Linux\n\n"
                "Source code : https://github.com/OlivierLeBozec/tstools\n"
-               "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
-               "Icon from http://www.flaticon.com/authors/gregor-cresnar\n"));
+               "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"));
 }
 
 void MainWindow::updateStatusBar(int percent)
@@ -127,6 +130,7 @@ void MainWindow::createLayout(QWidget *widget)
     m_pcrBox = new QCheckBox(tr("Display Pcr"));
     m_deltaPcrBox = new QCheckBox(tr("Display Pcr Delta"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
+    m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
 
     QGridLayout *pcrGroupBoxLayout = new QGridLayout;
     pcrGroupBoxLayout->addWidget(pcrPidLabel, 0, 0);
@@ -134,6 +138,7 @@ void MainWindow::createLayout(QWidget *widget)
     pcrGroupBoxLayout->addWidget(m_pcrBox, 1, 0);
     pcrGroupBoxLayout->addWidget(m_deltaPcrBox, 2, 0);
     pcrGroupBoxLayout->addWidget(m_jitterPcrBox, 3, 0);
+    pcrGroupBoxLayout->addWidget(m_bitratePcrBox, 4, 0);
     pcrGroupBoxLayout->setVerticalSpacing(0);
     m_pcrGroupBox->setLayout(pcrGroupBoxLayout);
     m_pcrGroupBox->setEnabled(false);
@@ -141,6 +146,7 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_pcrBox, SIGNAL(stateChanged(int)), this, SLOT(Pcr(int)));
     connect(m_deltaPcrBox, SIGNAL(stateChanged(int)), this, SLOT(deltaPcr(int)));
     connect(m_jitterPcrBox, SIGNAL(stateChanged(int)), this, SLOT(jitterPcr(int)));
+    connect(m_bitratePcrBox, SIGNAL(stateChanged(int)), this, SLOT(bitratePcr(int)));
     connect(m_pcrComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(erasePcrSeries(int)));
 
     // pts
@@ -260,6 +266,7 @@ void MainWindow::erasePcrSeries(int)
     m_pcrBox->setChecked(false);
     m_deltaPcrBox->setChecked(false);
     m_jitterPcrBox->setChecked(false);
+    m_bitratePcrBox->setChecked(false);
     m_diffPcrPtsBox->setChecked(false);
     m_diffPcrDtsBox->setChecked(false);
     cleanPcr();
@@ -387,6 +394,7 @@ void MainWindow::saveAsFile()
         serializeSeries(outFile, m_dtsWorker);
         serializeSeries(outFile, m_pcrDeltaWorker);
         serializeSeries(outFile, m_jitterPcrWorker);
+        serializeSeries(outFile, m_bitratePcrWorker);
         serializeSeries(outFile, m_ptsDeltaWorker);
         serializeSeries(outFile, m_dtsDeltaWorker);
         serializeSeries(outFile, m_diffPcrPtsWorker);
@@ -607,6 +615,30 @@ void MainWindow::showJitterPcr()
     if (m_jitterPcrBox->isChecked()) {
         // must be done in parent thread
         m_jitterPcrWorker->showSeries();
+    }
+}
+
+void MainWindow::bitratePcr(int state)
+{
+    if (state == Qt::Checked)
+        if (m_bitratePcrWorker == Q_NULLPTR)
+        {
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            m_bitratePcrWorker = new pcrBitrateWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            connect(m_bitratePcrWorker, SIGNAL(finished()), this, SLOT(showBitratePcr()));
+            buildSeries(m_bitratePcrWorker);
+        }
+        else
+            showSeries(m_bitratePcrWorker);
+    else
+        hideSeries(m_bitratePcrWorker);
+}
+
+void MainWindow::showBitratePcr()
+{
+    if (m_bitratePcrBox->isChecked()) {
+        // must be done in parent thread
+        m_bitratePcrWorker->showSeries();
     }
 }
 

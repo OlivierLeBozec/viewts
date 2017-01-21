@@ -26,6 +26,8 @@ private slots:
     void showDeltaPcr();
     void jitterPcr(int state);
     void showJitterPcr();
+    void bitratePcr(int state);
+    void showBitratePcr();
 
     void Pts(int state);
     void showPts();
@@ -73,6 +75,7 @@ private:
     QCheckBox* m_pcrBox;
     QCheckBox* m_deltaPcrBox;
     QCheckBox* m_jitterPcrBox;
+    QCheckBox* m_bitratePcrBox;
     QCheckBox* m_ptsBox;
     QCheckBox* m_deltaPtsBox;
     QCheckBox* m_dtsBox;
@@ -86,6 +89,7 @@ private:
     dtsWorker    *m_dtsWorker;
     pcrDeltaWorker  *m_pcrDeltaWorker;
     pcrJitterWorker *m_jitterPcrWorker;
+    pcrBitrateWorker *m_bitratePcrWorker;
     ptsDeltaWorker  *m_ptsDeltaWorker;
     dtsDeltaWorker  *m_dtsDeltaWorker;
     diffPcrPtsWorker *m_diffPcrPtsWorker;

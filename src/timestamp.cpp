@@ -21,7 +21,9 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_jitter_prev_index(-1),
     m_jitter_prev_val(-1),
     m_diff_prev_index(-1),
-    m_diff_prev_value(-1)
+    m_diff_prev_value(-1),
+    m_bitrate_prev_index_val(-1),
+    m_bitrate_prev_pcr_val(-1)
 {
     // align file on first 0x47
     char start[512];
@@ -118,7 +120,7 @@ double timestamp::getMaxDeltaPcr()
     return m_max_pcr-m_min_pcr;
 }
 
-double timestamp::getBitrate()
+double timestamp::getGlobalBitrate()
 {
     // test if pcr found
     if (m_pcrMap.empty()) return 0;
@@ -143,7 +145,7 @@ double timestamp::getDuration()
     double delta_pcr = getMaxDeltaPcr();
 
     // bitrate in byte per second
-    double bitrate = getBitrate();
+    double bitrate = getGlobalBitrate();
 
     // duration in seconds
     double duration = delta_pcr;
@@ -284,7 +286,7 @@ bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
         // estimated pcr is compute using bitrate and number of bit
         double offset = ((*m_jitter_ii).first - m_jitter_prev_index) * 188 * 8;
         double estimate_pcr = m_jitter_prev_val;
-        estimate_pcr += offset/getBitrate();
+        estimate_pcr += offset/getGlobalBitrate();
 
         // jitter in s
         jitter = (*m_jitter_ii).second - estimate_pcr;
@@ -352,6 +354,35 @@ bool timestamp::getNextDiff(unsigned int& index, double& diff)
 
         m_diff_prev_index = (*m_diff_ii).first;
         m_diff_prev_value = (*m_diff_ii).second;
+    }
+
+    return false;
+}
+
+bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
+{
+    // protection
+    if (m_pcrMap.empty())
+        return false;
+
+    // init iterator
+    if (m_bitrate_prev_pcr_val == -1) {
+
+        m_pcr_ii = m_pcrMap.begin();
+        m_bitrate_prev_index_val = (*m_pcr_ii).first;
+        m_bitrate_prev_pcr_val = (*m_pcr_ii).second;
+    }
+
+    if (m_pcr_ii != --m_pcrMap.end()) {
+
+        ++m_pcr_ii;
+        bitrate = (*m_pcr_ii).first - m_bitrate_prev_index_val;
+        bitrate *= 188;
+        bitrate /= (*m_pcr_ii).second - m_bitrate_prev_pcr_val;
+        index = (*m_pcr_ii).first;
+        m_bitrate_prev_index_val = (*m_pcr_ii).first;
+        m_bitrate_prev_pcr_val = (*m_pcr_ii).second;
+        return true;
     }
 
     return false;

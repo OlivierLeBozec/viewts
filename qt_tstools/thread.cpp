@@ -111,8 +111,18 @@ pcrJitterWorker::pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart 
 {
     // customize base class
     m_timestamp = new timestamp(*tsFile, pid);
-    m_Series->setName(QString("Jitter Pcr in sceonds"));
+    m_Series->setName(QString("Jitter Pcr in seconds"));
     m_func = &(m_timestamp->getNextJitterPcr);
+}
+
+pcrBitrateWorker::pcrBitrateWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart) :
+    timeStampWorker(tsFile, chart)
+
+{
+    // customize base class
+    m_timestamp = new timestamp(*tsFile, pid);
+    m_Series->setName(QString("bitrate in bit per seconds"));
+    m_func = &(m_timestamp->getNextBitrate);
 }
 
 ////////////////////

@@ -28,7 +28,7 @@ void DumpDuration(timestamp& ts)
 
 void DumpBitrate(timestamp& ts)
 {
-    double bitrate = ts.getBitrate();
+    double bitrate = ts.getGlobalBitrate();
 
     std::cout.flags (std::ios_base::fixed | std::ios::left);
     std::cout.precision(3);
@@ -183,6 +183,27 @@ void DumpDiff(timestamp& ts)
     }
 }
 
+void DumpLocalBitrate(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout.width(DUMP_PRECISION);
+    std::cout << "local bitrate (b/s)" << std::endl;
+
+    unsigned int index;
+    double bitrate;
+    while (ts.getNextBitrate(index, bitrate) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout.width(DUMP_PRECISION);
+        std::cout << bitrate << std::endl;
+    }
+}
+
 void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
     std::cout << "   " << pName << " - check timestamp" << std::endl;
@@ -211,8 +232,11 @@ void Usage(char *pName) {
     std::cout << "   -dur" << std::endl;
     std::cout << "          get duration of the stream" << std::endl;
     std::cout << std::endl;
-    std::cout << "   -rate" << std::endl;
-    std::cout << "          get bitrate of pid" << std::endl;
+    std::cout << "   -globalrate" << std::endl;
+    std::cout << "          get global bitrate of pid" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   -localrate" << std::endl;
+    std::cout << "          get local bitrate of pid" << std::endl;
     std::cout << std::endl;
     std::cout << "   -delta" << std::endl;
     std::cout << "          diff between same consecutive timestamp for pcr, pts or dts" << std::endl;
@@ -243,10 +267,10 @@ int main(int argc, char** argv)
 
     // check options
     std::string StrDump("-dump"), StrBitrate("-rate"), StrDuration("-dur"), StrPcr("-pidpcr"), StrPts("-pidpts"), StrDts("-piddts"),
-            StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff");
+            StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff"), StrLocalBitrate("-localrate");;
 
     unsigned int  pidpcr = TIMESTAMP_NO_PID, pidpts = TIMESTAMP_NO_PID, piddts = TIMESTAMP_NO_PID;
-    bool dump = false, rate = false, dur = false, delta = false, jitter = false, diff = false;
+    bool dump = false, rate = false, dur = false, delta = false, jitter = false, diff = false, localbitrate = false;
 
     for (int i=2; i<argc; ++i)
     {
@@ -260,6 +284,7 @@ int main(int argc, char** argv)
         else if (StrOption == StrDelta) delta = true;
         else if (StrOption == StrJitter) jitter = true;
         else if (StrOption == StrDiff) diff = true;
+        else if (StrOption == StrLocalBitrate) localbitrate = true;
     }
 
     if (pidpcr == TIMESTAMP_NO_PID && pidpts == TIMESTAMP_NO_PID && piddts == TIMESTAMP_NO_PID)
@@ -269,7 +294,7 @@ int main(int argc, char** argv)
     }
 
     // display timestamp
-    if (dump || rate || dur || delta || jitter || diff){
+    if (dump || rate || dur || delta || jitter || diff || localbitrate){
         timestamp ts(tsFile, pidpcr, pidpts, piddts);
         ts.run();
         if (dump && pidpcr != TIMESTAMP_NO_PID) DumpPcr(ts);
@@ -278,8 +303,9 @@ int main(int argc, char** argv)
         if (dur)    DumpDuration(ts);
         if (rate)   DumpBitrate(ts);
         if (delta)  DumpDelta(ts);
-        if (jitter) DumpJitterPcr(ts);
+        if (jitter && pidpcr != TIMESTAMP_NO_PID) DumpJitterPcr(ts);
         if (diff)   DumpDiff(ts);
+        if (localbitrate && pidpcr != TIMESTAMP_NO_PID) DumpLocalBitrate(ts);
     }
 
     // close

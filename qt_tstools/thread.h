@@ -80,6 +80,11 @@ class pcrJitterWorker : public timeStampWorker
 public:
     pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
 };
+class pcrBitrateWorker : public timeStampWorker
+{
+public:
+    pcrBitrateWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+};
 
 
 ////////////////////
