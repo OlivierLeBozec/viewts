@@ -92,14 +92,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    // check filename
-    std::ifstream tsFile(argv[1], std::ios::binary);
-    if (!tsFile.is_open())
-    {
-        std::cerr << "Failed to open file " << argv[1] << std::endl;
-        return -1;
-    }
-
     // check options
     std::string StrPidList("-pidlist"), StrPidMap ("-pidmap");
     bool pidlist = false, pidm = false;
@@ -113,11 +105,14 @@ int main(int argc, char** argv)
 
     // display pid info
     if (pidlist || pidm){
-        pidmap pm(tsFile);
+        std::string *Filename = new std::string(argv[1]);
+        pidmap pm(Filename);
 
         while (pm.run() == true);
         if (pidlist)    dumpPidmap(pm);
         if (pidm)       dumpMap(pm);
+
+        delete Filename;
     }
 
     // close

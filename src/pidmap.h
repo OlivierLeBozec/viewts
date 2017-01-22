@@ -27,10 +27,10 @@ class pidmap
     std::vector<unsigned int> m_pidVec;
     unsigned char m_prev_pattern;
 
-    std::ifstream& m_fileIn;
+    std::ifstream* m_fileIn;
 
 public:
-    pidmap(std::ifstream& fileIn);
+    pidmap(std::string* fileIn);
     ~pidmap();
 
     bool run(unsigned int NbPacket = (unsigned int)-1);

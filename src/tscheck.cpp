@@ -257,14 +257,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    // check filename
-    std::ifstream tsFile(argv[1], std::ios::binary);
-    if (!tsFile.is_open())
-    {
-        std::cerr << "Failed to open file " << argv[1] << std::endl;
-        return -1;
-    }
-
     // check options
     std::string StrDump("-dump"), StrBitrate("-rate"), StrDuration("-dur"), StrPcr("-pidpcr"), StrPts("-pidpts"), StrDts("-piddts"),
             StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff"), StrLocalBitrate("-localrate");;
@@ -295,7 +287,8 @@ int main(int argc, char** argv)
 
     // display timestamp
     if (dump || rate || dur || delta || jitter || diff || localbitrate){
-        timestamp ts(tsFile, pidpcr, pidpts, piddts);
+        std::string *Filename = new std::string(argv[1]);
+        timestamp ts(Filename, pidpcr, pidpts, piddts);
         ts.run();
         if (dump && pidpcr != TIMESTAMP_NO_PID) DumpPcr(ts);
         if (dump && pidpts != TIMESTAMP_NO_PID) DumpPts(ts);
@@ -306,10 +299,9 @@ int main(int argc, char** argv)
         if (jitter && pidpcr != TIMESTAMP_NO_PID) DumpJitterPcr(ts);
         if (diff)   DumpDiff(ts);
         if (localbitrate && pidpcr != TIMESTAMP_NO_PID) DumpLocalBitrate(ts);
-    }
 
-    // close
-    tsFile.close();
+        delete Filename;
+    }
 
     return 0;
 }

@@ -2,7 +2,6 @@
 #include "thread.h"
 
 MainWindow::MainWindow() :
-    m_tsFile(Q_NULLPTR),
     m_pthreadPool(QThreadPool::globalInstance()),
     m_pcrWorker(Q_NULLPTR), m_ptsWorker(Q_NULLPTR), m_dtsWorker(Q_NULLPTR),
     m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
@@ -23,10 +22,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::cleanAll()
 {
-    if (m_tsFile) {
-        m_tsFile->close();
-        delete m_tsFile;
-    }
     cleanPcr();
     cleanDts();
     cleanPts();
@@ -105,7 +100,8 @@ void MainWindow::about()
    QMessageBox::about(this, tr("About Application"),
             tr("viewTs version 0.90 for Windows and Linux\n\n"
                "Source code : https://github.com/OlivierLeBozec/tstools\n"
-               "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"));
+               "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
+               "Icon made by Madebyoliver from www.flaticon.com"));
 }
 
 void MainWindow::updateStatusBar(int percent)
@@ -128,7 +124,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* pcrPidLabel = new QLabel(tr("Pid:"));
     m_pcrComboBox = new QComboBox;
     m_pcrBox = new QCheckBox(tr("Display Pcr"));
-    m_deltaPcrBox = new QCheckBox(tr("Display Pcr Delta"));
+    m_deltaPcrBox = new QCheckBox(tr("Display Pcr Diff"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
     m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
 
@@ -154,7 +150,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* ptsPidLabel = new QLabel(tr("Pid:"));
     m_ptsComboBox = new QComboBox;
     m_ptsBox = new QCheckBox(tr("Display Pts"));
-    m_deltaPtsBox = new QCheckBox(tr("Display Pts Delta"));
+    m_deltaPtsBox = new QCheckBox(tr("Display Pts Diff"));
 
     QGridLayout *ptsGroupBoxLayout = new QGridLayout;
     ptsGroupBoxLayout->addWidget(ptsPidLabel, 0, 0);
@@ -174,7 +170,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* dtsPidLabel = new QLabel(tr("Pid:"));
     m_dtsComboBox = new QComboBox;
     m_dtsBox = new QCheckBox(tr("Display Dts"));
-    m_deltaDtsBox = new QCheckBox(tr("Display Dts Delta"));
+    m_deltaDtsBox = new QCheckBox(tr("Display Dts Diff"));
 
     QGridLayout *dtsGroupBoxLayout = new QGridLayout;
     dtsGroupBoxLayout->addWidget(dtsPidLabel, 0, 0, Qt::AlignTop);
@@ -302,16 +298,15 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Ts"), NULL);
     if (!fileName.isEmpty())
     {
+        m_tsFileName = fileName.toStdString();
+
         // delete previous allocations
         //statusBar()->showMessage(tr("Clean all..."));
         //cleanAll();
         clearAllSeries();
 
-        statusBar()->showMessage(tr("Loading file..."));
-        m_tsFile = new std::ifstream(fileName.toStdString().c_str(), std::ios::binary);
-
         statusBar()->showMessage(tr("Parsing first 5000 packets..."));
-        pidmap pm(*m_tsFile);
+        pidmap pm(&m_tsFileName);
         pm.run(5000);
 
         // clear previous value
@@ -455,7 +450,7 @@ void MainWindow::Pcr(int state)
         if (m_pcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            m_pcrWorker = new pcrWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_pcrWorker = new pcrWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_pcrWorker, SIGNAL(finished()), this, SLOT(showPcr()));
             buildSeries(m_pcrWorker);
         }
@@ -479,7 +474,7 @@ void MainWindow::Pts(int state)
         if (m_ptsWorker == Q_NULLPTR)
         {
             unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-            m_ptsWorker = new ptsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_ptsWorker = new ptsWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_ptsWorker, SIGNAL(finished()), this, SLOT(showPts()));
             buildSeries(m_ptsWorker);
         }
@@ -503,7 +498,7 @@ void MainWindow::Dts(int state)
         if (m_dtsWorker == Q_NULLPTR)
         {
             unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-            m_dtsWorker = new dtsWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_dtsWorker = new dtsWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_dtsWorker, SIGNAL(finished()), this, SLOT(updateDts()));
             buildSeries(m_dtsWorker);
         }
@@ -527,7 +522,7 @@ void MainWindow::deltaPcr(int state)
         if (m_pcrDeltaWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            m_pcrDeltaWorker = new pcrDeltaWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_pcrDeltaWorker = new pcrDeltaWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_pcrDeltaWorker, SIGNAL(finished()), this, SLOT(showDeltaPcr()));
             buildSeries(m_pcrDeltaWorker);
         }
@@ -551,7 +546,7 @@ void MainWindow::deltaPts(int state)
         if (m_ptsDeltaWorker == Q_NULLPTR)
         {
             unsigned int pid = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-            m_ptsDeltaWorker = new ptsDeltaWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_ptsDeltaWorker = new ptsDeltaWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_ptsDeltaWorker, SIGNAL(finished()), this, SLOT(showPtsDelta()));
             buildSeries(m_ptsDeltaWorker);
         }
@@ -576,7 +571,7 @@ void MainWindow::deltaDts(int state)
         if (m_dtsDeltaWorker == Q_NULLPTR)
         {
             unsigned int pid = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-            m_dtsDeltaWorker = new dtsDeltaWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_dtsDeltaWorker = new dtsDeltaWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_dtsDeltaWorker, SIGNAL(finished()), this, SLOT(showDtsDelta()));
             buildSeries(m_dtsDeltaWorker);
         }
@@ -600,7 +595,7 @@ void MainWindow::jitterPcr(int state)
         if (m_jitterPcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            m_jitterPcrWorker = new pcrJitterWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_jitterPcrWorker = new pcrJitterWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_jitterPcrWorker, SIGNAL(finished()), this, SLOT(showJitterPcr()));
             buildSeries(m_jitterPcrWorker);
         }
@@ -624,7 +619,7 @@ void MainWindow::bitratePcr(int state)
         if (m_bitratePcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            m_bitratePcrWorker = new pcrBitrateWorker(m_tsFile, pid, (Chart*)m_chartView->chart());
+            m_bitratePcrWorker = new pcrBitrateWorker(&m_tsFileName, pid, (Chart*)m_chartView->chart());
             connect(m_bitratePcrWorker, SIGNAL(finished()), this, SLOT(showBitratePcr()));
             buildSeries(m_bitratePcrWorker);
         }
@@ -649,7 +644,7 @@ void MainWindow::diffPcrPts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-            m_diffPcrPtsWorker = new diffPcrPtsWorker(m_tsFile, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_diffPcrPtsWorker = new diffPcrPtsWorker(&m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             connect(m_diffPcrPtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrPts()));
             buildSeries(m_diffPcrPtsWorker);
         }
@@ -675,7 +670,7 @@ void MainWindow::diffPcrDts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
             unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-            m_diffPcrDtsWorker = new diffPcrDtsWorker(m_tsFile, pidPcr, pidDts, (Chart*)m_chartView->chart());
+            m_diffPcrDtsWorker = new diffPcrDtsWorker(&m_tsFileName, pidPcr, pidDts, (Chart*)m_chartView->chart());
             connect(m_diffPcrDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrDts()));
             buildSeries(m_diffPcrDtsWorker);
         }
@@ -700,7 +695,7 @@ void MainWindow::diffPtsDts(int state)
         {
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
             unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-            m_diffPtsDtsWorker = new diffPtsDtsWorker(m_tsFile, pidPts, pidDts, (Chart*)m_chartView->chart());
+            m_diffPtsDtsWorker = new diffPtsDtsWorker(&m_tsFileName, pidPts, pidDts, (Chart*)m_chartView->chart());
             connect(m_diffPtsDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPtsDts()));
             buildSeries(m_diffPtsDtsWorker);
         }

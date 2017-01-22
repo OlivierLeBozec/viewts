@@ -57,7 +57,7 @@ private slots:
     void about();
 
 private:
-    std::ifstream* m_tsFile;
+    std::string m_tsFileName;
 
     QThreadPool *m_pthreadPool;
 

@@ -2,8 +2,7 @@
 #include "packet.h"
 #include "pes.h"
 
-timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
-    m_fileIn(fileIn),
+timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
     m_min_pcr(0xFFFFFFFFFFFFFFFF),
@@ -25,16 +24,18 @@ timestamp::timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pi
     m_bitrate_prev_index_val(-1),
     m_bitrate_prev_pcr_val(-1)
 {
+    m_fileIn =  new std::ifstream(fileNameIn->c_str(), std::ios::binary);
+
     // align file on first 0x47
     char start[512];
     int index = 0;
 
-    m_fileIn.read((char*)start, 512);
+    m_fileIn->read((char*)start, 512);
     while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
 
     // loop on packet
-    m_fileIn.clear();
-    m_fileIn.seekg(index);
+    m_fileIn->clear();
+    m_fileIn->seekg(index);
 }
 
 timestamp::~timestamp()
@@ -48,6 +49,9 @@ timestamp::~timestamp()
     if (!m_dtsMap.empty()) {
         m_dtsMap.clear();
     }
+
+    m_fileIn->close();
+    delete m_fileIn;
 }
 
 // Cpu consuming function
@@ -59,7 +63,7 @@ bool timestamp::run(unsigned int nbPacketToRead)
     while (nbPacketToRead)
     {
         // leave if no more data
-        if (!m_fileIn.read((char*)data, 188)) break;
+        if (!m_fileIn->read((char*)data, 188)) break;
         isDatatoRead = true;
 
         // create packet from buffer
