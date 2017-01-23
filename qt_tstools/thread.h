@@ -17,7 +17,7 @@ class timeStampWorker : public QObject, public QRunnable
     // used to compute competion rate
     unsigned int m_nbProgress;
     unsigned int m_progress;
-    unsigned int m_fileSize;
+    unsigned long long m_fileSize;
 
     // update the competion rate
     void updateProgress();
@@ -39,7 +39,7 @@ protected:
     bool (timestamp::*m_func)(unsigned int& index, double& val);
 
 public:
-    timeStampWorker(std::ifstream *tsFile, Chart *chart);
+    timeStampWorker(std::string *tsFile, Chart *chart);
     ~timeStampWorker();
 
     // true if the thread is running
@@ -49,8 +49,8 @@ public:
     void showSeries();
     void hideSeries();
 
-    // write the serie of points in file - TODO
-    void serializeSerie();
+    // write the serie of points in file
+    void serializeSeries(std::ofstream *outFile);
 
     // run function from QRunnable
     void run();
@@ -66,19 +66,24 @@ signals:
 class pcrWorker : public timeStampWorker
 {
 public:
-    pcrWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    pcrWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 class pcrDeltaWorker : public timeStampWorker
 {
 public:
-    pcrDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 class pcrJitterWorker : public timeStampWorker
 {
 public:
-    pcrJitterWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    pcrJitterWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+};
+class pcrBitrateWorker : public timeStampWorker
+{
+public:
+    pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 
@@ -87,13 +92,13 @@ public:
 class ptsWorker : public timeStampWorker
 {
 public:
-    ptsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    ptsWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 class ptsDeltaWorker : public timeStampWorker
 {
 public:
-    ptsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    ptsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 
@@ -102,14 +107,14 @@ public:
 class dtsWorker : public timeStampWorker
 {
 public:
-    dtsWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    dtsWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 // DTS delta worker
 class dtsDeltaWorker : public timeStampWorker
 {
 public:
-    dtsDeltaWorker(std::ifstream *tsFile, unsigned int pid, Chart *chart);
+    dtsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
 };
 
 ////////////////
@@ -117,19 +122,19 @@ public:
 class diffPcrPtsWorker : public timeStampWorker
 {
 public:
-    diffPcrPtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    diffPcrPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
 };
 
 class diffPcrDtsWorker : public timeStampWorker
 {
 public:
-    diffPcrDtsWorker(std::ifstream *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    diffPcrDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
 };
 
 class diffPtsDtsWorker : public timeStampWorker
 {
 public:
-    diffPtsDtsWorker(std::ifstream *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart);
+    diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart);
 };
 
 #endif // THREAD_H

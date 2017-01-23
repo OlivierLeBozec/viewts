@@ -26,6 +26,8 @@ private slots:
     void showDeltaPcr();
     void jitterPcr(int state);
     void showJitterPcr();
+    void bitratePcr(int state);
+    void showBitratePcr();
 
     void Pts(int state);
     void showPts();
@@ -55,7 +57,7 @@ private slots:
     void about();
 
 private:
-    std::ifstream* m_tsFile;
+    std::string m_tsFileName;
 
     QThreadPool *m_pthreadPool;
 
@@ -73,6 +75,7 @@ private:
     QCheckBox* m_pcrBox;
     QCheckBox* m_deltaPcrBox;
     QCheckBox* m_jitterPcrBox;
+    QCheckBox* m_bitratePcrBox;
     QCheckBox* m_ptsBox;
     QCheckBox* m_deltaPtsBox;
     QCheckBox* m_dtsBox;
@@ -86,6 +89,7 @@ private:
     dtsWorker    *m_dtsWorker;
     pcrDeltaWorker  *m_pcrDeltaWorker;
     pcrJitterWorker *m_jitterPcrWorker;
+    pcrBitrateWorker *m_bitratePcrWorker;
     ptsDeltaWorker  *m_ptsDeltaWorker;
     dtsDeltaWorker  *m_dtsDeltaWorker;
     diffPcrPtsWorker *m_diffPcrPtsWorker;
@@ -98,6 +102,7 @@ private:
     void showSeries(timeStampWorker *pWorker);
     void hideSeries(timeStampWorker *pWorker);
     void buildSeries(timeStampWorker *pWorker);
+    void serializeSeries(std::ofstream* outFile, timeStampWorker *pWorker);
 
     void cleanAll();
     void cleanPcr();

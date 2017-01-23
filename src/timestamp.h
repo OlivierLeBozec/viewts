@@ -9,7 +9,7 @@
 
 class timestamp
 {
-    std::ifstream& m_fileIn;
+    std::ifstream* m_fileIn;
 
     // number packets before the first pcr
     unsigned int m_packetBeforeFirstPcr;
@@ -60,15 +60,18 @@ class timestamp
     unsigned int m_diff_prev_index;
     double m_diff_prev_value;
 
+    // local bitrate
+    unsigned int m_bitrate_prev_index_val;
+    double m_bitrate_prev_pcr_val;
 
     double getMaxDeltaPcr();
 
 public:
 
-    timestamp(std::ifstream& fileIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
+    timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
     ~timestamp();
 
-    double  getBitrate();
+    double  getGlobalBitrate();
     double  getDuration();
     bool    getNextPcr(unsigned int& index, double& pcr);
     bool    getNextPts(unsigned int& index, double& pts);
@@ -76,6 +79,7 @@ public:
     bool    getNextDelta(unsigned int& index, double& delta);
     bool    getNextJitterPcr(unsigned int& index, double& jitter);
     bool    getNextDiff(unsigned int& index, double& diff);
+    bool    getNextBitrate(unsigned int& index, double& bitrate);
     bool    run(unsigned int NbPacket = (unsigned int)-1);
 };
 
