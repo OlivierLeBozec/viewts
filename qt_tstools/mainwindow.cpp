@@ -11,6 +11,8 @@ MainWindow::MainWindow() :
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
 
+    setAcceptDrops(true);
+
     createMenu();
     createLayout(main_widget);
 }
@@ -19,22 +21,6 @@ MainWindow::~MainWindow()
 {
     cleanAll();
 }
-
-/*void MainWindow::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton
-        && iconLabel->geometry().contains(event->pos())) {
-
-        QDrag *drag = new QDrag(this);
-        QMimeData *mimeData = new QMimeData;
-
-        mimeData->setText(commentEdit->toPlainText());
-        drag->setMimeData(mimeData);
-        drag->setPixmap(iconPixmap);
-
-        Qt::DropAction dropAction = drag->exec();
-    }
-}*/
 
 void MainWindow::cleanAll()
 {
@@ -309,86 +295,112 @@ void MainWindow::clearAllSeries()
     erasePtsSeries(0);
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if	(event->mimeData()->hasFormat("text/uri-list"))	{
+        event->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent*	event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (!mimeData->hasUrls()) {
+        return;
+    }
+
+    const QUrl url = mimeData->urls().first();
+    QMimeType mime = QMimeDatabase().mimeTypeForUrl(url);
+    if (mime.inherits("application/octet-stream")) {
+        m_tsFileName = url.toLocalFile().toStdString();
+        loadFile();
+    }
+}
+
 void MainWindow::openFile()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Ts"), NULL);
     if (!fileName.isEmpty())
     {
         m_tsFileName = fileName.toStdString();
-
-        // delete previous allocations
-        //statusBar()->showMessage(tr("Clean all..."));
-        //cleanAll();
-        clearAllSeries();
-
-        statusBar()->showMessage(tr("Parsing first 5000 packets..."));
-        pidmap pm(&m_tsFileName);
-        pm.run(5000);
-
-        // clear previous value
-        m_pcrComboBox->clear();
-        m_ptsComboBox->clear();
-        m_dtsComboBox->clear();
-        m_pcrGroupBox->setEnabled(false);
-        m_ptsGroupBox->setEnabled(false);
-        m_dtsGroupBox->setEnabled(false);
-        m_diffGroupBox->setEnabled(false);
-
-        // update pcr/pts/dts pid
-        std::vector<unsigned int>::iterator it;
-        std::vector<unsigned int> pidVect;
-
-        bool hasPcr = false;
-        pm.getPcrPid(pidVect);
-        for (it = pidVect.begin(); it < pidVect.end(); it++)
-        {
-            hasPcr = true;
-            m_pcrComboBox->addItem(QString::number(*it), *it);
-            m_pcrGroupBox->setEnabled(true);
-        }
-        pidVect.clear();
-
-        bool hasPts = false;
-        pm.getPtsPid(pidVect);
-        for (it = pidVect.begin(); it < pidVect.end(); it++)
-        {
-            hasPts = true;
-            m_ptsComboBox->addItem(QString::number(*it), *it);
-            m_ptsGroupBox->setEnabled(true);
-        }
-        pidVect.clear();
-
-        bool hasDts = false;
-        pm.getDtsPid(pidVect);
-        for (it = pidVect.begin(); it < pidVect.end(); it++)
-        {
-            hasDts = true;
-            m_dtsComboBox->addItem(QString::number(*it), *it);
-            m_dtsGroupBox->setEnabled(true);
-        }
-        pidVect.clear();
-
-        if (hasPcr && hasPts && hasDts)
-        {
-            m_diffGroupBox->setEnabled(true);
-        }
-        else if (hasPcr && hasPts)
-        {
-            // no Dts
-            m_diffGroupBox->setEnabled(true);
-            m_diffPtsDtsBox->setEnabled(false);
-            m_diffPcrDtsBox->setEnabled(false);
-        }
-        else if (hasDts && hasPts)
-        {
-            // no Pcr
-            m_diffGroupBox->setEnabled(true);
-            m_diffPcrPtsBox->setEnabled(false);
-            m_diffPcrDtsBox->setEnabled(false);
-        }
-
-        statusBar()->showMessage(tr("Done..."), 1000);
+        loadFile();
     }
+}
+
+void MainWindow::loadFile()
+{
+    // delete previous allocations
+    //statusBar()->showMessage(tr("Clean all..."));
+    //cleanAll();
+    clearAllSeries();
+
+    statusBar()->showMessage(tr("Parsing first 5000 packets..."));
+    pidmap pm(&m_tsFileName);
+    pm.run(5000);
+
+    // clear previous value
+    m_pcrComboBox->clear();
+    m_ptsComboBox->clear();
+    m_dtsComboBox->clear();
+    m_pcrGroupBox->setEnabled(false);
+    m_ptsGroupBox->setEnabled(false);
+    m_dtsGroupBox->setEnabled(false);
+    m_diffGroupBox->setEnabled(false);
+
+    // update pcr/pts/dts pid
+    std::vector<unsigned int>::iterator it;
+    std::vector<unsigned int> pidVect;
+
+    bool hasPcr = false;
+    pm.getPcrPid(pidVect);
+    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    {
+        hasPcr = true;
+        m_pcrComboBox->addItem(QString::number(*it), *it);
+        m_pcrGroupBox->setEnabled(true);
+    }
+    pidVect.clear();
+
+    bool hasPts = false;
+    pm.getPtsPid(pidVect);
+    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    {
+        hasPts = true;
+        m_ptsComboBox->addItem(QString::number(*it), *it);
+        m_ptsGroupBox->setEnabled(true);
+    }
+    pidVect.clear();
+
+    bool hasDts = false;
+    pm.getDtsPid(pidVect);
+    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    {
+        hasDts = true;
+        m_dtsComboBox->addItem(QString::number(*it), *it);
+        m_dtsGroupBox->setEnabled(true);
+    }
+    pidVect.clear();
+
+    if (hasPcr && hasPts && hasDts)
+    {
+        m_diffGroupBox->setEnabled(true);
+    }
+    else if (hasPcr && hasPts)
+    {
+        // no Dts
+        m_diffGroupBox->setEnabled(true);
+        m_diffPtsDtsBox->setEnabled(false);
+        m_diffPcrDtsBox->setEnabled(false);
+    }
+    else if (hasDts && hasPts)
+    {
+        // no Pcr
+        m_diffGroupBox->setEnabled(true);
+        m_diffPcrPtsBox->setEnabled(false);
+        m_diffPcrDtsBox->setEnabled(false);
+    }
+
+    statusBar()->showMessage(tr("Done..."), 1000);
 }
 
 void MainWindow::saveAsFile()
