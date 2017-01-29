@@ -22,6 +22,8 @@ HEADERS  += mainwindow.h \
     chartview.h \
     thread.h
 
+RC_FILE = viewTS.rc
+
 win32 {
   DESTDIR = $$PWD/../bin/windows/
 }
