@@ -115,8 +115,5 @@ int main(int argc, char** argv)
         delete Filename;
     }
 
-    // close
-    tsFile.close();
-
     return 0;
 }
