@@ -103,7 +103,7 @@ void MainWindow::about()
             tr("viewTs version 0.90 for Windows and Linux\n\n"
                "Source code : https://github.com/OlivierLeBozec/tstools\n"
                "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
-               "Icon made by Madebyoliver from www.flaticon.com"));
+               "Icon made by judge from http://fr.seaicons.com"));
 }
 
 void MainWindow::updateStatusBar(int percent)
@@ -190,7 +190,7 @@ void MainWindow::createLayout(QWidget *widget)
     // diff
     m_diffGroupBox = new QGroupBox(tr("Diff"));
     m_diffPcrPtsBox = new QCheckBox(tr("Display Pts-Pcr"));
-    m_diffPtsDtsBox = new QCheckBox(tr("Display Dts-Pts"));
+    m_diffPtsDtsBox = new QCheckBox(tr("Display Pts-Dts"));
     m_diffPcrDtsBox = new QCheckBox(tr("Display Dts-Pcr"));
 
     QGridLayout *diffGroupBoxLayout = new QGridLayout;

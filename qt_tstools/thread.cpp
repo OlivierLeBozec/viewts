@@ -200,6 +200,6 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, uns
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
-    m_Series->setName(QString("Dts-Pts in seconds"));
+    m_Series->setName(QString("Pts-Dts in seconds"));
     m_func = &(m_timestamp->getNextDiff);
 }
