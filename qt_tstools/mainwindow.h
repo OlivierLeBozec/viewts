@@ -11,6 +11,8 @@
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"
 
+#define VIEW_TS_VERSION "v1.00"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

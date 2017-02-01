@@ -99,8 +99,8 @@ void MainWindow::cleanDts()
 
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About Application"),
-            tr("viewTs version 0.90 for Windows and Linux\n\n"
+   QMessageBox::about(this, tr("About viewTS ") + VIEW_TS_VERSION,
+            tr("wiki : https://github.com/OlivierLeBozec/tstools/wiki\n"
                "Source code : https://github.com/OlivierLeBozec/tstools\n"
                "Report issues : https://github.com/OlivierLeBozec/tstools/issues\n"
                "Icon made by judge from http://fr.seaicons.com"));
