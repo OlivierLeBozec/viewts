@@ -21,6 +21,7 @@ public:
     double  getDts(void);
     bool    hasPts(void);
     bool    hasDts(void);
+    int     getPacketLength(void);
 
     pes(unsigned char* data);
 };

@@ -71,3 +71,8 @@ double pes::getDts(void)
     // unit of 90Khz -> s
     return (double)dts/90000;
 }
+
+int pes::getPacketLength(void)
+{
+   return m_pes_length;
+}

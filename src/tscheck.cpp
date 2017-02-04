@@ -60,7 +60,6 @@ void DumpPcr(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "PCR(s)" << std::endl;
 
     unsigned int index;
@@ -83,7 +82,6 @@ void DumpPts(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "PTS(s)" << std::endl;
 
     unsigned int index;
@@ -106,7 +104,6 @@ void DumpDts(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "DTS(s)" << std::endl;
 
     unsigned int index;
@@ -127,7 +124,6 @@ void DumpDelta(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "Delta (s)" << std::endl;
 
     unsigned int index;
@@ -148,7 +144,6 @@ void DumpJitterPcr(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "Jitter PCR (s)" << std::endl;
 
     unsigned int index;
@@ -169,7 +164,6 @@ void DumpDiff(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "timestamp diff (s)" << std::endl;
 
     unsigned int index;
@@ -190,7 +184,6 @@ void DumpLocalBitrate(timestamp& ts)
 
     std::cout.width(10);
     std::cout << "Index";
-    std::cout.width(DUMP_PRECISION);
     std::cout << "local bitrate (b/s)" << std::endl;
 
     unsigned int index;
@@ -201,6 +194,25 @@ void DumpLocalBitrate(timestamp& ts)
         std::cout << index;
         std::cout.width(DUMP_PRECISION);
         std::cout << bitrate << std::endl;
+    }
+}
+
+void DumpLevel(timestamp& ts)
+{
+    std::cout.flags (std::ios_base::fixed | std::ios::left);
+    std::cout.precision(DUMP_PRECISION);
+
+    std::cout.width(10);
+    std::cout << "Index";
+    std::cout << "level (byte)" << std::endl;
+
+    unsigned int index;
+    int level;
+    while (ts.getNextLevel(index, level) == true)
+    {
+        std::cout.width(10);
+        std::cout << index;
+        std::cout << level << std::endl;
     }
 }
 
@@ -246,6 +258,9 @@ void Usage(char *pName) {
     std::cout << std::endl;
     std::cout << "   -diff" << std::endl;
     std::cout << "          diff between 2 timestamps : pts - pcr, dts - pts or pts - dts" << std::endl;
+    std::cout << std::endl;
+    std::cout << "   -level" << std::endl;
+    std::cout << "          input buffer level of pid with pes" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -259,10 +274,10 @@ int main(int argc, char** argv)
 
     // check options
     std::string StrDump("-dump"), StrBitrate("-rate"), StrDuration("-dur"), StrPcr("-pidpcr"), StrPts("-pidpts"), StrDts("-piddts"),
-            StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff"), StrLocalBitrate("-localrate");;
+            StrDelta("-delta"), StrJitter("-jitter"), StrDiff("-diff"), StrLocalBitrate("-localrate"), StrLevel("-level");
 
     unsigned int  pidpcr = TIMESTAMP_NO_PID, pidpts = TIMESTAMP_NO_PID, piddts = TIMESTAMP_NO_PID;
-    bool dump = false, rate = false, dur = false, delta = false, jitter = false, diff = false, localbitrate = false;
+    bool dump = false, rate = false, dur = false, delta = false, jitter = false, diff = false, localbitrate = false, level = false;
 
     for (int i=2; i<argc; ++i)
     {
@@ -277,6 +292,7 @@ int main(int argc, char** argv)
         else if (StrOption == StrJitter) jitter = true;
         else if (StrOption == StrDiff) diff = true;
         else if (StrOption == StrLocalBitrate) localbitrate = true;
+        else if (StrOption == StrLevel) level = true;
     }
 
     if (pidpcr == TIMESTAMP_NO_PID && pidpts == TIMESTAMP_NO_PID && piddts == TIMESTAMP_NO_PID)
@@ -286,7 +302,7 @@ int main(int argc, char** argv)
     }
 
     // display timestamp
-    if (dump || rate || dur || delta || jitter || diff || localbitrate){
+    if (dump || rate || dur || delta || jitter || diff || localbitrate || level){
         std::string *Filename = new std::string(argv[1]);
         timestamp ts(Filename, pidpcr, pidpts, piddts);
         ts.run();
@@ -299,6 +315,7 @@ int main(int argc, char** argv)
         if (jitter && pidpcr != TIMESTAMP_NO_PID) DumpJitterPcr(ts);
         if (diff)   DumpDiff(ts);
         if (localbitrate && pidpcr != TIMESTAMP_NO_PID) DumpLocalBitrate(ts);
+        if (level && (pidpts != TIMESTAMP_NO_PID || piddts != TIMESTAMP_NO_PID)) DumpLevel(ts);
 
         delete Filename;
     }

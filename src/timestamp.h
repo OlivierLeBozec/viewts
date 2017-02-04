@@ -20,6 +20,7 @@ class timestamp
     // min max pcr and and corresponding index
     double m_min_pcr;
     double m_max_pcr;
+    double m_globalBitrate;
     unsigned int m_min_index;
     unsigned int m_max_index;
     unsigned int m_pidpcr;
@@ -27,10 +28,12 @@ class timestamp
     unsigned int m_piddts;
     unsigned int m_nbPacket;
 
-    // pcr pts dts map
+    // pid pcr pts dts map
     std::map<unsigned int, double> m_pcrMap;
     std::map<unsigned int, double> m_ptsMap;
     std::map<unsigned int, double> m_dtsMap;
+    std::map<unsigned int, unsigned int> m_pesLengthMap;
+    std::map<double, int> m_levelMap;
 
     // pcr next
     unsigned int m_pcr_prev_val;
@@ -64,6 +67,10 @@ class timestamp
     unsigned int m_bitrate_prev_index_val;
     double m_bitrate_prev_pcr_val;
 
+    // buffer level
+    int m_level;
+    std::map<unsigned int, unsigned int>::iterator m_length_ii;
+
     double getMaxDeltaPcr();
 
 public:
@@ -73,6 +80,7 @@ public:
 
     double  getGlobalBitrate();
     double  getDuration();
+    double  getTimeFromIndex(unsigned int index);
     bool    getNextPcr(unsigned int& index, double& pcr);
     bool    getNextPts(unsigned int& index, double& pts);
     bool    getNextDts(unsigned int& index, double& dts);
@@ -80,6 +88,7 @@ public:
     bool    getNextJitterPcr(unsigned int& index, double& jitter);
     bool    getNextDiff(unsigned int& index, double& diff);
     bool    getNextBitrate(unsigned int& index, double& bitrate);
+    bool    getNextLevel(unsigned int& index, int& level);
     bool    run(unsigned int NbPacket = (unsigned int)-1);
 };
 
