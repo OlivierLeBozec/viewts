@@ -94,7 +94,7 @@ pcrWorker::pcrWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString("Pcr in seconds"));
+    m_Series->setName(QString(tr("Pcr")));
     m_func = &(m_timestamp->getNextPcr);
 }
 
@@ -104,7 +104,7 @@ pcrDeltaWorker::pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString("Delta Pcr in seconds"));
+    m_Series->setName(QString(tr("Pcr(n+1) - Pcr(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -114,7 +114,7 @@ pcrJitterWorker::pcrJitterWorker(std::string *tsFile, unsigned int pid, Chart *c
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString("Jitter Pcr in seconds"));
+    m_Series->setName(QString(tr("Jitter Pcr")));
     m_func = &(m_timestamp->getNextJitterPcr);
 }
 
@@ -124,7 +124,7 @@ pcrBitrateWorker::pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart 
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString("bitrate in bit per seconds"));
+    m_Series->setName(QString(tr("bitrate in b/s")));
     m_func = &(m_timestamp->getNextBitrate);
 }
 
@@ -136,7 +136,7 @@ ptsWorker::ptsWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString("Pts in seconds"));
+    m_Series->setName(QString(tr("Pts")));
     m_func = &(m_timestamp->getNextPts);
 }
 
@@ -146,7 +146,7 @@ ptsDeltaWorker::ptsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString("Pts delta in seconds"));
+    m_Series->setName(QString(tr("Pts(n+1)) - Pts(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -158,7 +158,7 @@ dtsWorker::dtsWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString("Dts in seconds"));
+    m_Series->setName(QString(tr("Dts")));
     m_func = &(m_timestamp->getNextDts);
 }
 
@@ -168,7 +168,7 @@ dtsDeltaWorker::dtsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString("Dts delta in seconds"));
+    m_Series->setName(QString(tr("Dts(n+1) - Dts(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -180,7 +180,7 @@ diffPcrPtsWorker::diffPcrPtsWorker(std::string *tsFile, unsigned int pidPcr, uns
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pidPcr, pidPts);
-    m_Series->setName(QString("Pts-Pcr in seconds"));
+    m_Series->setName(QString(tr("Pts(n)-Pcr(n)")));
     m_func = &(m_timestamp->getNextDiff);
 }
 
@@ -190,7 +190,7 @@ diffPcrDtsWorker::diffPcrDtsWorker(std::string *tsFile, unsigned int pidPcr, uns
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pidPcr, TIMESTAMP_NO_PID, pidDts);
-    m_Series->setName(QString("Dts-Pcr in seconds"));
+    m_Series->setName(QString(tr("Dts(n)-Pcr(n)")));
     m_func = &(m_timestamp->getNextDiff);
 }
 
@@ -200,6 +200,6 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, uns
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
-    m_Series->setName(QString("Pts-Dts in seconds"));
+    m_Series->setName(QString(tr("Pts(n)-Dts(n)")));
     m_func = &(m_timestamp->getNextDiff);
 }
