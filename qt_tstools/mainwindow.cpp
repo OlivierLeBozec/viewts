@@ -126,7 +126,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* pcrPidLabel = new QLabel(tr("Pid:"));
     m_pcrComboBox = new QComboBox;
     m_pcrBox = new QCheckBox(tr("Display Pcr"));
-    m_deltaPcrBox = new QCheckBox(tr("Display Pcr Diff"));
+    m_deltaPcrBox = new QCheckBox(tr("Pcr(n+1) - Pcr(n)"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
     m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
 
@@ -152,7 +152,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* ptsPidLabel = new QLabel(tr("Pid:"));
     m_ptsComboBox = new QComboBox;
     m_ptsBox = new QCheckBox(tr("Display Pts"));
-    m_deltaPtsBox = new QCheckBox(tr("Display Pts Diff"));
+    m_deltaPtsBox = new QCheckBox(tr("Pts(n+1) - Pts(n)"));
 
     QGridLayout *ptsGroupBoxLayout = new QGridLayout;
     ptsGroupBoxLayout->addWidget(ptsPidLabel, 0, 0);
@@ -172,7 +172,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* dtsPidLabel = new QLabel(tr("Pid:"));
     m_dtsComboBox = new QComboBox;
     m_dtsBox = new QCheckBox(tr("Display Dts"));
-    m_deltaDtsBox = new QCheckBox(tr("Display Dts Diff"));
+    m_deltaDtsBox = new QCheckBox(tr("Dts(n+1) - Dts(n)"));
 
     QGridLayout *dtsGroupBoxLayout = new QGridLayout;
     dtsGroupBoxLayout->addWidget(dtsPidLabel, 0, 0, Qt::AlignTop);
@@ -189,9 +189,9 @@ void MainWindow::createLayout(QWidget *widget)
 
     // diff
     m_diffGroupBox = new QGroupBox(tr("Diff"));
-    m_diffPcrPtsBox = new QCheckBox(tr("Display Pts-Pcr"));
-    m_diffPtsDtsBox = new QCheckBox(tr("Display Pts-Dts"));
-    m_diffPcrDtsBox = new QCheckBox(tr("Display Dts-Pcr"));
+    m_diffPcrPtsBox = new QCheckBox(tr("Pts(n)-Pcr(n)"));
+    m_diffPtsDtsBox = new QCheckBox(tr("Pts(n)-Dts(n)"));
+    m_diffPcrDtsBox = new QCheckBox(tr("Dts(n)-Pcr(n)"));
 
     QGridLayout *diffGroupBoxLayout = new QGridLayout;
     diffGroupBoxLayout->addWidget(m_diffPcrPtsBox, 0, 0, Qt::AlignTop);
@@ -241,7 +241,7 @@ void MainWindow::createMenu()
     connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
     fileMenu->addAction(openAct);
 
-    QAction *saveAsAct = new QAction(tr("&SaveAs..."), this);
+    QAction *saveAsAct = new QAction(tr("&SaveAs in text..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save series in file"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFile);
