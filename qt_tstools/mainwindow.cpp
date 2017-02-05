@@ -10,7 +10,6 @@ MainWindow::MainWindow() :
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
-
     setAcceptDrops(true);
 
     createMenu();
@@ -126,7 +125,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* pcrPidLabel = new QLabel(tr("Pid:"));
     m_pcrComboBox = new QComboBox;
     m_pcrBox = new QCheckBox(tr("Display Pcr"));
-    m_deltaPcrBox = new QCheckBox(tr("Pcr(n+1) - Pcr(n)"));
+    m_deltaPcrBox = new QCheckBox(tr("Display Pcr(n+1) - Pcr(n)"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
     m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
 
@@ -152,7 +151,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* ptsPidLabel = new QLabel(tr("Pid:"));
     m_ptsComboBox = new QComboBox;
     m_ptsBox = new QCheckBox(tr("Display Pts"));
-    m_deltaPtsBox = new QCheckBox(tr("Pts(n+1) - Pts(n)"));
+    m_deltaPtsBox = new QCheckBox(tr("Display Pts(n+1) - Pts(n)"));
 
     QGridLayout *ptsGroupBoxLayout = new QGridLayout;
     ptsGroupBoxLayout->addWidget(ptsPidLabel, 0, 0);
@@ -172,7 +171,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* dtsPidLabel = new QLabel(tr("Pid:"));
     m_dtsComboBox = new QComboBox;
     m_dtsBox = new QCheckBox(tr("Display Dts"));
-    m_deltaDtsBox = new QCheckBox(tr("Dts(n+1) - Dts(n)"));
+    m_deltaDtsBox = new QCheckBox(tr("Display Dts(n+1) - Dts(n)"));
 
     QGridLayout *dtsGroupBoxLayout = new QGridLayout;
     dtsGroupBoxLayout->addWidget(dtsPidLabel, 0, 0, Qt::AlignTop);
@@ -189,9 +188,9 @@ void MainWindow::createLayout(QWidget *widget)
 
     // diff
     m_diffGroupBox = new QGroupBox(tr("Diff"));
-    m_diffPcrPtsBox = new QCheckBox(tr("Pts(n)-Pcr(n)"));
-    m_diffPtsDtsBox = new QCheckBox(tr("Pts(n)-Dts(n)"));
-    m_diffPcrDtsBox = new QCheckBox(tr("Dts(n)-Pcr(n)"));
+    m_diffPcrPtsBox = new QCheckBox(tr("Display Pts(n)-Pcr(n)"));
+    m_diffPtsDtsBox = new QCheckBox(tr("Display Pts(n)-Dts(n)"));
+    m_diffPcrDtsBox = new QCheckBox(tr("Display Dts(n)-Pcr(n)"));
 
     QGridLayout *diffGroupBoxLayout = new QGridLayout;
     diffGroupBoxLayout->addWidget(m_diffPcrPtsBox, 0, 0, Qt::AlignTop);
@@ -204,6 +203,9 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_diffPcrPtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrPts(int)));
     connect(m_diffPcrDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrDts(int)));
     connect(m_diffPtsDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPtsDts(int)));
+
+    // label
+    m_infoLabel = new QLabel();
 
     // graph
     Chart *chart = new Chart;
@@ -221,6 +223,7 @@ void MainWindow::createLayout(QWidget *widget)
     controlLayout->addWidget(m_ptsGroupBox);
     controlLayout->addWidget(m_dtsGroupBox);
     controlLayout->addWidget(m_diffGroupBox);
+    controlLayout->addWidget(m_infoLabel);
     controlLayout->addStretch(); // to add space when resize
 
     // horizontal layout
@@ -338,6 +341,9 @@ void MainWindow::loadFile()
     pidmap pm(&m_tsFileName);
     pm.run(5000);
 
+    // update info
+    buildInfo(pm);
+
     // clear previous value
     m_pcrComboBox->clear();
     m_ptsComboBox->clear();
@@ -347,7 +353,7 @@ void MainWindow::loadFile()
     m_dtsGroupBox->setEnabled(false);
     m_diffGroupBox->setEnabled(false);
 
-    // update pcr/pts/dts pid
+    // update pcr/pts/dts pid combo
     std::vector<unsigned int>::iterator it;
     std::vector<unsigned int> pidVect;
 
@@ -401,6 +407,29 @@ void MainWindow::loadFile()
     }
 
     statusBar()->showMessage(tr("Done..."), 1000);
+}
+
+// get duration and bitrate
+void MainWindow::buildInfo(pidmap& pm)
+{
+    std::vector<unsigned int> pidVect;
+    pm.getPcrPid(pidVect);
+
+    if (pidVect.size() != 0)
+    {
+        // start thread to get the info using first pcr pid
+        m_infoWorker = new infoWorker(&m_tsFileName, pidVect[0]);
+        connect(m_infoWorker, SIGNAL(finished()), this, SLOT(showInfo()));
+        m_pthreadPool->start(m_infoWorker);
+    }
+}
+
+// display bitrate and duration
+void MainWindow::showInfo()
+{
+    QString bitrate = QString(tr("bitrate: %1 B/s")).arg(QString::number(m_infoWorker->getGlobalBitrate()));
+    QString duration = QString(tr("duration: %1 s")).arg(QString::number(m_infoWorker->getGlobalDuration()));
+    m_infoLabel->setText(bitrate+"\n"+duration);
 }
 
 void MainWindow::saveAsFile()

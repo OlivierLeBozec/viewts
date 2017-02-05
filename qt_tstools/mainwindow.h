@@ -11,7 +11,7 @@
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"
 
-#define VIEW_TS_VERSION "v1.00"
+#define VIEW_TS_VERSION "v1.1.0"
 
 class MainWindow : public QMainWindow
 {
@@ -48,6 +48,7 @@ private slots:
     void diffPtsDts(int state);
     void showDiffPtsDts();
 
+    void showInfo();
     void updateStatusBar(int);
 
     void openFile();
@@ -86,6 +87,9 @@ private:
     QCheckBox* m_diffPtsDtsBox;
     QCheckBox* m_diffPcrDtsBox;
 
+    QLabel* m_infoLabel;
+    infoWorker* m_infoWorker;
+
     pcrWorker    *m_pcrWorker;
     ptsWorker    *m_ptsWorker;
     dtsWorker    *m_dtsWorker;
@@ -115,6 +119,8 @@ private:
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+
+    void buildInfo(pidmap& pm);
 };
 
 #endif // MAINWINDOW_H

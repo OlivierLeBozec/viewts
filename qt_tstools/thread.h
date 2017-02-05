@@ -10,6 +10,32 @@
 
 QT_CHARTS_USE_NAMESPACE
 
+class infoWorker : public QObject, public QRunnable
+{
+    Q_OBJECT
+
+    // run function from QRunnable
+    void run();
+
+protected:
+    // retrieve the time stamps
+    timestamp* m_timestamp;
+
+public:
+    infoWorker(std::string *tsFile, unsigned int pid);
+    ~infoWorker();
+
+    // true if the thread is running
+    bool m_isRunning;
+
+    // manipulate the series
+    double getGlobalBitrate();
+    double getGlobalDuration();
+
+signals:
+     void finished();
+};
+
 class timeStampWorker : public QObject, public QRunnable
 {
     Q_OBJECT

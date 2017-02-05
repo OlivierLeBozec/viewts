@@ -1,5 +1,50 @@
 #include "thread.h"
 
+////////////////////
+// Info worker
+infoWorker::infoWorker(std::string *tsFile, unsigned int pid) :
+     m_isRunning(false)
+{
+    // customize base class
+    m_timestamp = new timestamp(tsFile, pid);
+}
+
+infoWorker::~infoWorker()
+{
+    delete m_timestamp;
+}
+
+void infoWorker::run()
+{
+    m_isRunning = true;
+    m_timestamp->run();
+    m_isRunning = false;
+
+    emit finished();
+}
+
+double infoWorker::getGlobalBitrate()
+{
+    if (m_timestamp && m_isRunning == false)
+    {
+        // in byte per seconds
+        return m_timestamp->getGlobalBitrate();
+    }
+    return 0;
+}
+
+double infoWorker::getGlobalDuration()
+{
+    if (m_timestamp && m_isRunning == false)
+    {
+        // in seconds
+        return m_timestamp->getDuration();
+    }
+    return 0;
+}
+
+////////////////////////////////
+// Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string *tsFileName, Chart *chart) :
    m_nbProgress(0), m_progress(0),  m_chart(chart), m_isRunning(false)
 
