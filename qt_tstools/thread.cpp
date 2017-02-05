@@ -255,6 +255,6 @@ buffLevelWorker::buffLevelWorker(std::string *tsFile, unsigned int pidPcr, unsig
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pidPcr, pidPts, pidDts);
-    m_Series->setName(QString(tr("buffer level")));
+    m_Series->setName(QString(tr("PES buffer level")));
     m_func = &(m_timestamp->getNextLevel);
 }

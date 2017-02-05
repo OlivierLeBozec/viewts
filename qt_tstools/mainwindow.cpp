@@ -6,7 +6,7 @@ MainWindow::MainWindow() :
     m_pcrWorker(Q_NULLPTR), m_ptsWorker(Q_NULLPTR), m_dtsWorker(Q_NULLPTR),
     m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
     m_ptsDeltaWorker(Q_NULLPTR), m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR),
-    m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR)
+    m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR), m_buffLevelWorker(Q_NULLPTR)
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
@@ -800,8 +800,8 @@ void MainWindow::buffLevel(int state)
 
 void MainWindow::showBuffLevel()
 {
-    if (m_diffPcrDtsBox->isChecked()) {
+    if (m_buffLevelBox->isChecked()) {
         // must be done in parent thread
-        m_diffPcrDtsWorker->showSeries();
+        m_buffLevelWorker->showSeries();
     }
 }
