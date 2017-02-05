@@ -404,8 +404,10 @@ bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
     return false;
 }
 
-bool timestamp::getNextLevel(unsigned int& index, int& level)
+bool timestamp::getNextLevel(unsigned int& index, double& level)
 {
+    int _level = 0;
+
     // protection
     if (m_pesLengthMap.empty())
         return false;
@@ -415,13 +417,13 @@ bool timestamp::getNextLevel(unsigned int& index, int& level)
 
         m_length_ii = m_pesLengthMap.begin();
         index = m_length_ii->first;
-        level = m_level = m_length_ii->second;
+        _level = m_level = m_length_ii->second;
     }
     else if (m_length_ii != --m_pesLengthMap.end()) {
 
         ++m_length_ii;
         index = m_length_ii->first;
-        level = m_length_ii->second;
+        _level = m_length_ii->second;
     }
     else return false;
 
@@ -438,8 +440,8 @@ bool timestamp::getNextLevel(unsigned int& index, int& level)
     assert(release_time != 0);
 
     // increase buffer and set release time
-    m_level += level;
-    m_levelMap[release_time] = level;
+    m_level += _level;
+    m_levelMap[release_time] = _level;
     //printf ("Add %f %u\n", release_time, level);
 
     // decrease buffer level - remove old buffer
@@ -456,6 +458,6 @@ bool timestamp::getNextLevel(unsigned int& index, int& level)
     }
 
     //printf ("Nb item %u - %f\n", m_levelMap.size(), getTimeFromIndex(index));
-    level = m_level;
+    level = (double)m_level;
     return true;
 }

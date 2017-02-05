@@ -200,19 +200,17 @@ void DumpLocalBitrate(timestamp& ts)
 void DumpLevel(timestamp& ts)
 {
     std::cout.flags (std::ios_base::fixed | std::ios::left);
-    std::cout.precision(DUMP_PRECISION);
 
     std::cout.width(10);
     std::cout << "Index";
     std::cout << "level (byte)" << std::endl;
 
     unsigned int index;
-    int level;
+    double level;
     while (ts.getNextLevel(index, level) == true)
     {
         std::cout.width(10);
-        std::cout << index;
-        std::cout << level << std::endl;
+        std::cout << index << (int)level << std::endl;
     }
 }
 

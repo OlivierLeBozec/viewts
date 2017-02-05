@@ -88,7 +88,7 @@ public:
     bool    getNextJitterPcr(unsigned int& index, double& jitter);
     bool    getNextDiff(unsigned int& index, double& diff);
     bool    getNextBitrate(unsigned int& index, double& bitrate);
-    bool    getNextLevel(unsigned int& index, int& level);
+    bool    getNextLevel(unsigned int& index, double& level);
     bool    run(unsigned int NbPacket = (unsigned int)-1);
 };
 
