@@ -134,6 +134,7 @@ double timestamp::getMaxDeltaPcr()
     return m_max_pcr-m_min_pcr;
 }
 
+// in byte per seconds
 double timestamp::getGlobalBitrate()
 {
     // test if pcr found
@@ -143,9 +144,8 @@ double timestamp::getGlobalBitrate()
     double delta_pcr =  getMaxDeltaPcr();
 
     // bitrate in byte per second
-    double bitrate = (double)((m_max_index - m_min_index)*188);
-    bitrate /= delta_pcr;
-    m_globalBitrate = bitrate *= 8;
+    m_globalBitrate = (double)((m_max_index - m_min_index)*188);
+    m_globalBitrate /= delta_pcr;
 
     return m_globalBitrate;
 }
@@ -160,8 +160,8 @@ double timestamp::getDuration()
 
     // duration in seconds
     double duration = delta_pcr;
-    duration += (m_packetBeforeFirstPcr*188*8)/m_globalBitrate;   // before first pcr
-    duration += (m_packetAfterLastPcr*188*8)/m_globalBitrate;     // after last pcr
+    duration += (m_packetBeforeFirstPcr*188)/m_globalBitrate;   // before first pcr
+    duration += (m_packetAfterLastPcr*188)/m_globalBitrate;     // after last pcr
 
     return duration;
 }
@@ -300,9 +300,9 @@ bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
         ++m_jitter_ii;
 
         // estimated pcr is compute using bitrate and number of bit
-        double offset = (m_jitter_ii->first - m_jitter_prev_index) * 188 * 8;
+        double offset = (m_jitter_ii->first - m_jitter_prev_index) * 188;
         double estimate_pcr = m_jitter_prev_val;
-        estimate_pcr += offset/getGlobalBitrate();
+        estimate_pcr += offset/m_globalBitrate;
 
         // jitter in s
         jitter = m_jitter_ii->second - estimate_pcr;
@@ -425,7 +425,7 @@ bool timestamp::getNextLevel(unsigned int& index, int& level)
     }
     else return false;
 
-    // add size to buffer map
+    // time when buffer is release
     double release_time = 0;
     std::map<unsigned int, double>::const_iterator dts_ii = m_dtsMap.find(index);
     std::map<unsigned int, double>::const_iterator pts_ii = m_ptsMap.find(index);
@@ -437,26 +437,25 @@ bool timestamp::getNextLevel(unsigned int& index, int& level)
     }
     assert(release_time != 0);
 
-    // increase buffer level
+    // increase buffer and set release time
     m_level += level;
     m_levelMap[release_time] = level;
+    //printf ("Add %f %u\n", release_time, level);
 
     // decrease buffer level - remove old buffer
     std::map<double, int>::iterator level_ii = m_levelMap.begin();
     while (level_ii != m_levelMap.end())
     {
-        int index_to_remove = -1;
-
-        if (level_ii->first < getTimeFromIndex(index)) {
+        if (level_ii->first < getTimeFromIndex(index) && level_ii->second) {
+            //printf ("Del %f %u\n", level_ii->first, level_ii->second);
             m_level -= level_ii->second;
-            index_to_remove = level_ii->first;
+            m_levelMap[level_ii->first] = 0;
         }
-        else break;
 
         if (level_ii != m_levelMap.end()) level_ii++;
-        if (index_to_remove != -1) m_levelMap.erase (index_to_remove);
     }
 
+    //printf ("Nb item %u - %f\n", m_levelMap.size(), getTimeFromIndex(index));
     level = m_level;
     return true;
 }
