@@ -149,7 +149,7 @@ pcrDeltaWorker::pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString(tr("Pcr(n+1) - Pcr(n)")));
+    m_Series->setName(QString(tr("Pcr(n+1)-Pcr(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -169,7 +169,7 @@ pcrBitrateWorker::pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart 
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString(tr("bitrate in b/s")));
+    m_Series->setName(QString(tr("bitrate in B/s")));
     m_func = &(m_timestamp->getNextBitrate);
 }
 
@@ -191,7 +191,7 @@ ptsDeltaWorker::ptsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString(tr("Pts(n+1)) - Pts(n)")));
+    m_Series->setName(QString(tr("Pts(n+1))-Pts(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -213,7 +213,7 @@ dtsDeltaWorker::dtsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, pid);
-    m_Series->setName(QString(tr("Dts(n+1) - Dts(n)")));
+    m_Series->setName(QString(tr("Dts(n+1)-Dts(n)")));
     m_func = &(m_timestamp->getNextDelta);
 }
 
@@ -247,4 +247,14 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, uns
     m_timestamp = new timestamp(tsFile, TIMESTAMP_NO_PID, pidPts, pidDts);
     m_Series->setName(QString(tr("Pts(n)-Dts(n)")));
     m_func = &(m_timestamp->getNextDiff);
+}
+
+buffLevelWorker::buffLevelWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
+    timeStampWorker(tsFile, chart)
+
+{
+    // customize base class
+    m_timestamp = new timestamp(tsFile, pidPcr, pidPts, pidDts);
+    m_Series->setName(QString(tr("buffer level")));
+    m_func = &(m_timestamp->getNextLevel);
 }
