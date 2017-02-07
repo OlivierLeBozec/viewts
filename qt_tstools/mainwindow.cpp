@@ -74,6 +74,10 @@ void MainWindow::cleanPts()
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
     }
+    if (m_buffLevelWorker) {
+        m_pthreadPool->cancel(m_buffLevelWorker);
+        delete m_buffLevelWorker; m_buffLevelWorker = Q_NULLPTR;
+    }
 }
 
 void MainWindow::cleanDts()
@@ -93,6 +97,10 @@ void MainWindow::cleanDts()
     if (m_diffPtsDtsWorker) {
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
+    }
+    if (m_buffLevelWorker) {
+        m_pthreadPool->cancel(m_buffLevelWorker);
+        delete m_buffLevelWorker; m_buffLevelWorker = Q_NULLPTR;
     }
 }
 
@@ -462,6 +470,7 @@ void MainWindow::saveAsFile()
         serializeSeries(outFile, m_diffPcrPtsWorker);
         serializeSeries(outFile, m_diffPcrDtsWorker);
         serializeSeries(outFile, m_diffPtsDtsWorker);
+        serializeSeries(outFile, m_buffLevelWorker);
 
         outFile->close();
         statusBar()->showMessage(tr("Done..."), 1000);
