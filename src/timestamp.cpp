@@ -25,7 +25,7 @@ timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int 
     m_diff_prev_value(-1),
     m_bitrate_prev_index_val(-1),
     m_bitrate_prev_pcr_val(-1),
-    m_level(0)
+    m_level(-1)
 {
     m_fileIn =  new std::ifstream(fileNameIn->c_str(), std::ios::binary);
 
@@ -413,7 +413,7 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         return false;
 
     // init index and level
-    if (m_level == 0) {
+    if (m_level == -1) {
 
         m_length_ii = m_pesLengthMap.begin();
         index = m_length_ii->first;
@@ -428,20 +428,20 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
     else return false;
 
     // time when buffer is release
-    double release_time = 0;
+    double _release_time = 0;
     std::map<unsigned int, double>::const_iterator dts_ii = m_dtsMap.find(index);
     std::map<unsigned int, double>::const_iterator pts_ii = m_ptsMap.find(index);
     if (dts_ii != m_dtsMap.end())
-        release_time = m_dtsMap[index];
+        _release_time = m_dtsMap[index];
     else if (pts_ii != m_ptsMap.end())
     {
-        release_time = m_ptsMap[index];
+        _release_time = m_ptsMap[index];
     }
-    assert(release_time != 0);
+    assert(_release_time != 0);
 
     // increase buffer and set release time
     m_level += _level;
-    m_levelMap[release_time] = _level;
+    m_levelMap[_release_time] = _level;
     //printf ("Add %f %u\n", release_time, level);
 
     // decrease buffer level - remove old buffer
@@ -451,7 +451,7 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         if (level_ii->first < getTimeFromIndex(index) && level_ii->second) {
             //printf ("Del %f %u\n", level_ii->first, level_ii->second);
             m_level -= level_ii->second;
-            m_levelMap[level_ii->first] = 0;
+            level_ii->second = 0;
         }
 
         if (level_ii != m_levelMap.end()) level_ii++;
