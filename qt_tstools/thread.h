@@ -42,7 +42,6 @@ class timeStampWorker : public QObject, public QRunnable
 
     // used to compute competion rate
     unsigned int m_nbProgress;
-    unsigned int m_progress;
     unsigned long long m_fileSize;
 
     // update the competion rate

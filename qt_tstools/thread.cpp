@@ -46,10 +46,9 @@ double infoWorker::getGlobalDuration()
 ////////////////////////////////
 // Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string *tsFileName, Chart *chart) :
-   m_nbProgress(0), m_progress(0),  m_chart(chart), m_isRunning(false)
+   m_nbProgress(0),  m_chart(chart), m_isRunning(false)
 
 {
-
     // new drawing
     m_Series = new QLineSeries();
 
@@ -82,7 +81,8 @@ void timeStampWorker::updateProgress()
     m_nbProgress += m_WindowPacket;
     if (m_fileSize)
     {
-        double tmp = m_nbProgress*188;
+        double tmp = m_nbProgress;
+        tmp *= 188;
         tmp *= 100;
         tmp /= (double)m_fileSize;
         emit updated((int)tmp);
