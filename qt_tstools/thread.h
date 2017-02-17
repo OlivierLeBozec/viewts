@@ -163,9 +163,15 @@ public:
     diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart);
 };
 
-class buffLevelWorker : public timeStampWorker
+class buffLevelPtsWorker : public timeStampWorker
 {
 public:
-    buffLevelWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
+    buffLevelPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+};
+
+class buffLevelPtsDtsWorker : public timeStampWorker
+{
+public:
+    buffLevelPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
 };
 #endif // THREAD_H

@@ -249,12 +249,22 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, uns
     m_func = &(m_timestamp->getNextDiff);
 }
 
-buffLevelWorker::buffLevelWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
+buffLevelPtsWorker::buffLevelPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+    timeStampWorker(tsFile, chart)
+
+{
+    // customize base class
+    m_timestamp = new timestamp(tsFile, pidPcr, pidPts);
+    m_Series->setName(QString(tr("ES buffer level using PTS")));
+    m_func = &(m_timestamp->getNextLevel);
+}
+
+buffLevelPtsDtsWorker::buffLevelPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pidPcr, pidPts, pidDts);
-    m_Series->setName(QString(tr("PES buffer level")));
+    m_Series->setName(QString(tr("PES buffer level using PTS/DTS")));
     m_func = &(m_timestamp->getNextLevel);
 }

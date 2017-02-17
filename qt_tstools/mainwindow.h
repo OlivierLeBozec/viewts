@@ -47,8 +47,10 @@ private slots:
     void showDiffPcrDts();
     void diffPtsDts(int state);
     void showDiffPtsDts();
-    void buffLevel(int state);
-    void showBuffLevel();
+    void buffLevelPts(int state);
+    void showBuffLevelPts();
+    void buffLevelPtsDts(int state);
+    void showBuffLevelPtsDts();
 
     void showInfo();
     void updateStatusBar(int);
@@ -88,7 +90,8 @@ private:
     QCheckBox* m_diffPcrPtsBox;
     QCheckBox* m_diffPtsDtsBox;
     QCheckBox* m_diffPcrDtsBox;
-    QCheckBox* m_buffLevelBox;
+    QCheckBox* m_buffLevelPtsDtsBox;
+    QCheckBox* m_buffLevelPtsBox;
 
     QLabel* m_infoLabel;
     infoWorker* m_infoWorker;
@@ -104,7 +107,8 @@ private:
     diffPcrPtsWorker    *m_diffPcrPtsWorker;
     diffPcrDtsWorker    *m_diffPcrDtsWorker;
     diffPtsDtsWorker    *m_diffPtsDtsWorker;
-    buffLevelWorker     *m_buffLevelWorker;
+    buffLevelPtsWorker      *m_buffLevelPtsWorker;
+    buffLevelPtsDtsWorker   *m_buffLevelPtsDtsWorker;
 
     void createLayout(QWidget *widget);
     void createMenu();

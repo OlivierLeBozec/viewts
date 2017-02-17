@@ -6,7 +6,8 @@ MainWindow::MainWindow() :
     m_pcrWorker(Q_NULLPTR), m_ptsWorker(Q_NULLPTR), m_dtsWorker(Q_NULLPTR),
     m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
     m_ptsDeltaWorker(Q_NULLPTR), m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR),
-    m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR), m_buffLevelWorker(Q_NULLPTR)
+    m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR), m_buffLevelPtsWorker(Q_NULLPTR),
+    m_buffLevelPtsDtsWorker(Q_NULLPTR)
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
@@ -54,6 +55,14 @@ void MainWindow::cleanPcr()
         m_pthreadPool->cancel(m_diffPcrDtsWorker);
         delete m_diffPcrDtsWorker; m_diffPcrDtsWorker = Q_NULLPTR;
     }
+    if (m_buffLevelPtsWorker) {
+        m_pthreadPool->cancel(m_buffLevelPtsWorker);
+        delete m_buffLevelPtsWorker; m_buffLevelPtsWorker = Q_NULLPTR;
+    }
+    if (m_buffLevelPtsDtsWorker) {
+        m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
+    }
 }
 
 void MainWindow::cleanPts()
@@ -74,9 +83,13 @@ void MainWindow::cleanPts()
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
     }
-    if (m_buffLevelWorker) {
-        m_pthreadPool->cancel(m_buffLevelWorker);
-        delete m_buffLevelWorker; m_buffLevelWorker = Q_NULLPTR;
+    if (m_buffLevelPtsWorker) {
+        m_pthreadPool->cancel(m_buffLevelPtsWorker);
+        delete m_buffLevelPtsWorker; m_buffLevelPtsWorker = Q_NULLPTR;
+    }
+    if (m_buffLevelPtsDtsWorker) {
+        m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
     }
 }
 
@@ -98,9 +111,9 @@ void MainWindow::cleanDts()
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
     }
-    if (m_buffLevelWorker) {
-        m_pthreadPool->cancel(m_buffLevelWorker);
-        delete m_buffLevelWorker; m_buffLevelWorker = Q_NULLPTR;
+    if (m_buffLevelPtsDtsWorker) {
+        m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
     }
 }
 
@@ -133,7 +146,7 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* pcrPidLabel = new QLabel(tr("Pid:"));
     m_pcrComboBox = new QComboBox;
     m_pcrBox = new QCheckBox(tr("Display Pcr"));
-    m_deltaPcrBox = new QCheckBox(tr("Display Pcr(n+1)-Pcr(n)"));
+    m_deltaPcrBox = new QCheckBox(tr("Display Pcr diff"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
     m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
 
@@ -159,13 +172,15 @@ void MainWindow::createLayout(QWidget *widget)
     QLabel* ptsPidLabel = new QLabel(tr("Pid:"));
     m_ptsComboBox = new QComboBox;
     m_ptsBox = new QCheckBox(tr("Display Pts"));
-    m_deltaPtsBox = new QCheckBox(tr("Display Pts(n+1)-Pts(n)"));
+    m_deltaPtsBox = new QCheckBox(tr("Display Pts diff"));
+    m_buffLevelPtsBox = new QCheckBox(tr("ES buffer level using Pts"));
 
     QGridLayout *ptsGroupBoxLayout = new QGridLayout;
     ptsGroupBoxLayout->addWidget(ptsPidLabel, 0, 0);
     ptsGroupBoxLayout->addWidget(m_ptsComboBox, 0, 1);
     ptsGroupBoxLayout->addWidget(m_ptsBox, 1, 0);
     ptsGroupBoxLayout->addWidget(m_deltaPtsBox, 2, 0);
+    ptsGroupBoxLayout->addWidget(m_buffLevelPtsBox, 3, 0);
     ptsGroupBoxLayout->setVerticalSpacing(0);
     m_ptsGroupBox->setLayout(ptsGroupBoxLayout);
     m_ptsGroupBox->setEnabled(false);
@@ -173,19 +188,22 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_ptsBox, SIGNAL(stateChanged(int)), this, SLOT(Pts(int)));
     connect(m_deltaPtsBox, SIGNAL(stateChanged(int)), this, SLOT(deltaPts(int)));
     connect(m_ptsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(erasePtsSeries(int)));
+    connect(m_buffLevelPtsBox, SIGNAL(stateChanged(int)), this, SLOT(buffLevelPts(int)));
 
     // dts
     m_dtsGroupBox = new QGroupBox(tr("Dts"));
     QLabel* dtsPidLabel = new QLabel(tr("Pid:"));
     m_dtsComboBox = new QComboBox;
     m_dtsBox = new QCheckBox(tr("Display Dts"));
-    m_deltaDtsBox = new QCheckBox(tr("Display Dts(n+1)-Dts(n)"));
+    m_deltaDtsBox = new QCheckBox(tr("Display Dts diff"));
+    m_buffLevelPtsDtsBox = new QCheckBox(tr("ES buffer level using Pts/Dts"));
 
     QGridLayout *dtsGroupBoxLayout = new QGridLayout;
     dtsGroupBoxLayout->addWidget(dtsPidLabel, 0, 0, Qt::AlignTop);
     dtsGroupBoxLayout->addWidget(m_dtsComboBox, 0, 1, Qt::AlignTop);
     dtsGroupBoxLayout->addWidget(m_dtsBox, 1, 0, Qt::AlignTop);
     dtsGroupBoxLayout->addWidget(m_deltaDtsBox, 2, 0, Qt::AlignTop);
+    dtsGroupBoxLayout->addWidget(m_buffLevelPtsDtsBox, 3, 0, Qt::AlignTop);
     dtsGroupBoxLayout->setVerticalSpacing(0);
     m_dtsGroupBox->setLayout(dtsGroupBoxLayout);
     m_dtsGroupBox->setEnabled(false);
@@ -193,19 +211,18 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_dtsBox, SIGNAL(stateChanged(int)), this, SLOT(Dts(int)));
     connect(m_deltaDtsBox, SIGNAL(stateChanged(int)), this, SLOT(deltaDts(int)));
     connect(m_dtsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(eraseDtsSeries(int)));
+    connect(m_buffLevelPtsDtsBox, SIGNAL(stateChanged(int)), this, SLOT(buffLevelPtsDts(int)));
 
     // diff
     m_diffGroupBox = new QGroupBox(tr("Diff"));
-    m_diffPcrPtsBox = new QCheckBox(tr("Display Pts(n)-Pcr(n)"));
-    m_diffPtsDtsBox = new QCheckBox(tr("Display Pts(n)-Dts(n)"));
-    m_diffPcrDtsBox = new QCheckBox(tr("Display Dts(n)-Pcr(n)"));
-    m_buffLevelBox = new QCheckBox(tr("Display PES buffer level"));
+    m_diffPcrPtsBox = new QCheckBox(tr("Display Pts-Pcr"));
+    m_diffPtsDtsBox = new QCheckBox(tr("Display Pts-Dts"));
+    m_diffPcrDtsBox = new QCheckBox(tr("Display Dts-Pcr"));
 
     QGridLayout *diffGroupBoxLayout = new QGridLayout;
     diffGroupBoxLayout->addWidget(m_diffPcrPtsBox, 0, 0, Qt::AlignTop);
     diffGroupBoxLayout->addWidget(m_diffPtsDtsBox, 1, 0, Qt::AlignTop);
     diffGroupBoxLayout->addWidget(m_diffPcrDtsBox, 2, 0, Qt::AlignTop);
-    diffGroupBoxLayout->addWidget(m_buffLevelBox, 3, 0, Qt::AlignTop);
     diffGroupBoxLayout->setVerticalSpacing(0);
     m_diffGroupBox->setLayout(diffGroupBoxLayout);
     m_diffGroupBox->setEnabled(false);
@@ -213,7 +230,6 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_diffPcrPtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrPts(int)));
     connect(m_diffPcrDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPcrDts(int)));
     connect(m_diffPtsDtsBox, SIGNAL(stateChanged(int)), this, SLOT(diffPtsDts(int)));
-    connect(m_buffLevelBox, SIGNAL(stateChanged(int)), this, SLOT(buffLevel(int)));
 
     // label
     m_infoLabel = new QLabel();
@@ -281,7 +297,8 @@ void MainWindow::erasePcrSeries(int)
     m_bitratePcrBox->setChecked(false);
     m_diffPcrPtsBox->setChecked(false);
     m_diffPcrDtsBox->setChecked(false);
-    m_buffLevelBox->setChecked(false);
+    m_buffLevelPtsBox->setChecked(false);
+    m_buffLevelPtsDtsBox->setChecked(false);
     cleanPcr();
 }
 
@@ -291,7 +308,8 @@ void MainWindow::erasePtsSeries(int)
     m_deltaPtsBox->setChecked(false);
     m_diffPcrPtsBox->setChecked(false);
     m_diffPtsDtsBox->setChecked(false);
-    m_buffLevelBox->setChecked(false);
+    m_buffLevelPtsBox->setChecked(false);
+    m_buffLevelPtsDtsBox->setChecked(false);
     cleanPts();
 }
 
@@ -301,6 +319,7 @@ void MainWindow::eraseDtsSeries(int)
     m_deltaDtsBox->setChecked(false);
     m_diffPtsDtsBox->setChecked(false);
     m_diffPcrDtsBox->setChecked(false);
+    m_buffLevelPtsDtsBox->setChecked(false);
     cleanDts();
 }
 
@@ -421,7 +440,8 @@ void MainWindow::loadFile()
         m_diffGroupBox->setEnabled(true);
         m_diffPcrPtsBox->setEnabled(false);
         m_diffPcrDtsBox->setEnabled(false);
-        m_buffLevelBox->setEnabled(false);
+        m_buffLevelPtsBox->setEnabled(false);
+        m_buffLevelPtsDtsBox->setEnabled(false);
     }
 
     statusBar()->showMessage(tr("Done..."), 1000);
@@ -470,7 +490,8 @@ void MainWindow::saveAsFile()
         serializeSeries(outFile, m_diffPcrPtsWorker);
         serializeSeries(outFile, m_diffPcrDtsWorker);
         serializeSeries(outFile, m_diffPtsDtsWorker);
-        serializeSeries(outFile, m_buffLevelWorker);
+        serializeSeries(outFile, m_buffLevelPtsWorker);
+        serializeSeries(outFile, m_buffLevelPtsDtsWorker);
 
         outFile->close();
         statusBar()->showMessage(tr("Done..."), 1000);
@@ -479,6 +500,12 @@ void MainWindow::saveAsFile()
 
 void MainWindow::showSeries(timeStampWorker *pWorker)
 {
+    // protection
+    if (!pWorker) {
+        qWarning() << "Worker is not initialized";
+        return;
+    }
+
     if (pWorker->m_isRunning) {
         // if thread has not ended then reconnect the signal
         connect(pWorker, SIGNAL(updated(int)), this, SLOT(updateStatusBar(int)));
@@ -491,6 +518,12 @@ void MainWindow::showSeries(timeStampWorker *pWorker)
 
 void MainWindow::hideSeries(timeStampWorker *pWorker)
 {
+    // protection
+    if (!pWorker) {
+        qWarning() << "Worker is not initialized";
+        return;
+    }
+
     if (pWorker->m_isRunning) {
         // if thread has not ended then disconnect the signal
         disconnect(pWorker, SIGNAL(updated(int)), this, SLOT(updateStatusBar(int)));
@@ -503,6 +536,12 @@ void MainWindow::hideSeries(timeStampWorker *pWorker)
 
 void MainWindow::buildSeries(timeStampWorker *pWorker)
 {
+    // protection
+    if (!pWorker) {
+        qWarning() << "Worker is not initialized";
+        return;
+    }
+
     // build serie
     connect(pWorker, SIGNAL(updated(int)), this, SLOT(updateStatusBar(int)));
 
@@ -789,28 +828,61 @@ void MainWindow::showDiffPtsDts()
     }
 }
 
-void MainWindow::buffLevel(int state)
+void MainWindow::buffLevelPts(int state)
 {
     if (state == Qt::Checked)
-        if (m_buffLevelWorker == Q_NULLPTR)
+        if (m_buffLevelPtsWorker == Q_NULLPTR)
+        {
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+            m_buffLevelPtsWorker = new buffLevelPtsWorker(&m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            connect(m_buffLevelPtsWorker, SIGNAL(finished()), this, SLOT(showBuffLevelPts()));
+            buildSeries(m_buffLevelPtsWorker);
+        }
+        else
+            showSeries(m_buffLevelPtsWorker);
+    else
+        hideSeries(m_buffLevelPtsWorker);
+}
+
+void MainWindow::showBuffLevelPts()
+{
+    if (m_buffLevelPtsBox->isChecked()) {
+        // must be done in parent thread
+        m_buffLevelPtsWorker->showSeries();
+    }
+}
+
+void MainWindow::buffLevelPtsDts(int state)
+{
+    if (state == Qt::Checked)
+        if (m_buffLevelPtsDtsWorker == Q_NULLPTR)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
             unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
-            m_buffLevelWorker = new buffLevelWorker(&m_tsFileName, pidPcr, pidPts, pidDts, (Chart*)m_chartView->chart());
-            connect(m_buffLevelWorker, SIGNAL(finished()), this, SLOT(showBuffLevel()));
-            buildSeries(m_buffLevelWorker);
+
+            // pid pts and dts must be equal to have a significant value
+            if (pidPts != pidDts) {
+                statusBar()->showMessage(tr("Pid PTS and DTS must be equal"), 1000);
+            }
+            else
+            {
+                m_buffLevelPtsDtsWorker = new buffLevelPtsDtsWorker(&m_tsFileName, pidPcr, pidPts, pidDts, (Chart*)m_chartView->chart());
+                connect(m_buffLevelPtsDtsWorker, SIGNAL(finished()), this, SLOT(showBuffLevelPtsDts()));
+                buildSeries(m_buffLevelPtsDtsWorker);
+            }
         }
         else
-            showSeries(m_buffLevelWorker);
+            showSeries(m_buffLevelPtsDtsWorker);
     else
-        hideSeries(m_buffLevelWorker);
+        hideSeries(m_buffLevelPtsDtsWorker);
 }
 
-void MainWindow::showBuffLevel()
+void MainWindow::showBuffLevelPtsDts()
 {
-    if (m_buffLevelBox->isChecked()) {
+    if (m_buffLevelPtsDtsBox->isChecked()) {
         // must be done in parent thread
-        m_buffLevelWorker->showSeries();
+        m_buffLevelPtsDtsWorker->showSeries();
     }
 }
