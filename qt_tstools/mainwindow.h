@@ -58,6 +58,7 @@ private slots:
     void openFile();
     void saveAsFile();
     void clearAllSeries();
+    void xAxis();
     void erasePcrSeries(int);
     void erasePtsSeries(int);
     void eraseDtsSeries(int);
@@ -123,6 +124,8 @@ private:
     void cleanPcr();
     void cleanPts();
     void cleanDts();
+
+    bool m_isTimeXAxis;
 
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;

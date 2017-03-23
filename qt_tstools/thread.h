@@ -57,6 +57,9 @@ protected:
     // chart for drawing
     Chart* m_chart;
 
+    // axis
+    bool m_isTimeXaxis;
+
     // series of data to draw
     QLineSeries* m_Series;
 
@@ -66,6 +69,10 @@ protected:
 public:
     timeStampWorker(std::string *tsFile, Chart *chart);
     ~timeStampWorker();
+
+    void SetTimeAxis (bool isTimeXaxis) {
+        m_isTimeXaxis = isTimeXaxis;
+    }
 
     // true if the thread is running
     bool m_isRunning;
@@ -117,13 +124,13 @@ public:
 class ptsWorker : public timeStampWorker
 {
 public:
-    ptsWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    ptsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
 };
 
 class ptsDeltaWorker : public timeStampWorker
 {
 public:
-    ptsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    ptsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
 };
 
 
@@ -132,14 +139,14 @@ public:
 class dtsWorker : public timeStampWorker
 {
 public:
-    dtsWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    dtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
 };
 
 // DTS delta worker
 class dtsDeltaWorker : public timeStampWorker
 {
 public:
-    dtsDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    dtsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
 };
 
 ////////////////
@@ -159,7 +166,7 @@ public:
 class diffPtsDtsWorker : public timeStampWorker
 {
 public:
-    diffPtsDtsWorker(std::string *tsFile, unsigned int pidPts, unsigned int pidDts, Chart *chart);
+    diffPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
 };
 
 class buffLevelPtsWorker : public timeStampWorker

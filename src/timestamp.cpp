@@ -168,7 +168,45 @@ double timestamp::getDuration()
 
 double timestamp::getTimeFromIndex(unsigned int index)
 {
+    double time = 0;
+
+#if 1
+    if (m_pcrMap.find(index) != m_pcrMap.end()) {
+        // use current pcr value
+        time = m_pcrMap[index] - (*m_pcrMap.begin()).second;
+    }
+    else {
+        // lower pcr
+        std::map<unsigned int, double>::iterator itlow;
+        unsigned int index_low = index;
+        do {
+            itlow = m_pcrMap.find(index_low--);
+        } while (itlow == m_pcrMap.end() && index_low > 0);
+
+        // upper pcr
+        std::map<unsigned int, double>::iterator ithigh;
+        ithigh = m_pcrMap.lower_bound(index);
+
+        if (ithigh != m_pcrMap.end() && itlow != m_pcrMap.end())
+        {
+            // calculate mean bitrate
+            double localBitrate = ithigh->first - itlow->first;
+            localBitrate *= 188;
+            localBitrate /= ithigh->second - itlow->second;
+            //printf("localbitrate %f\n", localBitrate);
+
+            // estimate time
+            time = ((index - itlow->first)*188)/localBitrate;
+            time += itlow->second;
+            time -= (*m_pcrMap.begin()).second;
+        }
+    }
+
+    return time;
+
+#else
     return (index*188)/m_globalBitrate + (*m_pcrMap.begin()).second;
+#endif
 }
 
 bool timestamp::getNextPcr(unsigned int& index, double& pcr)
@@ -253,14 +291,14 @@ bool timestamp::getNextDelta(unsigned int& index, double& delta)
 {
     if (m_delta_prev_val == -1) {
 
-        if (m_pidpcr != TIMESTAMP_NO_PID) {
-            m_delta_map = &m_pcrMap;
+        if(m_piddts != TIMESTAMP_NO_PID) {
+            m_delta_map = &m_dtsMap;
         }
         else if(m_pidpts != TIMESTAMP_NO_PID) {
             m_delta_map = &m_ptsMap;
         }
-        else if(m_piddts != TIMESTAMP_NO_PID) {
-            m_delta_map = &m_dtsMap;
+        else if (m_pidpcr != TIMESTAMP_NO_PID) {
+            m_delta_map = &m_pcrMap;
         }
         else
             return false;
@@ -321,26 +359,23 @@ bool timestamp::getNextDiff(unsigned int& index, double& diff)
 {
     if (m_diff_prev_index == -1 && m_diff_prev_value == -1) {
 
-        if (m_pidpcr != TIMESTAMP_NO_PID) {
-            m_diff_map1 = &m_pcrMap;
-
-            // dts - pcr
-            if(m_piddts != TIMESTAMP_NO_PID) {
-                m_diff_map2 = &m_dtsMap;
-            }
-            // pts - pcr
-            else if(m_pidpts != TIMESTAMP_NO_PID) {
-                m_diff_map2 = &m_ptsMap;
-            }
-            else return false;
-        }
-        else if(m_piddts != TIMESTAMP_NO_PID) {
-            m_diff_map1 = &m_dtsMap;
+        if(m_piddts != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) {
 
             // pts - dts
-            if(m_pidpts != TIMESTAMP_NO_PID) {
-                m_diff_map2 = &m_ptsMap;
-            }
+            m_diff_map1 = &m_dtsMap;
+            m_diff_map2 = &m_ptsMap;
+        }
+        else if (m_pidpcr != TIMESTAMP_NO_PID && m_piddts != TIMESTAMP_NO_PID) {
+
+            // dts - pcr
+            m_diff_map1 = &m_pcrMap;
+            m_diff_map2 = &m_dtsMap;
+        }
+        else if (m_pidpcr != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) {
+
+            // pts - pcr
+            m_diff_map1 = &m_pcrMap;
+            m_diff_map2 = &m_ptsMap;
         }
         else return false;
 
@@ -428,21 +463,20 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
     else return false;
 
     // time when buffer is release
-    double _release_time = 0;
+    double release_time = 0;
     std::map<unsigned int, double>::const_iterator dts_ii = m_dtsMap.find(index);
     std::map<unsigned int, double>::const_iterator pts_ii = m_ptsMap.find(index);
     if (dts_ii != m_dtsMap.end())
-        _release_time = m_dtsMap[index];
+        release_time = m_dtsMap[index];
     else if (pts_ii != m_ptsMap.end())
-    {
-        _release_time = m_ptsMap[index];
-    }
-    assert(_release_time != 0);
+        release_time = m_ptsMap[index];
+
+    // should never occur -> program stop TBC
+    assert(release_time != 0);
 
     // increase buffer and set release time
     m_level += _level;
-    m_levelMap[_release_time] = _level;
-    //printf ("Add %f %u\n", release_time, level);
+    m_levelMap[release_time] = _level;
 
     // decrease buffer level - remove old buffer
     std::map<double, int>::iterator level_ii = m_levelMap.begin();
