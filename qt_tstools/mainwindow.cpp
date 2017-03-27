@@ -27,40 +27,56 @@ void MainWindow::cleanAll()
     cleanPcr();
     cleanDts();
     cleanPts();
+
+
+    // wait for all thread to be completed
+    if (m_pthreadPool->activeThreadCount())
+    {
+        statusBar()->showMessage(tr("Waiting for threads completion..."));
+        m_pthreadPool->waitForDone();
+    }
 }
 
 void MainWindow::cleanPcr()
 {
     if (m_pcrWorker) {
         m_pthreadPool->cancel(m_pcrWorker);
+        m_pcrWorker->abort();
         delete m_pcrWorker; m_pcrWorker = Q_NULLPTR;
     }
     if (m_pcrDeltaWorker) {
         m_pthreadPool->cancel(m_pcrDeltaWorker);
+        m_pcrDeltaWorker->abort();
         delete m_pcrDeltaWorker; m_pcrDeltaWorker = Q_NULLPTR;
     }
     if (m_jitterPcrWorker) {
         m_pthreadPool->cancel(m_jitterPcrWorker);
+        m_jitterPcrWorker->abort();
         delete m_jitterPcrWorker; m_jitterPcrWorker = Q_NULLPTR;
     }
     if (m_bitratePcrWorker) {
         m_pthreadPool->cancel(m_bitratePcrWorker);
+        m_bitratePcrWorker->abort();
         delete m_bitratePcrWorker; m_bitratePcrWorker = Q_NULLPTR;
     }
     if (m_diffPcrPtsWorker) {
         m_pthreadPool->cancel(m_diffPcrPtsWorker);
+        m_diffPcrPtsWorker->abort();
         delete m_diffPcrPtsWorker; m_diffPcrPtsWorker = Q_NULLPTR;
     }
     if (m_diffPcrDtsWorker) {
         m_pthreadPool->cancel(m_diffPcrDtsWorker);
+        m_diffPcrDtsWorker->abort();
         delete m_diffPcrDtsWorker; m_diffPcrDtsWorker = Q_NULLPTR;
     }
     if (m_buffLevelPtsWorker) {
         m_pthreadPool->cancel(m_buffLevelPtsWorker);
+        m_buffLevelPtsWorker->abort();
         delete m_buffLevelPtsWorker; m_buffLevelPtsWorker = Q_NULLPTR;
     }
     if (m_buffLevelPtsDtsWorker) {
         m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        m_buffLevelPtsDtsWorker->abort();
         delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
     }
 }
@@ -69,26 +85,32 @@ void MainWindow::cleanPts()
 {
     if (m_ptsWorker) {
         m_pthreadPool->cancel(m_ptsWorker);
+        m_ptsWorker->abort();
         delete m_ptsWorker; m_ptsWorker = Q_NULLPTR;
     }
     if (m_ptsDeltaWorker) {
         m_pthreadPool->cancel(m_ptsDeltaWorker);
+        m_ptsDeltaWorker->abort();
         delete m_ptsDeltaWorker; m_ptsDeltaWorker = Q_NULLPTR;
     }
     if (m_diffPcrPtsWorker) {
         m_pthreadPool->cancel(m_diffPcrPtsWorker);
+        m_diffPcrPtsWorker->abort();
         delete m_diffPcrPtsWorker; m_diffPcrPtsWorker = Q_NULLPTR;
     }
     if (m_diffPtsDtsWorker) {
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
+        m_diffPtsDtsWorker->abort();
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
     }
     if (m_buffLevelPtsWorker) {
         m_pthreadPool->cancel(m_buffLevelPtsWorker);
+        m_buffLevelPtsWorker->abort();
         delete m_buffLevelPtsWorker; m_buffLevelPtsWorker = Q_NULLPTR;
     }
     if (m_buffLevelPtsDtsWorker) {
         m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        m_buffLevelPtsDtsWorker->abort();
         delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
     }
 }
@@ -97,22 +119,27 @@ void MainWindow::cleanDts()
 {
     if (m_dtsWorker) {
         m_pthreadPool->cancel(m_dtsWorker);
+        m_dtsWorker->abort();
         delete m_dtsWorker; m_dtsWorker = Q_NULLPTR;
     }
     if (m_dtsDeltaWorker) {
         m_pthreadPool->cancel(m_dtsDeltaWorker);
+        m_dtsDeltaWorker->abort();
         delete m_dtsDeltaWorker; m_dtsDeltaWorker = Q_NULLPTR;
     }
     if (m_diffPcrDtsWorker) {
         m_pthreadPool->cancel(m_diffPcrDtsWorker);
+        m_diffPcrDtsWorker->abort();
         delete m_diffPcrDtsWorker; m_diffPcrDtsWorker = Q_NULLPTR;
     }
     if (m_diffPtsDtsWorker) {
         m_pthreadPool->cancel(m_diffPtsDtsWorker);
+        m_diffPtsDtsWorker->abort();
         delete m_diffPtsDtsWorker; m_diffPtsDtsWorker = Q_NULLPTR;
     }
     if (m_buffLevelPtsDtsWorker) {
         m_pthreadPool->cancel(m_buffLevelPtsDtsWorker);
+        m_buffLevelPtsDtsWorker->abort();
         delete m_buffLevelPtsDtsWorker; m_buffLevelPtsDtsWorker = Q_NULLPTR;
     }
 }

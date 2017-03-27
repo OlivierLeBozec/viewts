@@ -46,7 +46,7 @@ double infoWorker::getGlobalDuration()
 ////////////////////////////////
 // Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string *tsFileName, Chart *chart) :
-   m_nbProgress(0),  m_chart(chart), m_isTimeXaxis(true), m_isRunning(false)
+   m_nbProgress(0),  m_chart(chart), m_isTimeXaxis(true), m_isRunning(false), m_isAborting(false)
 
 {
     // new drawing
@@ -110,15 +110,25 @@ void timeStampWorker::serializeSeries(std::ofstream *outFile)
     }
 }
 
+void timeStampWorker::abort()
+{
+    m_isAborting = true;
+
+    // loop until thread is completed
+    while (m_isRunning == true) {
+        QThread::msleep(10); // 10 milliseconds
+    }
+}
+
 void timeStampWorker::run()
 {
     m_isRunning = true;
 
-    while (m_timestamp->run(m_WindowPacket) == true)
+    while (m_timestamp->run(m_WindowPacket) == true && m_isAborting == false)
     {
         unsigned int index;
         double val;
-        while((m_timestamp->*m_func)(index, val) == true)
+        while((m_timestamp->*m_func)(index, val) == true  && m_isAborting == false)
         {
             if (m_isTimeXaxis)
                 // time for X axis

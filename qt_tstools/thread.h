@@ -2,6 +2,7 @@
 #define THREAD_H
 
 #include <QDebug>
+#include <QThread>
 #include <QRunnable>
 #include <QtCharts/QLineSeries>
 
@@ -77,12 +78,18 @@ public:
     // true if the thread is running
     bool m_isRunning;
 
+    // true if the thread is aborting
+    bool m_isAborting;
+
     // manipulate the series
     void showSeries();
     void hideSeries();
 
     // write the serie of points in file
     void serializeSeries(std::ofstream *outFile);
+
+    // abort the thread
+    void abort();
 
     // run function from QRunnable
     void run();
