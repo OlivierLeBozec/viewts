@@ -80,7 +80,7 @@ public:
 
     double  getGlobalBitrate();
     double  getDuration();
-    double  getTimeFromIndex(unsigned int index);
+    bool    getTimeFromIndex(unsigned int index, double& time);
     bool    getNextPcr(unsigned int& index, double& pcr);
     bool    getNextPts(unsigned int& index, double& pts);
     bool    getNextDts(unsigned int& index, double& dts);

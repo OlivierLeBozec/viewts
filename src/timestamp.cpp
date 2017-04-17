@@ -101,14 +101,14 @@ bool timestamp::run(unsigned int nbPacketToRead)
 
         if (packet.getPid() == m_pidpts && packet.hasPes()) {
                 // create pes from buffer
-                pes pes(&data[packet.getPesOffset()]);
+                pes pes(data + packet.getPesOffset());
                 m_pesLengthMap[m_nbPacket] = pes.getPacketLength();
                 if(pes.hasPts()) m_ptsMap[m_nbPacket] = pes.getPts();
         }
 
         if (packet.getPid() == m_piddts && packet.hasPes()) {
                 // create pes from buffer
-                pes pes(&data[packet.getPesOffset()]);
+                pes pes(data + packet.getPesOffset());
                 m_pesLengthMap[m_nbPacket] = pes.getPacketLength();
                 if(pes.hasDts()) m_dtsMap[m_nbPacket] = pes.getDts();
         }
@@ -141,7 +141,7 @@ double timestamp::getGlobalBitrate()
     if (m_pcrMap.empty()) return 0;
 
     // max pcr diff in seconds
-    double delta_pcr =  getMaxDeltaPcr();
+    double delta_pcr = getMaxDeltaPcr();
 
     // bitrate in byte per second
     m_globalBitrate = (double)((m_max_index - m_min_index)*188);
@@ -166,26 +166,20 @@ double timestamp::getDuration()
     return duration;
 }
 
-double timestamp::getTimeFromIndex(unsigned int index)
+bool timestamp::getTimeFromIndex(unsigned int index, double &time)
 {
-    double time = 0;
-
 #if 1
     if (m_pcrMap.find(index) != m_pcrMap.end()) {
         // use current pcr value
         time = m_pcrMap[index] - (*m_pcrMap.begin()).second;
+        return true;
     }
     else {
         // lower pcr
-        std::map<unsigned int, double>::iterator itlow;
-        unsigned int index_low = index;
-        do {
-            itlow = m_pcrMap.find(index_low--);
-        } while (itlow == m_pcrMap.end() && index_low > 0);
+        std::map<unsigned int, double>::iterator itlow = m_pcrMap.lower_bound(index);
 
         // upper pcr
-        std::map<unsigned int, double>::iterator ithigh;
-        ithigh = m_pcrMap.lower_bound(index);
+        std::map<unsigned int, double>::iterator ithigh = m_pcrMap.upper_bound(index);
 
         if (ithigh != m_pcrMap.end() && itlow != m_pcrMap.end())
         {
@@ -199,13 +193,15 @@ double timestamp::getTimeFromIndex(unsigned int index)
             time = ((index - itlow->first)*188)/localBitrate;
             time += itlow->second;
             time -= (*m_pcrMap.begin()).second;
+            return true;
         }
     }
 
-    return time;
+    return false;
 
 #else
-    return (index*188)/m_globalBitrate + (*m_pcrMap.begin()).second;
+    time = (index*188)/m_globalBitrate + (*m_pcrMap.begin()).second;
+    return true;
 #endif
 }
 
@@ -441,7 +437,7 @@ bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
 
 bool timestamp::getNextLevel(unsigned int& index, double& level)
 {
-    int _level = 0;
+    int levelTmp = 0;
 
     // protection
     if (m_pesLengthMap.empty())
@@ -452,13 +448,13 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
 
         m_length_ii = m_pesLengthMap.begin();
         index = m_length_ii->first;
-        _level = m_level = m_length_ii->second;
+        levelTmp = m_level = m_length_ii->second;
     }
     else if (m_length_ii != --m_pesLengthMap.end()) {
 
         ++m_length_ii;
         index = m_length_ii->first;
-        _level = m_length_ii->second;
+        levelTmp = m_length_ii->second;
     }
     else return false;
 
@@ -472,26 +468,29 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         release_time = m_ptsMap[index];
 
     // should never occur -> program stop TBC
-    assert(release_time != 0);
+    //assert(release_time != 0);
+
+    double current_time;
+    if (getTimeFromIndex(index, current_time) == false)
+        return false;
 
     // increase buffer and set release time
-    m_level += _level;
-    m_levelMap[release_time] = _level;
+    m_level += levelTmp;
+    m_levelMap[release_time] = levelTmp;
 
     // decrease buffer level - remove old buffer
     std::map<double, int>::iterator level_ii = m_levelMap.begin();
-    while (level_ii != m_levelMap.end())
+    for (;level_ii != m_levelMap.end(); level_ii++)
     {
-        if (level_ii->first < getTimeFromIndex(index) && level_ii->second) {
+        // compare release time with current time
+        if (level_ii->first < current_time && level_ii->second) {
             //printf ("Del %f %u\n", level_ii->first, level_ii->second);
             m_level -= level_ii->second;
             level_ii->second = 0;
         }
-
-        if (level_ii != m_levelMap.end()) level_ii++;
     }
 
-    //printf ("Nb item %u - %f\n", m_levelMap.size(), getTimeFromIndex(index));
     level = (double)m_level;
+    //printf ("Nb item %u - %u\n", m_levelMap.size(), m_level);
     return true;
 }

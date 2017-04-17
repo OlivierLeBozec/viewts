@@ -130,9 +130,12 @@ void timeStampWorker::run()
         double val;
         while((m_timestamp->*m_func)(index, val) == true  && m_isAborting == false)
         {
-            if (m_isTimeXaxis)
+            if (m_isTimeXaxis) {
+                double time;
                 // time for X axis
-                m_Series->append( m_timestamp->getTimeFromIndex(index), (qreal)val);
+                if (m_timestamp->getTimeFromIndex(index, time) == true)
+                    m_Series->append(time, (qreal)val);
+            }
             else
                 // packet index for X axis
                 m_Series->append( index, (qreal)val);
