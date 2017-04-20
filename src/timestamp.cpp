@@ -168,18 +168,21 @@ double timestamp::getDuration()
 
 bool timestamp::getTimeFromIndex(unsigned int index, double &time)
 {
-#if 1
     if (m_pcrMap.find(index) != m_pcrMap.end()) {
         // use current pcr value
         time = m_pcrMap[index] - (*m_pcrMap.begin()).second;
         return true;
     }
-    else {
-        // lower pcr
-        std::map<unsigned int, double>::iterator itlow = m_pcrMap.lower_bound(index);
-
+    else // estimate time
+    {
         // upper pcr
         std::map<unsigned int, double>::iterator ithigh = m_pcrMap.upper_bound(index);
+        //printf("upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
+
+        // lower pcr
+        std::map<unsigned int, double>::iterator itlow = ithigh;
+        itlow--;
+        //printf("lower %u [%u] %llf\n", index, itlow->first, itlow->second);
 
         if (ithigh != m_pcrMap.end() && itlow != m_pcrMap.end())
         {
@@ -187,7 +190,7 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
             double localBitrate = ithigh->first - itlow->first;
             localBitrate *= 188;
             localBitrate /= ithigh->second - itlow->second;
-            //printf("localbitrate %f\n", localBitrate);
+            //printf("localbitrate %llf\n", localBitrate);
 
             // estimate time
             time = ((index - itlow->first)*188)/localBitrate;
@@ -198,11 +201,6 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
     }
 
     return false;
-
-#else
-    time = (index*188)/m_globalBitrate + (*m_pcrMap.begin()).second;
-    return true;
-#endif
 }
 
 bool timestamp::getNextPcr(unsigned int& index, double& pcr)
