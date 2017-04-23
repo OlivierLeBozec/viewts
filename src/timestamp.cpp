@@ -64,9 +64,12 @@ bool timestamp::run(unsigned int nbPacketToRead)
 {
     unsigned char data[188];
     bool isDatatoRead = false;
+    unsigned int startPacketIndex = 0;
 
     while (nbPacketToRead)
     {
+        bool updatePesLength = false;
+
         // leave if no more data
         if (!m_fileIn->read((char*)data, 188)) break;
         isDatatoRead = true;
@@ -74,43 +77,58 @@ bool timestamp::run(unsigned int nbPacketToRead)
         // create packet from buffer
         packet packet(data);
 
-        // update number of packet and store pcr
+        // update number of packet and store PCR
         if (packet.getPid() == m_pidpcr)
         {
             if (packet.hasPcr()) {
                 m_pcrMap[m_nbPacket] = packet.getPcr();
                 m_packetAfterLastPcr=0;
 
-                // store min pcr and corresponding index
+                // store min PCR and corresponding index
                 if (m_pcrMap[m_nbPacket] < m_min_pcr) {
                     m_min_pcr = m_pcrMap[m_nbPacket];
                     m_min_index = m_nbPacket;
                 }
 
-                // store max pcr and corresponding index
+                // store max PCR and corresponding index
                 if (m_pcrMap[m_nbPacket] > m_max_pcr) {
                     m_max_pcr = m_pcrMap[m_nbPacket];
                     m_max_index = m_nbPacket;
                 }
             }
-            else { /* pid without pcr */
+            else { // pid without PCR
                 if (m_pcrMap.empty()) m_packetBeforeFirstPcr++;
                 m_packetAfterLastPcr++;
             }
         }
 
-        if (packet.getPid() == m_pidpts && packet.hasPes()) {
-                // create pes from buffer
-                pes pes(data + packet.getPesOffset());
-                m_pesLengthMap[m_nbPacket] = pes.getPacketLength();
-                if(pes.hasPts()) m_ptsMap[m_nbPacket] = pes.getPts();
+        // get PTS and DTS
+        if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && packet.hasPesHeader())
+        {
+            // create pes from buffer
+            pes pes(data + packet.getPesOffset());
+
+            if(pes.hasPts()) {
+                m_ptsMap[m_nbPacket] = pes.getPts();
+                updatePesLength = true;
+            }
+
+            if(pes.hasDts()) {
+                m_dtsMap[m_nbPacket] = pes.getDts();
+                updatePesLength = true;
+            }
         }
 
-        if (packet.getPid() == m_piddts && packet.hasPes()) {
-                // create pes from buffer
-                pes pes(data + packet.getPesOffset());
-                m_pesLengthMap[m_nbPacket] = pes.getPacketLength();
-                if(pes.hasDts()) m_dtsMap[m_nbPacket] = pes.getDts();
+        // update PES length using timestamp as trigger - cause length is PES header can be null
+        if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && updatePesLength == true)
+        {
+            startPacketIndex = m_nbPacket;
+            m_pesLengthMap[startPacketIndex] = 184;
+        }
+        else if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && startPacketIndex != 0)
+        {
+            // add remaining PES size
+            m_pesLengthMap[startPacketIndex] += 184;
         }
 
         // next packet
@@ -175,13 +193,14 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
     }
     else // estimate time
     {
-        // upper pcr
-        std::map<unsigned int, double>::iterator ithigh = m_pcrMap.upper_bound(index);
-        //printf("upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
-
-        // lower pcr
-        std::map<unsigned int, double>::iterator itlow = ithigh;
+        // upper and lower pcr
+        std::map<unsigned int, double>::iterator ithigh, itlow;
+        itlow = ithigh = m_pcrMap.upper_bound(index);
+        if (ithigh == m_pcrMap.begin() || ithigh == m_pcrMap.end())
+            return false;
         itlow--;
+
+        //printf("upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
         //printf("lower %u [%u] %llf\n", index, itlow->first, itlow->second);
 
         if (ithigh != m_pcrMap.end() && itlow != m_pcrMap.end())
@@ -198,6 +217,9 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
             time -= (*m_pcrMap.begin()).second;
             return true;
         }
+
+        printf("error upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
+        printf("error lower %u [%u] %llf\n", index, itlow->first, itlow->second);
     }
 
     return false;
@@ -461,30 +483,30 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
     std::map<unsigned int, double>::const_iterator dts_ii = m_dtsMap.find(index);
     std::map<unsigned int, double>::const_iterator pts_ii = m_ptsMap.find(index);
     if (dts_ii != m_dtsMap.end())
-        release_time = m_dtsMap[index];
+        release_time = m_dtsMap[index] - (*m_pcrMap.begin()).second;
     else if (pts_ii != m_ptsMap.end())
-        release_time = m_ptsMap[index];
+        release_time = m_ptsMap[index] - (*m_pcrMap.begin()).second;
 
     // should never occur -> program stop TBC
-    //assert(release_time != 0);
+    assert(release_time != 0);
 
     double current_time;
-    if (getTimeFromIndex(index, current_time) == false)
-        return false;
-
-    // increase buffer and set release time
-    m_level += levelTmp;
-    m_levelMap[release_time] = levelTmp;
-
-    // decrease buffer level - remove old buffer
-    std::map<double, int>::iterator level_ii = m_levelMap.begin();
-    for (;level_ii != m_levelMap.end(); level_ii++)
+    if (getTimeFromIndex(index, current_time) == true)
     {
-        // compare release time with current time
-        if (level_ii->first < current_time && level_ii->second) {
-            //printf ("Del %f %u\n", level_ii->first, level_ii->second);
-            m_level -= level_ii->second;
-            level_ii->second = 0;
+        // increase buffer and set release time
+        m_level += levelTmp;
+        m_levelMap[release_time] = levelTmp;
+
+        // decrease buffer level - remove old buffer
+        std::map<double, int>::iterator level_ii = m_levelMap.begin();
+        for (;level_ii != m_levelMap.end(); level_ii++)
+        {
+            // compare release time with current time
+            if (level_ii->first < current_time && level_ii->second) {
+                //printf ("Del %f %u\n", level_ii->first, level_ii->second);
+                m_level -= level_ii->second;
+                level_ii->second = 0;
+            }
         }
     }
 

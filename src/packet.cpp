@@ -15,7 +15,7 @@ packet::AdaptationField_t packet::getAdaptationField(void)
     return (AdaptationField_t) ((m_data[3] & 0x30) >> 4);
 }
 
-bool packet::hasPes(void)
+bool packet::hasPesHeader(void)
 {
     // pusi
     if ((m_data[1] & 0x40) == 0x40) {

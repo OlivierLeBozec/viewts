@@ -133,13 +133,17 @@ void timeStampWorker::run()
             if (m_isTimeXaxis) {
                 double time;
                 // time for X axis
-                if (m_timestamp->getTimeFromIndex(index, time) == true)
+                if (m_timestamp->getTimeFromIndex(index, time) == true) {
                     m_Series->append(time, (qreal)val);
+                    qDebug() << m_Series->name() << " - index " << index << " - " << time << " s - " << val;
+                }
             }
-            else
+            else {
+
                 // packet index for X axis
                 m_Series->append( index, (qreal)val);
-            //qDebug() << m_Series->name() << " - index " << index << " - " << m_timestamp->getTimeFromIndex(index) << " ms - " << val;
+                qDebug() << m_Series->name() << " - index " << index << " - " << val;
+            }
         }
         updateProgress();
     }

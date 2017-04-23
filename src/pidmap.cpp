@@ -60,7 +60,7 @@ bool pidmap::run(unsigned int nbPacketToRead)
         m_pidMap[pid].nb_packet++;
         m_pidMap[pid].has_pcr |= packet.hasPcr();
 
-        if (packet.hasPes()) {
+        if (packet.hasPesHeader()) {
             // create pes from buffer
             pes pes(data + packet.getPesOffset());
             m_pidMap[pid].has_pts |= pes.hasPts();

@@ -22,7 +22,7 @@ public:
     unsigned int        getPid(void);
     double              getPcr(void);
     bool                hasPcr(void);
-    bool                hasPes(void);
+    bool                hasPesHeader(void);
     unsigned int        getPesOffset(void);
 
     packet(unsigned char* data);
