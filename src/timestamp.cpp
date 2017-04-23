@@ -108,12 +108,12 @@ bool timestamp::run(unsigned int nbPacketToRead)
             // create pes from buffer
             pes pes(data + packet.getPesOffset());
 
-            if(pes.hasPts()) {
+            if(pes.hasPts() && packet.getPid() == m_pidpts) {
                 m_ptsMap[m_nbPacket] = pes.getPts();
                 updatePesLength = true;
             }
 
-            if(pes.hasDts()) {
+            if(pes.hasDts() && packet.getPid() == m_piddts) {
                 m_dtsMap[m_nbPacket] = pes.getDts();
                 updatePesLength = true;
             }
