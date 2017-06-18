@@ -1,18 +1,20 @@
 # tstools
 Tools for MPEG-TS streams.
 To compile use cmake for windows or linux.
+
 More details in the Wiki.
 
 ## qt tools
-viewTS : display the timestamp of a ts stream
+viewTS : display the timestamp of a ts stream.
+
 To compile first import in Qt top level CMakeLists.txt.
 Only windows is working for the moment.
 
-[[https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png|alt=octocat]]
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png|alt=octocat)
 
-[[https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrptsdts.png|alt=octocat]]
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrptsdts.png|alt=octocat)
 
-[[https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png|alt=octocat]]
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png|alt=octocat)
 
 ## tsmap
 NAME
