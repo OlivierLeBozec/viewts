@@ -10,11 +10,11 @@ viewTS : display the timestamp of a ts stream.
 To compile first import in Qt top level CMakeLists.txt.
 Only windows is working for the moment.
 
-![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png|alt=octocat)
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
 
-![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrptsdts.png|alt=octocat)
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrptsdts.png)
 
-![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png|alt=octocat)
+![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
 ## tsmap
 NAME
