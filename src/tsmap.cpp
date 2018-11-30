@@ -105,14 +105,12 @@ int main(int argc, char** argv)
 
     // display pid info
     if (pidlist || pidm){
-        std::string *Filename = new std::string(argv[1]);
-        pidmap pm(Filename);
+        std::string Filename = argv[1];
+        pidmap pm(&Filename);
 
         while (pm.run() == true);
         if (pidlist)    dumpPidmap(pm);
         if (pidm)       dumpMap(pm);
-
-        delete Filename;
     }
 
     return 0;
