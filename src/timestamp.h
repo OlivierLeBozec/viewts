@@ -76,7 +76,6 @@ class timestamp
 public:
 
     timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
-    ~timestamp();
 
     double  getGlobalBitrate();
     double  getDuration();

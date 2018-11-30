@@ -41,22 +41,6 @@ timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int 
     m_fileIn.seekg(index);
 }
 
-timestamp::~timestamp()
-{
-    if (!m_pcrMap.empty()) {
-        m_pcrMap.clear();
-    }
-    if (!m_ptsMap.empty()) {
-        m_ptsMap.clear();
-    }
-    if (!m_dtsMap.empty()) {
-        m_dtsMap.clear();
-    }
-    if (!m_pesLengthMap.empty()) {
-        m_pesLengthMap.clear();
-    }
-}
-
 // Cpu consuming function
 bool timestamp::run(unsigned int nbPacketToRead)
 {
