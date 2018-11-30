@@ -33,8 +33,8 @@ timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int 
     char start[512];
     int index = 0;
 
-    m_fileIn.read((char*)start, 512);
-    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
+    m_fileIn.read(start, sizeof start);
+    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start)) index++;
 
     // loop on packet
     m_fileIn.clear();
