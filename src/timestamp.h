@@ -9,7 +9,7 @@
 
 class timestamp
 {
-    std::ifstream* m_fileIn;
+    std::ifstream m_fileIn;
 
     // number packets before the first pcr
     unsigned int m_packetBeforeFirstPcr;
