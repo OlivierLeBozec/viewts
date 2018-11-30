@@ -28,6 +28,8 @@ timestamp::timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int p
     m_level(-1)
 {
     m_fileIn =  std::ifstream(fileNameIn, std::ios::binary);
+    if(!m_fileIn.is_open())
+      throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 
     // align file on first 0x47
     char start[512];
