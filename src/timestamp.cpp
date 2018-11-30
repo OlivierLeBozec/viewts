@@ -3,7 +3,7 @@
 #include "pes.h"
 #include "assert.h"
 
-timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
+timestamp::timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
     m_min_pcr(0xFFFFFFFFFFFFFFFF),
@@ -27,7 +27,7 @@ timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int 
     m_bitrate_prev_pcr_val(-1),
     m_level(-1)
 {
-    m_fileIn =  std::ifstream(fileNameIn->c_str(), std::ios::binary);
+    m_fileIn =  std::ifstream(fileNameIn, std::ios::binary);
 
     // align file on first 0x47
     char start[512];

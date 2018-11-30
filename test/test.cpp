@@ -32,7 +32,7 @@ TEST(pcr, check_PCR_values_on_audio)
     double pcr;
 
     std::string Filename = "../../ts/audio.ts";
-    timestamp ts(&Filename, 305);
+    timestamp ts(Filename, 305);
 
     // run leave when completed
     EXPECT_EQ(ts.run(), true);
@@ -56,7 +56,7 @@ TEST(pcr, check_PCR_values_on_video_dvbSub)
     double pcr;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, 220);
+    timestamp ts(Filename, 220);
 
     // run leave every 1000 packet
     while(ts.run(1000) == true);
@@ -80,7 +80,7 @@ TEST(pts, check_PTS_values_on_audio)
     double pts;
 
     std::string Filename = "../../ts/audio.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, 305);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, 305);
 
     EXPECT_EQ(ts.run(), true);
 
@@ -103,7 +103,7 @@ TEST(pts, check_PTS_values_on_video_dvbSub)
     double pts;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, 220);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, 220);
 
     // run leave every 1000 packet
     while(ts.run(1000) == true);
@@ -127,7 +127,7 @@ TEST(dts, check_DTS_values_on_video_dvbSub)
     double dts;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, 220);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, 220);
 
     // run leave every 1000 packet
     while(ts.run(1000) == true);
@@ -151,7 +151,7 @@ TEST(delta, check_deltaPCR_values_on_audio)
     double delta;
 
     std::string Filename = "../../ts/audio.ts";
-    timestamp ts(&Filename, 305);
+    timestamp ts(Filename, 305);
     ts.run();
 
     // first value
@@ -173,7 +173,7 @@ TEST(delta, check_deltaPTS_values_on_video_dvbSub)
     double delta;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, 220);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, 220);
 
     // run leave every 1000 packet
     while(ts.run(1000) == true);
@@ -197,7 +197,7 @@ TEST(delta, check_deltaDTS_values_on_video_dvbSub)
     double delta;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, 220);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, TIMESTAMP_NO_PID, 220);
 
     // run leave every 1000 packet
     while(ts.run(1000) == true);
@@ -221,7 +221,7 @@ TEST(diff, check_diffPcrPts_values_on_audio)
     double diff;
 
     std::string Filename = "../../ts/audio.ts";
-    timestamp ts(&Filename, 305, 305);
+    timestamp ts(Filename, 305, 305);
     EXPECT_EQ(ts.run(), true);
 
     // first value
@@ -241,7 +241,7 @@ TEST(diff, check_diffPtsDts_values_on_video_dvbSub)
     double diff;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, TIMESTAMP_NO_PID, 220, 220);
+    timestamp ts(Filename, TIMESTAMP_NO_PID, 220, 220);
     while (ts.run(1000) == true);
 
     // first value
@@ -263,7 +263,7 @@ TEST(jitter, check_jitterPcr_values_on_video_dvbSub)
     double jitter;
 
     std::string Filename = "../../ts/video_dvbSub.ts";
-    timestamp ts(&Filename, 220);
+    timestamp ts(Filename, 220);
     while (ts.run(1000) == true);
 
     // first value
