@@ -6,7 +6,7 @@
 
 #include "chart.h"
 #include "chartview.h"
-#include "thread.h"
+#include "workers.h"
 
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"

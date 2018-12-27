@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "thread.h"
+#include "workers.h"
 
 MainWindow::MainWindow() :
     m_pthreadPool(QThreadPool::globalInstance()),
@@ -513,7 +513,7 @@ void MainWindow::showInfo()
 
 void MainWindow::saveAsFile()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save series"), NULL, NULL /*tr("*.txt")*/);
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save series"), nullptr, nullptr /*tr("*.txt")*/);
     if (!fileName.isEmpty())
     {
         // overwrite all in the file

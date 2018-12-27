@@ -14,12 +14,12 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     chart.cpp \
     chartview.cpp \
-    thread.cpp
+    workers.cpp
 
 HEADERS  += mainwindow.h \
     chart.h \
     chartview.h \
-    thread.h
+    workers.h
 
 RC_FILE = viewTS.rc
 
@@ -34,7 +34,6 @@ linux {
   DESTDIR = $$PWD/../bin/linux/
   INCLUDEPATH += $$PWD/../bin/linux
   DEPENDPATH += $$PWD/../bin/linux
-  QMAKE_CXXFLAGS += -fpermissive
 }
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../bin/windows/ -ltstoolcheck -ltstoolmap
