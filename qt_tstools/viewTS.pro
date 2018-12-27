@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT      += core gui charts widgets
-CONFIG  += static
+QT += core gui charts widgets
 
 TARGET = viewTS
 TEMPLATE = app
@@ -28,6 +27,7 @@ win32 {
   DESTDIR = $$PWD/../bin/windows/
   INCLUDEPATH += $$PWD/../bin/windows
   DEPENDPATH += $$PWD/../bin/windows
+  CONFIG  += static
 }
 
 linux {
