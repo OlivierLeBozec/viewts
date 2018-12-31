@@ -2,7 +2,7 @@
 
 ////////////////////
 // Info worker
-infoWorker::infoWorker(std::string *tsFile, unsigned int pid) :
+infoWorker::infoWorker(std::string &tsFile, unsigned int pid) :
      m_isRunning(false)
 {
     // customize base class
@@ -45,7 +45,7 @@ double infoWorker::getGlobalDuration()
 
 ////////////////////////////////
 // Timestamp worker - base class
-timeStampWorker::timeStampWorker(std::string *tsFileName, Chart *chart) :
+timeStampWorker::timeStampWorker(std::string &tsFileName, Chart *chart) :
    m_nbProgress(0),  m_chart(chart), m_isTimeXaxis(true), m_isRunning(false), m_isAborting(false)
 
 {
@@ -60,7 +60,7 @@ timeStampWorker::timeStampWorker(std::string *tsFileName, Chart *chart) :
     setAutoDelete (false);
 
     // get file size
-    std::ifstream* fileIn =  new std::ifstream(tsFileName->c_str(), std::ios::binary);
+    std::ifstream* fileIn =  new std::ifstream(tsFileName.c_str(), std::ios::binary);
     fileIn->seekg (0, std::ios::end);
     m_fileSize = (unsigned long long)fileIn->tellg();
     fileIn->seekg (0, std::ios::beg);
@@ -155,7 +155,7 @@ void timeStampWorker::run()
 
 ////////////////////
 // PCR worker
-pcrWorker::pcrWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
+pcrWorker::pcrWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -163,7 +163,7 @@ pcrWorker::pcrWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
     m_Series->setName(QString(tr("Pcr")));
 }
 
-pcrDeltaWorker::pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
+pcrDeltaWorker::pcrDeltaWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -171,7 +171,7 @@ pcrDeltaWorker::pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *cha
     m_Series->setName(QString(tr("Pcr(n+1)-Pcr(n)")));
 }
 
-pcrJitterWorker::pcrJitterWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
+pcrJitterWorker::pcrJitterWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -179,7 +179,7 @@ pcrJitterWorker::pcrJitterWorker(std::string *tsFile, unsigned int pid, Chart *c
     m_Series->setName(QString(tr("Jitter Pcr")));
 }
 
-pcrBitrateWorker::pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart *chart) :
+pcrBitrateWorker::pcrBitrateWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -189,7 +189,7 @@ pcrBitrateWorker::pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart 
 
 ////////////////////
 // PTS worker
-ptsWorker::ptsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+ptsWorker::ptsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -197,7 +197,7 @@ ptsWorker::ptsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidP
     m_Series->setName(QString(tr("Pts")));
 }
 
-ptsDeltaWorker::ptsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+ptsDeltaWorker::ptsDeltaWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -207,7 +207,7 @@ ptsDeltaWorker::ptsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigne
 
 ////////////////////
 // DTS worker
-dtsWorker::dtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart) :
+dtsWorker::dtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -215,7 +215,7 @@ dtsWorker::dtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidD
     m_Series->setName(QString(tr("Dts")));
 }
 
-dtsDeltaWorker::dtsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+dtsDeltaWorker::dtsDeltaWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -225,7 +225,7 @@ dtsDeltaWorker::dtsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigne
 
 ////////////////
 // Diff worker
-diffPcrPtsWorker::diffPcrPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+diffPcrPtsWorker::diffPcrPtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -233,7 +233,7 @@ diffPcrPtsWorker::diffPcrPtsWorker(std::string *tsFile, unsigned int pidPcr, uns
     m_Series->setName(QString(tr("Pts(n)-Pcr(n)")));
 }
 
-diffPcrDtsWorker::diffPcrDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart) :
+diffPcrDtsWorker::diffPcrDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -241,7 +241,7 @@ diffPcrDtsWorker::diffPcrDtsWorker(std::string *tsFile, unsigned int pidPcr, uns
     m_Series->setName(QString(tr("Dts(n)-Pcr(n)")));
 }
 
-diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
+diffPtsDtsWorker::diffPtsDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -249,7 +249,7 @@ diffPtsDtsWorker::diffPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, uns
     m_Series->setName(QString(tr("Pts(n)-Dts(n)")));
 }
 
-buffLevelPtsWorker::buffLevelPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
+buffLevelPtsWorker::buffLevelPtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class
@@ -257,7 +257,7 @@ buffLevelPtsWorker::buffLevelPtsWorker(std::string *tsFile, unsigned int pidPcr,
     m_Series->setName(QString(tr("ES buffer level using PTS")));
 }
 
-buffLevelPtsDtsWorker::buffLevelPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
+buffLevelPtsDtsWorker::buffLevelPtsDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart) :
     timeStampWorker(tsFile, chart)
 {
     // customize base class

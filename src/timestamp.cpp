@@ -2,8 +2,9 @@
 #include "packet.h"
 #include "pes.h"
 #include "assert.h"
+#include <stdexcept>
 
-timestamp::timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
+timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
     m_min_pcr(0xFFFFFFFFFFFFFFFF),
@@ -27,7 +28,7 @@ timestamp::timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int p
     m_bitrate_prev_pcr_val(-1),
     m_level(-1)
 {
-    m_fileIn =  std::ifstream(fileNameIn, std::ios::binary);
+    m_fileIn.open(fileNameIn.c_str(), std::ios::binary);
     if(!m_fileIn.is_open())
       throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 

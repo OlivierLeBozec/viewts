@@ -23,7 +23,7 @@ protected:
     timestamp* m_timestamp;
 
 public:
-    infoWorker(std::string *tsFile, unsigned int pid);
+    infoWorker(std::string &tsFile, unsigned int pid);
     ~infoWorker();
 
     // true if the thread is running
@@ -68,7 +68,7 @@ protected:
     virtual bool getData(unsigned int& index, double& val) = 0;
 
 public:
-    timeStampWorker(std::string *tsFile, Chart *chart);
+    timeStampWorker(std::string &tsFile, Chart *chart);
     ~timeStampWorker();
 
     void SetTimeAxis (bool isTimeXaxis) {
@@ -105,7 +105,7 @@ signals:
 class pcrWorker : public timeStampWorker
 {
 public:
-    pcrWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    pcrWorker(std::string &tsFile, unsigned int pid, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextPcr(index, val);
     }
@@ -114,7 +114,7 @@ public:
 class pcrDeltaWorker : public timeStampWorker
 {
 public:
-    pcrDeltaWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    pcrDeltaWorker(std::string &tsFile, unsigned int pid, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDelta(index, val);
     }
@@ -123,7 +123,7 @@ public:
 class pcrJitterWorker : public timeStampWorker
 {
 public:
-    pcrJitterWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    pcrJitterWorker(std::string &tsFile, unsigned int pid, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextJitterPcr(index, val);
     }
@@ -132,7 +132,7 @@ public:
 class pcrBitrateWorker : public timeStampWorker
 {
 public:
-    pcrBitrateWorker(std::string *tsFile, unsigned int pid, Chart *chart);
+    pcrBitrateWorker(std::string &tsFile, unsigned int pid, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextBitrate(index, val);
     }
@@ -144,7 +144,7 @@ public:
 class ptsWorker : public timeStampWorker
 {
 public:
-    ptsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    ptsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextPts(index, val);
     }
@@ -153,7 +153,7 @@ public:
 class ptsDeltaWorker : public timeStampWorker
 {
 public:
-    ptsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    ptsDeltaWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDelta(index, val);
     }
@@ -165,7 +165,7 @@ public:
 class dtsWorker : public timeStampWorker
 {
 public:
-    dtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
+    dtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDts(index, val);
     }
@@ -175,7 +175,7 @@ public:
 class dtsDeltaWorker : public timeStampWorker
 {
 public:
-    dtsDeltaWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
+    dtsDeltaWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidDts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDelta(index, val);
     }
@@ -186,7 +186,7 @@ public:
 class diffPcrPtsWorker : public timeStampWorker
 {
 public:
-    diffPcrPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    diffPcrPtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDiff(index, val);
     }
@@ -195,7 +195,7 @@ public:
 class diffPcrDtsWorker : public timeStampWorker
 {
 public:
-    diffPcrDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    diffPcrDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDiff(index, val);
     }
@@ -204,7 +204,7 @@ public:
 class diffPtsDtsWorker : public timeStampWorker
 {
 public:
-    diffPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
+    diffPtsDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextDiff(index, val);
     }
@@ -213,7 +213,7 @@ public:
 class buffLevelPtsWorker : public timeStampWorker
 {
 public:
-    buffLevelPtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
+    buffLevelPtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextLevel(index, val);
     }
@@ -222,7 +222,7 @@ public:
 class buffLevelPtsDtsWorker : public timeStampWorker
 {
 public:
-    buffLevelPtsDtsWorker(std::string *tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
+    buffLevelPtsDtsWorker(std::string &tsFile, unsigned int pidPcr, unsigned int pidPts, unsigned int pidDts, Chart *chart);
     bool getData(unsigned int& index, double& val) {
         return m_timestamp->getNextLevel(index, val);
     }
