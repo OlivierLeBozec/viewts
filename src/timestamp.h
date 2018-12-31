@@ -9,7 +9,7 @@
 
 class timestamp
 {
-    std::ifstream* m_fileIn;
+    std::ifstream m_fileIn;
 
     // number packets before the first pcr
     unsigned int m_packetBeforeFirstPcr;
@@ -75,8 +75,7 @@ class timestamp
 
 public:
 
-    timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
-    ~timestamp();
+    timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int pidpts = TIMESTAMP_NO_PID, unsigned int piddts = TIMESTAMP_NO_PID);
 
     double  getGlobalBitrate();
     double  getDuration();

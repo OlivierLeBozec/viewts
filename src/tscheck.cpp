@@ -301,7 +301,7 @@ int main(int argc, char** argv)
 
     // display timestamp
     if (dump || rate || dur || delta || jitter || diff || localbitrate || level){
-        std::string *Filename = new std::string(argv[1]);
+        std::string Filename = std::string(argv[1]);
         timestamp ts(Filename, pidpcr, pidpts, piddts);
         ts.run();
         if (dump && pidpcr != TIMESTAMP_NO_PID) DumpPcr(ts);
@@ -314,8 +314,6 @@ int main(int argc, char** argv)
         if (diff)   DumpDiff(ts);
         if (localbitrate && pidpcr != TIMESTAMP_NO_PID) DumpLocalBitrate(ts);
         if (level && (pidpts != TIMESTAMP_NO_PID || piddts != TIMESTAMP_NO_PID)) DumpLevel(ts);
-
-        delete Filename;
     }
 
     return 0;

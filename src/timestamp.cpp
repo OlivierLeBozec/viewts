@@ -3,7 +3,7 @@
 #include "pes.h"
 #include "assert.h"
 
-timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
+timestamp::timestamp(std::string fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
     m_packetAfterLastPcr(0),
     m_min_pcr(0xFFFFFFFFFFFFFFFF),
@@ -27,36 +27,20 @@ timestamp::timestamp(std::string* fileNameIn, unsigned int pidpcr, unsigned int 
     m_bitrate_prev_pcr_val(-1),
     m_level(-1)
 {
-    m_fileIn =  new std::ifstream(fileNameIn->c_str(), std::ios::binary);
+    m_fileIn =  std::ifstream(fileNameIn, std::ios::binary);
+    if(!m_fileIn.is_open())
+      throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 
     // align file on first 0x47
     char start[512];
     int index = 0;
 
-    m_fileIn->read((char*)start, 512);
-    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
+    m_fileIn.read(start, sizeof start);
+    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start)) index++;
 
     // loop on packet
-    m_fileIn->clear();
-    m_fileIn->seekg(index);
-}
-
-timestamp::~timestamp()
-{
-    if (!m_pcrMap.empty()) {
-        m_pcrMap.clear();
-    }
-    if (!m_ptsMap.empty()) {
-        m_ptsMap.clear();
-    }
-    if (!m_dtsMap.empty()) {
-        m_dtsMap.clear();
-    }
-    if (!m_pesLengthMap.empty()) {
-        m_pesLengthMap.clear();
-    }
-    m_fileIn->close();
-    delete m_fileIn;
+    m_fileIn.clear();
+    m_fileIn.seekg(index);
 }
 
 // Cpu consuming function
@@ -71,7 +55,7 @@ bool timestamp::run(unsigned int nbPacketToRead)
         bool updatePesLength = false;
 
         // leave if no more data
-        if (!m_fileIn->read((char*)data, 188)) break;
+        if (!m_fileIn.read((char*)data, 188)) break;
         isDatatoRead = true;
 
         // create packet from buffer
