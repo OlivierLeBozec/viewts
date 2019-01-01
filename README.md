@@ -4,6 +4,7 @@ More details can be found in the Wiki.
 viewTS : display the timestamp of a ts stream.
 
 To compile first import in qt_tstools/viewTS.pro in QtCreator.
+
 Windows and Linux are supported.
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
@@ -14,7 +15,9 @@ Windows and Linux are supported.
 
 # CLI tstools
 Bunch of tools for MPEG-TS streams.
-To compile first import in top level CMakelist in QtCreator.
+
+To compile first import in top level CMakelists.txt in QtCreator.
+
 Windows and Linux are supported.
 
 ## tsmap
@@ -81,13 +84,6 @@ Following commands are available only at least one PID is specified
 SYNOPSIS
    /home/olivier/tstools/tscut FILE [-split <nb packet>]
 
-# Linux env
-Qt 5.12.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 5.3.1 20160406 (Red Hat 5.3.1-6)) on "xcb" 
-OS: CentOS Linux 7 (Core) [linux version 3.10.0-693.21.1.el7.x86_64]
-From revision 7c17edcce2
-Built on Nov 23 2018 01:26:40
-
-
 DESCRIPTION
    cut ts stream
 
@@ -110,3 +106,11 @@ DESCRIPTION
     ./tscheck ./ts/video.ts -pidpcr 601 -pidpts 301 -diff
     ./tscheck ./ts/video.ts -piddts 601 -pidpts 601 -diff
 
+# Linux env
+Qt 5.12.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 5.3.1 20160406 (Red Hat 5.3.1-6)) on "xcb" 
+
+OS: CentOS Linux 7 (Core) [linux version 3.10.0-693.21.1.el7.x86_64]
+
+From revision 7c17edcce2
+
+Built on Nov 23 2018 01:26:40
