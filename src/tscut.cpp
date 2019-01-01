@@ -20,6 +20,8 @@ void Usage(char *pName) {
     std::cout << std::endl;
     std::cout << "    -split <nb packets>" << std::endl;
     std::cout << "          cut file every nb packets" << std::endl;
+    std::cout << "    -divide <nb chunks>" << std::endl;
+    std::cout << "          cut file in nb chunks" << std::endl;
     std::cout << std::endl;
 }
 
@@ -43,9 +45,9 @@ int main(int argc, char** argv)
 
         // align file on 0x47
         char start[512];
-        int index = 0;
+        unsigned int index = 0;
 
-        tsFile.read((char*)start, 512);
+        tsFile.read(start, sizeof start);
         while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
 
         tsFile.seekg(index);
@@ -53,15 +55,26 @@ int main(int argc, char** argv)
 
     // check options
     std::string StrSplit("-split");
+    std::string StrDivide("-divide");
     unsigned int splitNb = 0;
 
     for (int i=2; i<argc; ++i)
     {
         std::string StrOption(argv[i]);
         if (StrOption == StrSplit) splitNb = atoi(argv[++i]);
+        if (StrOption == StrDivide) {
+            // get file size
+            long curIndex = tsFile.tellg();
+            tsFile.seekg( 0, std::ios::end);
+            long fileSize = tsFile.tellg();
+            tsFile.seekg(curIndex);
+            fileSize/=188;
+
+            splitNb = (unsigned int)(fileSize / atol(argv[++i]));
+        }
     }
 
-    // display pid info
+    // cut into files
     if (splitNb){
         char* data = (char*)malloc(188*splitNb);
         int totalRead = 0;
