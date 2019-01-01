@@ -1,20 +1,21 @@
-# tstools
-Tools for MPEG-TS streams.
-To compile use cmake for windows or linux.
-
-More details in the Wiki.
+More details can be found in the Wiki.
 
 ## qt tools
 viewTS : display the timestamp of a ts stream.
 
-To compile first import in Qt top level CMakeLists.txt.
-Only windows is working for the moment.
+To compile first import in qt_tstools/viewTS.pro in QtCreator.
+Windows and Linux are supported.
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrptsdts.png)
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
+
+# CLI tstools
+Bunch of tools for MPEG-TS streams.
+To compile first import in top level CMakelist in QtCreator.
+Windows and Linux are supported.
 
 ## tsmap
 NAME
@@ -79,6 +80,13 @@ Following commands are available only at least one PID is specified
 
 SYNOPSIS
    /home/olivier/tstools/tscut FILE [-split <nb packet>]
+
+# Linux env
+Qt 5.12.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 5.3.1 20160406 (Red Hat 5.3.1-6)) on "xcb" 
+OS: CentOS Linux 7 (Core) [linux version 3.10.0-693.21.1.el7.x86_64]
+From revision 7c17edcce2
+Built on Nov 23 2018 01:26:40
+
 
 DESCRIPTION
    cut ts stream
