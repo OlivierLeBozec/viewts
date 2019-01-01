@@ -3,7 +3,7 @@
 #include "pes.h"
 
 pidmap::pidmap(std::string* fileNameIn) :
-    m_prev_pid(-1), m_prev_pattern(255)
+    m_prev_pid(PID_NOT_INITIALIZED), m_prev_pattern(255)
 {
     // open file
     m_fileIn = new std::ifstream(fileNameIn->c_str(), std::ios::binary);
@@ -117,7 +117,7 @@ bool pidmap::GetNextPidInfo(unsigned int& pid, pidinfo& pidInfo)
         return false;
 
     // init iterator
-    if (m_prev_pid == -1) {
+    if (m_prev_pid == PID_NOT_INITIALIZED) {
 
         m_pidMap_ii = m_pidMap.begin();
         m_prev_pid = pid = (*m_pidMap_ii).first;

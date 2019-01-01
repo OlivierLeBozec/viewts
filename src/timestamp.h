@@ -6,6 +6,7 @@
 #include <map>
 
 #define TIMESTAMP_NO_PID  0xFFFF
+#define TIMESTAMP_NOT_INITIALIZED  0xFFFFFFFF
 
 class timestamp
 {

@@ -605,7 +605,7 @@ void MainWindow::Pcr(int state)
     if (state == Qt::Checked)
         if (m_pcrWorker == Q_NULLPTR)
         {
-            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             m_pcrWorker = new pcrWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
             m_pcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_pcrWorker, SIGNAL(finished()), this, SLOT(showPcr()));
@@ -630,8 +630,8 @@ void MainWindow::Pts(int state)
     if (state == Qt::Checked)
         if (m_ptsWorker == Q_NULLPTR)
         {
-            unsigned int pidpcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidpts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+            unsigned int pidpcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidpts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
             m_ptsWorker = new ptsWorker(m_tsFileName, pidpcr, pidpts, (Chart*)m_chartView->chart());
             m_ptsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_ptsWorker, SIGNAL(finished()), this, SLOT(showPts()));
@@ -656,8 +656,8 @@ void MainWindow::Dts(int state)
     if (state == Qt::Checked)
         if (m_dtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
             m_dtsWorker = new dtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             m_dtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_dtsWorker, SIGNAL(finished()), this, SLOT(updateDts()));
@@ -682,7 +682,7 @@ void MainWindow::deltaPcr(int state)
     if (state == Qt::Checked)
         if (m_pcrDeltaWorker == Q_NULLPTR)
         {
-            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             m_pcrDeltaWorker = new pcrDeltaWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
             m_pcrDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_pcrDeltaWorker, SIGNAL(finished()), this, SLOT(showDeltaPcr()));
@@ -707,8 +707,8 @@ void MainWindow::deltaPts(int state)
     if (state == Qt::Checked)
         if (m_ptsDeltaWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
             m_ptsDeltaWorker = new ptsDeltaWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             m_ptsDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_ptsDeltaWorker, SIGNAL(finished()), this, SLOT(showPtsDelta()));
@@ -734,8 +734,8 @@ void MainWindow::deltaDts(int state)
     if (state == Qt::Checked)
         if (m_dtsDeltaWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
             m_dtsDeltaWorker = new dtsDeltaWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             m_dtsDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_dtsDeltaWorker, SIGNAL(finished()), this, SLOT(showDtsDelta()));
@@ -760,7 +760,7 @@ void MainWindow::jitterPcr(int state)
     if (state == Qt::Checked)
         if (m_jitterPcrWorker == Q_NULLPTR)
         {
-            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             m_jitterPcrWorker = new pcrJitterWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
             m_jitterPcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_jitterPcrWorker, SIGNAL(finished()), this, SLOT(showJitterPcr()));
@@ -785,7 +785,7 @@ void MainWindow::bitratePcr(int state)
     if (state == Qt::Checked)
         if (m_bitratePcrWorker == Q_NULLPTR)
         {
-            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             m_bitratePcrWorker = new pcrBitrateWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
             m_bitratePcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_bitratePcrWorker, SIGNAL(finished()), this, SLOT(showBitratePcr()));
@@ -810,8 +810,8 @@ void MainWindow::diffPcrPts(int state)
     if (state == Qt::Checked)
         if (m_diffPcrPtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
             m_diffPcrPtsWorker = new diffPcrPtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             m_diffPcrPtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPcrPtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrPts()));
@@ -837,8 +837,8 @@ void MainWindow::diffPcrDts(int state)
     if (state == Qt::Checked)
         if (m_diffPcrDtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
             m_diffPcrDtsWorker = new diffPcrDtsWorker(m_tsFileName, pidPcr, pidDts, (Chart*)m_chartView->chart());
             m_diffPcrDtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPcrDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrDts()));
@@ -863,9 +863,9 @@ void MainWindow::diffPtsDts(int state)
     if (state == Qt::Checked)
         if (m_diffPtsDtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
+            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
             m_diffPtsDtsWorker = new diffPtsDtsWorker(m_tsFileName, pidPcr, pidPts, pidDts, (Chart*)m_chartView->chart());
             m_diffPtsDtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPtsDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPtsDts()));
@@ -890,8 +890,8 @@ void MainWindow::buffLevelPts(int state)
     if (state == Qt::Checked)
         if (m_buffLevelPtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
             m_buffLevelPtsWorker = new buffLevelPtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
             m_buffLevelPtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_buffLevelPtsWorker, SIGNAL(finished()), this, SLOT(showBuffLevelPts()));
@@ -916,9 +916,9 @@ void MainWindow::buffLevelPtsDts(int state)
     if (state == Qt::Checked)
         if (m_buffLevelPtsDtsWorker == Q_NULLPTR)
         {
-            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toInt();
-            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toInt();
-            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toInt();
+            unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
+            unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
 
             // pid pts and dts must be equal to have a significant value
             if (pidPts != pidDts) {

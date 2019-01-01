@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#define PID_NOT_INITIALIZED  0xFFFF
+
 class pidinfo {
 public:
     unsigned int nb_packet;

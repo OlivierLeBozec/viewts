@@ -16,16 +16,16 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     m_pidpts(pidpts),
     m_piddts(piddts),
     m_nbPacket(0),
-    m_pcr_prev_val(-1),
-    m_pts_prev_val(-1),
-    m_dts_prev_val(-1),
-    m_delta_prev_val(-1),
-    m_jitter_prev_index(-1),
-    m_jitter_prev_val(-1),
-    m_diff_prev_index(-1),
-    m_diff_prev_value(-1),
-    m_bitrate_prev_index_val(-1),
-    m_bitrate_prev_pcr_val(-1),
+    m_pcr_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_pts_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_dts_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_delta_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_jitter_prev_index(TIMESTAMP_NOT_INITIALIZED),
+    m_jitter_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_diff_prev_index(TIMESTAMP_NOT_INITIALIZED),
+    m_diff_prev_value(TIMESTAMP_NOT_INITIALIZED),
+    m_bitrate_prev_index_val(TIMESTAMP_NOT_INITIALIZED),
+    m_bitrate_prev_pcr_val(TIMESTAMP_NOT_INITIALIZED),
     m_level(-1)
 {
     m_fileIn.open(fileNameIn.c_str(), std::ios::binary);
@@ -34,7 +34,7 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
 
     // align file on first 0x47
     char start[512];
-    int index = 0;
+    unsigned int index = 0;
 
     m_fileIn.read(start, sizeof start);
     while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start)) index++;
@@ -203,8 +203,8 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
             return true;
         }
 
-        printf("error upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
-        printf("error lower %u [%u] %llf\n", index, itlow->first, itlow->second);
+        printf("error upper %u [%u] %f\n", index, ithigh->first, ithigh->second);
+        printf("error lower %u [%u] %f\n", index, itlow->first, itlow->second);
     }
 
     return false;
@@ -217,7 +217,7 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
         return false;
 
     // init iterator
-    if (m_pcr_prev_val == -1) {
+    if (m_pcr_prev_val == TIMESTAMP_NOT_INITIALIZED) {
 
         m_pcr_ii = m_pcrMap.begin();
         index = m_pcr_ii->first;
@@ -243,7 +243,7 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
         return false;
 
     // init iterator
-    if (m_pts_prev_val == -1) {
+    if (m_pts_prev_val == TIMESTAMP_NOT_INITIALIZED) {
 
         m_pts_ii = m_ptsMap.begin();
         index = m_pts_ii->first;
@@ -269,7 +269,7 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
         return false;
 
     // init iterator
-    if (m_dts_prev_val == -1) {
+    if (m_dts_prev_val == TIMESTAMP_NOT_INITIALIZED) {
 
         m_dts_ii = m_dtsMap.begin();
         index = m_dts_ii->first;
@@ -290,7 +290,7 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
 
 bool timestamp::getNextDelta(unsigned int& index, double& delta)
 {
-    if (m_delta_prev_val == -1) {
+    if (m_delta_prev_val == TIMESTAMP_NOT_INITIALIZED) {
 
         if(m_piddts != TIMESTAMP_NO_PID) {
             m_delta_map = &m_dtsMap;
@@ -326,7 +326,7 @@ bool timestamp::getNextDelta(unsigned int& index, double& delta)
 
 bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
 {
-    if (m_jitter_prev_val == -1 && m_jitter_prev_index == -1) {
+    if (m_jitter_prev_val == TIMESTAMP_NOT_INITIALIZED && m_jitter_prev_index == TIMESTAMP_NOT_INITIALIZED) {
 
         m_jitter_ii = m_pcrMap.begin();
         m_jitter_prev_index = m_jitter_ii->first;
@@ -358,7 +358,7 @@ bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
 
 bool timestamp::getNextDiff(unsigned int& index, double& diff)
 {
-    if (m_diff_prev_index == -1 && m_diff_prev_value == -1) {
+    if (m_diff_prev_index == TIMESTAMP_NOT_INITIALIZED && m_diff_prev_value == TIMESTAMP_NOT_INITIALIZED) {
 
         if(m_piddts != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) {
 
@@ -418,7 +418,7 @@ bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
         return false;
 
     // init iterator
-    if (m_bitrate_prev_pcr_val == -1) {
+    if (m_bitrate_prev_pcr_val == TIMESTAMP_NOT_INITIALIZED) {
 
         m_pcr_ii = m_pcrMap.begin();
         m_bitrate_prev_index_val = m_pcr_ii->first;
