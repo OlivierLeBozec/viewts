@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     // display pid info
     if (pidlist || pidm){
         std::string Filename = argv[1];
-        pidmap pm(&Filename);
+        pidmap pm(Filename);
 
         while (pm.run() == true);
         if (pidlist)    dumpPidmap(pm);

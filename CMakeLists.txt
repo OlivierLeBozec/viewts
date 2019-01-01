@@ -1,5 +1,6 @@
 project(tstools CXX)
 cmake_minimum_required(VERSION 2.8)
+set (CMAKE_CXX_STANDARD 11)
 
 #exe path
 if (NOT WIN32)

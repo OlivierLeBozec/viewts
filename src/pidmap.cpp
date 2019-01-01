@@ -2,22 +2,24 @@
 #include "packet.h"
 #include "pes.h"
 
-pidmap::pidmap(std::string* fileNameIn) :
+pidmap::pidmap(std::string& fileNameIn) :
     m_prev_pid(PID_NOT_INITIALIZED), m_prev_pattern(255)
 {
     // open file
-    m_fileIn = new std::ifstream(fileNameIn->c_str(), std::ios::binary);
+    m_fileIn.open(fileNameIn.c_str(), std::ios::binary);
+    if(!m_fileIn.is_open())
+      throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 
     // align file on first 0x47
     char start[512];
-    int index = 0;
+    unsigned int index = 0;
 
-    m_fileIn->read((char*)start, 512);
+    m_fileIn.read(start, sizeof start);
     while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
 
     // loop on packet
-    m_fileIn->clear();
-    m_fileIn->seekg(index);
+    m_fileIn.clear();
+    m_fileIn.seekg(index);
 }
 
 pidmap::~pidmap()
@@ -29,8 +31,7 @@ pidmap::~pidmap()
         m_pidVec.clear();
     }
 
-    m_fileIn->close();
-    delete m_fileIn;
+    m_fileIn.close();
 }
 
 // Cpu consuming function
@@ -42,7 +43,7 @@ bool pidmap::run(unsigned int nbPacketToRead)
     while (nbPacketToRead)
     {
         // leave if no more data
-        if (! m_fileIn->read((char*)data, 188)) break;
+        if (! m_fileIn.read((char*)data, 188)) break;
         isDataToRead = true;
 
         // create packet from buffer

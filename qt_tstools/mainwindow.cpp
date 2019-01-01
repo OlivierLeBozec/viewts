@@ -411,7 +411,7 @@ void MainWindow::loadFile()
     clearAllSeries();
 
     statusBar()->showMessage(tr("Parsing first 5000 packets..."));
-    pidmap pm(&m_tsFileName);
+    pidmap pm(m_tsFileName);
     pm.run(5000);
 
     // update info

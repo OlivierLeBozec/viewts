@@ -6,7 +6,7 @@
 TEST(pid, check_pid_on_video_dvbSub)
 {
     std::string Filename = "../../ts/video_dvbSub.ts";
-    pidmap pm(&Filename);
+    pidmap pm(Filename);
 
     // check first 10000 packet
     EXPECT_EQ(pm.run(10000), true);

@@ -19,7 +19,7 @@ bool packet::hasPesHeader(void)
 {
     // pusi
     if ((m_data[1] & 0x40) == 0x40) {
-        int offset = getPesOffset();
+        unsigned int offset = getPesOffset();
 
         // pes start code 0x0000001
         if (m_data[offset] == 0x00 && m_data[offset+1] == 0x00 && m_data[offset+2] == 0x01) {
@@ -32,7 +32,7 @@ bool packet::hasPesHeader(void)
 unsigned int packet::getPesOffset(void)
 {
     // get adaptation field length
-    int offset = 0;
+    unsigned int offset = 0;
     if (getAdaptationField() == FOLLOWED_BY_PAYLOAD) {
         offset = m_data[4]; // adaptation filed length
         ++offset;           // add adaptation field length byte
@@ -45,6 +45,11 @@ unsigned int packet::getPid(void)
     return ((m_data[1] & 0x1f) << 8) | m_data[2];
 }
 
+unsigned int packet::getCC(void)
+{
+    return (m_data[3] & 0x0f);
+}
+
 bool packet::hasPcr(void)
 {
     // check if adaptation field present
@@ -52,13 +57,40 @@ bool packet::hasPcr(void)
     if (adaptationField == NO_PAYLOAD || adaptationField == FOLLOWED_BY_PAYLOAD)
     {
         // adaptation field length
-        if (m_data[4] == 0)
-            return false;
+        if (m_data[4] == 0) return false;
 
         // check if pcr flag in adaptation field
-        if ((m_data[5] & 0x10) == 0x10)
-            return true;
-        return false;
+        return ((m_data[5] & 0x10) == 0x10);
+    }
+    return false;
+}
+
+bool packet::hasRap(void)
+{
+    // check if adaptation field present
+    AdaptationField_t adaptationField = getAdaptationField();
+    if (adaptationField == NO_PAYLOAD || adaptationField == FOLLOWED_BY_PAYLOAD)
+    {
+        // adaptation field length
+        if (m_data[4] == 0) return false;
+
+        // check random access indicator flag in adaptation field
+        return ((m_data[5] & 0x40) == 0x40);
+    }
+    return false;
+}
+
+bool packet::hasDiscontinuity(void)
+{
+    // check if adaptation field present
+    AdaptationField_t adaptationField = getAdaptationField();
+    if (adaptationField == NO_PAYLOAD || adaptationField == FOLLOWED_BY_PAYLOAD)
+    {
+        // adaptation field length
+        if (m_data[4] == 0) return false;
+
+        // check discontinuity flag in adaptation field
+        return ((m_data[5] & 0x80) == 0x80);
     }
     return false;
 }
