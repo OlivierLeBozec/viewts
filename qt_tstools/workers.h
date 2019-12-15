@@ -99,6 +99,39 @@ signals:
      void updated(int);
 };
 
+////////////////////
+// flag worker
+class ccWorker : public timeStampWorker
+{
+    unsigned int m_pid;
+
+public:
+    ccWorker(std::string &tsFile, unsigned int pid, Chart *chart);
+    bool getData(unsigned int& index, double& val) {
+        bool ret;
+        unsigned int pid;
+        do{
+            ret = m_timestamp->getNextCC(index, pid);
+        } while (ret == true || pid == m_pid);
+        return ret;
+    }
+};
+
+class rapFlagWorker : public timeStampWorker
+{
+    unsigned int m_pid;
+
+public:
+    rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart);
+    bool getData(unsigned int& index, double& val) {
+        bool ret;
+        unsigned int pid;
+        do{
+            ret = m_timestamp->getNextRap(index, pid);
+        } while (ret == true || pid == m_pid);
+        return ret;
+    }
+};
 
 ////////////////////
 // PCR worker

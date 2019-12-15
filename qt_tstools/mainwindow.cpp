@@ -7,7 +7,8 @@ MainWindow::MainWindow() :
     m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
     m_ptsDeltaWorker(Q_NULLPTR), m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR),
     m_diffPcrDtsWorker(Q_NULLPTR), m_diffPtsDtsWorker(Q_NULLPTR), m_buffLevelPtsWorker(Q_NULLPTR),
-    m_buffLevelPtsDtsWorker(Q_NULLPTR), m_isTimeXAxis(true)
+    m_buffLevelPtsDtsWorker(Q_NULLPTR), m_ccWorker(Q_NULLPTR), m_rapFlagWorker(Q_NULLPTR),
+    m_isTimeXAxis(true)
 {
     QWidget *main_widget = new QWidget;
     setCentralWidget(main_widget);
@@ -27,7 +28,7 @@ void MainWindow::cleanAll()
     cleanPcr();
     cleanDts();
     cleanPts();
-
+    cleanFlag();
 
     // wait for all thread to be completed
     if (m_pthreadPool->activeThreadCount())
@@ -144,6 +145,21 @@ void MainWindow::cleanDts()
     }
 }
 
+void MainWindow::cleanFlag()
+{
+    if (m_ccWorker) {
+        m_pthreadPool->cancel(m_ccWorker);
+        m_ccWorker->abort();
+        delete m_ccWorker; m_ccWorker = Q_NULLPTR;
+    }
+
+    if (m_rapFlagWorker) {
+        m_pthreadPool->cancel(m_rapFlagWorker);
+        m_rapFlagWorker->abort();
+        delete m_rapFlagWorker; m_rapFlagWorker = Q_NULLPTR;
+    }
+}
+
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About viewTS ") + VIEW_TS_VERSION,
@@ -176,6 +192,8 @@ void MainWindow::createLayout(QWidget *widget)
     m_deltaPcrBox = new QCheckBox(tr("Display Pcr diff"));
     m_jitterPcrBox = new QCheckBox(tr("Display Pcr Jitter"));
     m_bitratePcrBox = new QCheckBox(tr("Display bitrate"));
+    m_ccBox = new QCheckBox(tr("Display CC error"));
+    m_rapFlagBox = new QCheckBox(tr("Display RAP"));
 
     QGridLayout *pcrGroupBoxLayout = new QGridLayout;
     pcrGroupBoxLayout->addWidget(pcrPidLabel, 0, 0);
@@ -184,6 +202,8 @@ void MainWindow::createLayout(QWidget *widget)
     pcrGroupBoxLayout->addWidget(m_deltaPcrBox, 2, 0);
     pcrGroupBoxLayout->addWidget(m_jitterPcrBox, 3, 0);
     pcrGroupBoxLayout->addWidget(m_bitratePcrBox, 4, 0);
+    pcrGroupBoxLayout->addWidget(m_ccBox, 5, 0);
+    pcrGroupBoxLayout->addWidget(m_rapFlagBox, 6, 0);
     pcrGroupBoxLayout->setVerticalSpacing(0);
     m_pcrGroupBox->setLayout(pcrGroupBoxLayout);
     m_pcrGroupBox->setEnabled(false);
@@ -193,6 +213,8 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_jitterPcrBox, SIGNAL(stateChanged(int)), this, SLOT(jitterPcr(int)));
     connect(m_bitratePcrBox, SIGNAL(stateChanged(int)), this, SLOT(bitratePcr(int)));
     connect(m_pcrComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(erasePcrSeries(int)));
+    connect(m_ccBox, SIGNAL(stateChanged(int)), this, SLOT(cc(int)));
+    connect(m_rapFlagBox, SIGNAL(stateChanged(int)), this, SLOT(rapFlag(int)));
 
     // pts
     m_ptsGroupBox = new QGroupBox(tr("Pts"));
@@ -606,7 +628,7 @@ void MainWindow::Pcr(int state)
         if (m_pcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
-            m_pcrWorker = new pcrWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
+            m_pcrWorker = new pcrWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
             m_pcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_pcrWorker, SIGNAL(finished()), this, SLOT(showPcr()));
             buildSeries(m_pcrWorker);
@@ -632,7 +654,7 @@ void MainWindow::Pts(int state)
         {
             unsigned int pidpcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidpts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
-            m_ptsWorker = new ptsWorker(m_tsFileName, pidpcr, pidpts, (Chart*)m_chartView->chart());
+            m_ptsWorker = new ptsWorker(m_tsFileName, pidpcr, pidpts, static_cast<Chart*>(m_chartView->chart()));
             m_ptsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_ptsWorker, SIGNAL(finished()), this, SLOT(showPts()));
             buildSeries(m_ptsWorker);
@@ -658,7 +680,7 @@ void MainWindow::Dts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
-            m_dtsWorker = new dtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_dtsWorker = new dtsWorker(m_tsFileName, pidPcr, pidPts, static_cast<Chart*>(m_chartView->chart()));
             m_dtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_dtsWorker, SIGNAL(finished()), this, SLOT(updateDts()));
             buildSeries(m_dtsWorker);
@@ -683,7 +705,7 @@ void MainWindow::deltaPcr(int state)
         if (m_pcrDeltaWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
-            m_pcrDeltaWorker = new pcrDeltaWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
+            m_pcrDeltaWorker = new pcrDeltaWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
             m_pcrDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_pcrDeltaWorker, SIGNAL(finished()), this, SLOT(showDeltaPcr()));
             buildSeries(m_pcrDeltaWorker);
@@ -709,7 +731,7 @@ void MainWindow::deltaPts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
-            m_ptsDeltaWorker = new ptsDeltaWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_ptsDeltaWorker = new ptsDeltaWorker(m_tsFileName, pidPcr, pidPts, static_cast<Chart*>(m_chartView->chart()));
             m_ptsDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_ptsDeltaWorker, SIGNAL(finished()), this, SLOT(showPtsDelta()));
             buildSeries(m_ptsDeltaWorker);
@@ -736,7 +758,7 @@ void MainWindow::deltaDts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
-            m_dtsDeltaWorker = new dtsDeltaWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_dtsDeltaWorker = new dtsDeltaWorker(m_tsFileName, pidPcr, pidPts, static_cast<Chart*>(m_chartView->chart()));
             m_dtsDeltaWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_dtsDeltaWorker, SIGNAL(finished()), this, SLOT(showDtsDelta()));
             buildSeries(m_dtsDeltaWorker);
@@ -761,7 +783,7 @@ void MainWindow::jitterPcr(int state)
         if (m_jitterPcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
-            m_jitterPcrWorker = new pcrJitterWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
+            m_jitterPcrWorker = new pcrJitterWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
             m_jitterPcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_jitterPcrWorker, SIGNAL(finished()), this, SLOT(showJitterPcr()));
             buildSeries(m_jitterPcrWorker);
@@ -786,7 +808,7 @@ void MainWindow::bitratePcr(int state)
         if (m_bitratePcrWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
-            m_bitratePcrWorker = new pcrBitrateWorker(m_tsFileName, pid, (Chart*)m_chartView->chart());
+            m_bitratePcrWorker = new pcrBitrateWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
             m_bitratePcrWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_bitratePcrWorker, SIGNAL(finished()), this, SLOT(showBitratePcr()));
             buildSeries(m_bitratePcrWorker);
@@ -812,7 +834,7 @@ void MainWindow::diffPcrPts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
-            m_diffPcrPtsWorker = new diffPcrPtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_diffPcrPtsWorker = new diffPcrPtsWorker(m_tsFileName, pidPcr, pidPts, static_cast<Chart*>(m_chartView->chart()));
             m_diffPcrPtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPcrPtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrPts()));
             buildSeries(m_diffPcrPtsWorker);
@@ -839,7 +861,7 @@ void MainWindow::diffPcrDts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
-            m_diffPcrDtsWorker = new diffPcrDtsWorker(m_tsFileName, pidPcr, pidDts, (Chart*)m_chartView->chart());
+            m_diffPcrDtsWorker = new diffPcrDtsWorker(m_tsFileName, pidPcr, pidDts, static_cast<Chart*>(m_chartView->chart()));
             m_diffPcrDtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPcrDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPcrDts()));
             buildSeries(m_diffPcrDtsWorker);
@@ -866,7 +888,7 @@ void MainWindow::diffPtsDts(int state)
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
             unsigned int pidDts = m_dtsComboBox->itemData(m_dtsComboBox->currentIndex()).toUInt();
-            m_diffPtsDtsWorker = new diffPtsDtsWorker(m_tsFileName, pidPcr, pidPts, pidDts, (Chart*)m_chartView->chart());
+            m_diffPtsDtsWorker = new diffPtsDtsWorker(m_tsFileName, pidPcr, pidPts, pidDts, static_cast<Chart*>(m_chartView->chart()));
             m_diffPtsDtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_diffPtsDtsWorker, SIGNAL(finished()), this, SLOT(showDiffPtsDts()));
             buildSeries(m_diffPtsDtsWorker);
@@ -892,7 +914,7 @@ void MainWindow::buffLevelPts(int state)
         {
             unsigned int pidPcr = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
             unsigned int pidPts = m_ptsComboBox->itemData(m_ptsComboBox->currentIndex()).toUInt();
-            m_buffLevelPtsWorker = new buffLevelPtsWorker(m_tsFileName, pidPcr, pidPts, (Chart*)m_chartView->chart());
+            m_buffLevelPtsWorker = new buffLevelPtsWorker(m_tsFileName, pidPcr, pidPts, static_cast<Chart*>(m_chartView->chart()));
             m_buffLevelPtsWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_buffLevelPtsWorker, SIGNAL(finished()), this, SLOT(showBuffLevelPts()));
             buildSeries(m_buffLevelPtsWorker);
@@ -926,7 +948,7 @@ void MainWindow::buffLevelPtsDts(int state)
             }
             else
             {
-                m_buffLevelPtsDtsWorker = new buffLevelPtsDtsWorker(m_tsFileName, pidPcr, pidPts, pidDts, (Chart*)m_chartView->chart());
+                m_buffLevelPtsDtsWorker = new buffLevelPtsDtsWorker(m_tsFileName, pidPcr, pidPts, pidDts, static_cast<Chart*>(m_chartView->chart()));
                 m_buffLevelPtsDtsWorker->SetTimeAxis(m_isTimeXAxis);
                 connect(m_buffLevelPtsDtsWorker, SIGNAL(finished()), this, SLOT(showBuffLevelPtsDts()));
                 buildSeries(m_buffLevelPtsDtsWorker);
@@ -943,5 +965,55 @@ void MainWindow::showBuffLevelPtsDts()
     if (m_buffLevelPtsDtsBox->isChecked()) {
         // must be done in parent thread
         m_buffLevelPtsDtsWorker->showSeries();
+    }
+}
+
+void MainWindow::cc(int state)
+{
+    if (state == Qt::Checked)
+        if (m_ccWorker == Q_NULLPTR)
+        {
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            m_ccWorker = new ccWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
+            m_ccWorker->SetTimeAxis(m_isTimeXAxis);
+            connect(m_ccWorker, SIGNAL(finished()), this, SLOT(showCC()));
+            buildSeries(m_ccWorker);
+        }
+        else
+            showSeries(m_ccWorker);
+    else
+        hideSeries(m_ccWorker);
+}
+
+void MainWindow::showCC()
+{
+    if (m_ccBox->isChecked()) {
+        // must be done in parent thread
+        m_ccWorker->showSeries();
+    }
+}
+
+void MainWindow::rapFlag(int state)
+{
+    if (state == Qt::Checked)
+        if (m_rapFlagWorker == Q_NULLPTR)
+        {
+            unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
+            m_rapFlagWorker = new rapFlagWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
+            m_rapFlagWorker->SetTimeAxis(m_isTimeXAxis);
+            connect(m_rapFlagWorker, SIGNAL(finished()), this, SLOT(showRapFlag()));
+            buildSeries(m_rapFlagWorker);
+        }
+        else
+            showSeries(m_rapFlagWorker);
+    else
+        hideSeries(m_rapFlagWorker);
+}
+
+void MainWindow::showRapFlag()
+{
+    if (m_rapFlagBox->isChecked()) {
+        // must be done in parent thread
+        m_rapFlagWorker->showSeries();
     }
 }

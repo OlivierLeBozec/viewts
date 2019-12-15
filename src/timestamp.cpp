@@ -16,9 +16,11 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     m_pidpts(pidpts),
     m_piddts(piddts),
     m_nbPacket(0),
-    m_pcr_prev_val(TIMESTAMP_NOT_INITIALIZED),
-    m_pts_prev_val(TIMESTAMP_NOT_INITIALIZED),
-    m_dts_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_isCCerrorInit(false),
+    m_isRAPinit(false),
+    m_isPCRinit(false),
+    m_isPTSinit(false),
+    m_isDTSinit(false),
     m_delta_prev_val(TIMESTAMP_NOT_INITIALIZED),
     m_jitter_prev_index(TIMESTAMP_NOT_INITIALIZED),
     m_jitter_prev_val(TIMESTAMP_NOT_INITIALIZED),
@@ -26,7 +28,7 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     m_diff_prev_value(TIMESTAMP_NOT_INITIALIZED),
     m_bitrate_prev_index_val(TIMESTAMP_NOT_INITIALIZED),
     m_bitrate_prev_pcr_val(TIMESTAMP_NOT_INITIALIZED),
-    m_level(-1)
+    m_level(TIMESTAMP_NOT_INITIALIZED)
 {
     m_fileIn.open(fileNameIn.c_str(), std::ios::binary);
     if(!m_fileIn.is_open())
@@ -61,6 +63,22 @@ bool timestamp::run(unsigned int nbPacketToRead)
 
         // create packet from buffer
         packet packet(data);
+
+        if (packet.getPid() == m_pidpts || packet.getPid() == m_piddts || packet.getPid() == m_pidpcr)
+        {
+            // compare expected continuity counter to current
+            if ((m_ccMap[packet.getPid()] + 1) % 0xF != packet.getCC())
+            {
+                m_ccError[m_nbPacket] = packet.getPid();
+            }
+            m_ccMap[packet.getPid()] = packet.getCC();
+
+            // check RAP
+            if (packet.hasRap())
+            {
+                m_rapMap[m_nbPacket] = packet.getPid();
+            }
+        }
 
         // update number of packet and store PCR
         if (packet.getPid() == m_pidpcr)
@@ -217,19 +235,20 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
         return false;
 
     // init iterator
-    if (m_pcr_prev_val == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_isPCRinit == false)
+    {
         m_pcr_ii = m_pcrMap.begin();
         index = m_pcr_ii->first;
-        m_pcr_prev_val = pcr = m_pcr_ii->second;
+        pcr = m_pcr_ii->second;
+        m_isPCRinit = true;
         return true;
     }
 
-    if (m_pcr_ii != --m_pcrMap.end()) {
-
-        ++m_pcr_ii;
+    ++m_pcr_ii;
+    if (m_pcr_ii != m_pcrMap.end())
+    {
         index = m_pcr_ii->first;
-        m_pcr_prev_val = pcr = m_pcr_ii->second;
+        pcr = m_pcr_ii->second;
         return true;
     }
 
@@ -243,19 +262,20 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
         return false;
 
     // init iterator
-    if (m_pts_prev_val == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_isPTSinit == false)
+    {
         m_pts_ii = m_ptsMap.begin();
         index = m_pts_ii->first;
-        m_pts_prev_val = pts = m_pts_ii->second;
+        pts = m_pts_ii->second;
+        m_isPTSinit = true;
         return true;
     }
 
-    if (m_pts_ii != --m_ptsMap.end()) {
-
-        ++m_pts_ii;
+    ++m_pts_ii;
+    if (m_pts_ii != --m_ptsMap.end())
+    {
         index = m_pts_ii->first;
-        m_pts_prev_val = pts = m_pts_ii->second;
+        pts = m_pts_ii->second;
         return true;
     }
 
@@ -269,19 +289,20 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
         return false;
 
     // init iterator
-    if (m_dts_prev_val == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_isDTSinit == false)
+    {
         m_dts_ii = m_dtsMap.begin();
         index = m_dts_ii->first;
-        m_dts_prev_val = dts = m_dts_ii->second;
+        dts = m_dts_ii->second;
+        m_isDTSinit = true;
         return true;
     }
 
-    if (m_dts_ii != --m_dtsMap.end()) {
-
-        ++m_dts_ii;
+    ++m_dts_ii;
+    if (m_dts_ii != m_dtsMap.end())
+    {
         index = m_dts_ii->first;
-        m_dts_prev_val = dts = m_dts_ii->second;
+        dts = m_dts_ii->second;
         return true;
     }
 
@@ -442,14 +463,14 @@ bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
 
 bool timestamp::getNextLevel(unsigned int& index, double& level)
 {
-    int levelTmp = 0;
+    unsigned int levelTmp = 0;
 
     // protection
     if (m_pesLengthMap.empty())
         return false;
 
     // init index and level
-    if (m_level == -1) {
+    if (m_level == TIMESTAMP_NOT_INITIALIZED) {
 
         m_length_ii = m_pesLengthMap.begin();
         index = m_length_ii->first;
@@ -483,7 +504,7 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         m_levelMap[release_time] = levelTmp;
 
         // decrease buffer level - remove old buffer
-        std::map<double, int>::iterator level_ii = m_levelMap.begin();
+        std::map<double, unsigned int>::iterator level_ii = m_levelMap.begin();
         for (;level_ii != m_levelMap.end(); level_ii++)
         {
             // compare release time with current time
@@ -495,7 +516,61 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         }
     }
 
-    level = (double)m_level;
+    level = static_cast<double>(m_level);
     //printf ("Nb item %u - %u\n", m_levelMap.size(), m_level);
     return true;
+}
+
+bool timestamp::getNextCC(unsigned int& index, unsigned int& pid)
+{
+    // protection
+    if (m_ccError.empty())
+        return false;
+
+    // init iterator
+    if (m_isCCerrorInit == false)
+    {
+        m_cc_ii = m_ccError.begin();
+        index = m_cc_ii->first;
+        pid = m_cc_ii->second;
+        m_isCCerrorInit = true;
+        return true;
+    }
+
+    ++m_cc_ii;
+    if (m_cc_ii != m_ccError.end())
+    {
+        index = m_cc_ii->first;
+        pid = m_cc_ii->second;
+        return true;
+    }
+
+    return false;
+}
+
+bool timestamp::getNextRap(unsigned int& index, unsigned int& pid)
+{
+    // protection
+    if (m_rapMap.empty())
+        return false;
+
+    // init iterator
+    if (m_isRAPinit == false)
+    {
+        m_rap_ii = m_rapMap.begin();
+        index = m_rap_ii->first;
+        pid = m_rap_ii->second;
+        m_isRAPinit = true;
+        return true;
+    }
+
+    ++m_rap_ii;
+    if (m_rap_ii != m_rapMap.end())
+    {
+        index = m_rap_ii->first;
+        pid = m_rap_ii->second;
+        return true;
+    }
+
+    return false;
 }

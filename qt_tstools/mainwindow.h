@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow();
-    ~MainWindow();
+    ~MainWindow() override;
 
 private slots:
     void Pcr(int state);
@@ -51,6 +51,10 @@ private slots:
     void showBuffLevelPts();
     void buffLevelPtsDts(int state);
     void showBuffLevelPtsDts();
+    void cc(int state);
+    void showCC();
+    void rapFlag(int state);
+    void showRapFlag();
 
     void showInfo();
     void updateStatusBar(int);
@@ -84,6 +88,8 @@ private:
     QCheckBox* m_deltaPcrBox;
     QCheckBox* m_jitterPcrBox;
     QCheckBox* m_bitratePcrBox;
+    QCheckBox* m_ccBox;
+    QCheckBox* m_rapFlagBox;
     QCheckBox* m_ptsBox;
     QCheckBox* m_deltaPtsBox;
     QCheckBox* m_dtsBox;
@@ -110,6 +116,8 @@ private:
     diffPtsDtsWorker    *m_diffPtsDtsWorker;
     buffLevelPtsWorker      *m_buffLevelPtsWorker;
     buffLevelPtsDtsWorker   *m_buffLevelPtsDtsWorker;
+    ccWorker        *m_ccWorker;
+    rapFlagWorker   *m_rapFlagWorker;
 
     void createLayout(QWidget *widget);
     void createMenu();
@@ -124,6 +132,7 @@ private:
     void cleanPcr();
     void cleanPts();
     void cleanDts();
+    void cleanFlag();
 
     bool m_isTimeXAxis;
 

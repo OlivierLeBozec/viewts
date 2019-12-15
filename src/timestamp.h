@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <vector>
 
 #define TIMESTAMP_NO_PID  0xFFFF
 #define TIMESTAMP_NOT_INITIALIZED  0xFFFFFFFF
@@ -29,23 +30,34 @@ class timestamp
     unsigned int m_piddts;
     unsigned int m_nbPacket;
 
-    // pid pcr pts dts map
+    // map
     std::map<unsigned int, double> m_pcrMap;
     std::map<unsigned int, double> m_ptsMap;
     std::map<unsigned int, double> m_dtsMap;
     std::map<unsigned int, unsigned int> m_pesLengthMap;
-    std::map<double, int> m_levelMap;
+    std::map<double, unsigned int> m_levelMap;
+
+    // CC error
+    std::map<unsigned int, unsigned int> m_ccMap;
+    std::map<unsigned int, unsigned int> m_ccError;
+    std::map<unsigned int, unsigned int>::iterator m_cc_ii;
+    bool m_isCCerrorInit;
+
+    // Random access point
+    std::map<unsigned int, unsigned int> m_rapMap;
+    std::map<unsigned int, unsigned int>::iterator m_rap_ii;
+    bool m_isRAPinit;
 
     // pcr next
-    unsigned int m_pcr_prev_val;
+    bool m_isPCRinit;
     std::map<unsigned int, double>::iterator m_pcr_ii;
 
     // pts next
-    unsigned int m_pts_prev_val;
+    bool m_isPTSinit;
     std::map<unsigned int, double>::iterator m_pts_ii;
 
     // dts next
-    unsigned int m_dts_prev_val;
+    bool m_isDTSinit;
     std::map<unsigned int, double>::iterator m_dts_ii;
 
     // pcr pts dts delta next
@@ -69,7 +81,7 @@ class timestamp
     double m_bitrate_prev_pcr_val;
 
     // buffer level
-    int m_level;
+    unsigned int m_level;
     std::map<unsigned int, unsigned int>::iterator m_length_ii;
 
     double getMaxDeltaPcr();
@@ -89,6 +101,8 @@ public:
     bool    getNextDiff(unsigned int& index, double& diff);
     bool    getNextBitrate(unsigned int& index, double& bitrate);
     bool    getNextLevel(unsigned int& index, double& level);
+    bool    getNextCC(unsigned int& index, unsigned int& pid);
+    bool    getNextRap(unsigned int& index, unsigned int& pid);
     bool    run(unsigned int NbPacket = (unsigned int)-1);
 };
 

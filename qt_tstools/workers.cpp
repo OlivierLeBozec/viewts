@@ -154,6 +154,24 @@ void timeStampWorker::run()
 }
 
 ////////////////////
+// Flag worker
+ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
+    timeStampWorker(tsFile, chart), m_pid(pid)
+{
+    // customize base class
+    m_timestamp = new timestamp(tsFile, pid);
+    m_Series->setName(QString(tr("CC")));
+}
+
+rapFlagWorker::rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
+    timeStampWorker(tsFile, chart), m_pid(pid)
+{
+    // customize base class
+    m_timestamp = new timestamp(tsFile, pid);
+    m_Series->setName(QString(tr("RAP")));
+}
+
+////////////////////
 // PCR worker
 pcrWorker::pcrWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
     timeStampWorker(tsFile, chart)
