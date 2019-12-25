@@ -1,5 +1,5 @@
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef WORKERS_H
+#define WORKERS_H
 
 #include <QDebug>
 #include <QThread>
@@ -71,6 +71,8 @@ public:
     timeStampWorker(std::string &tsFile, Chart *chart);
     ~timeStampWorker();
 
+    QLineSeries* getSeries();
+
     void SetTimeAxis (bool isTimeXaxis) {
         m_isTimeXaxis = isTimeXaxis;
     }
@@ -97,40 +99,6 @@ public:
 signals:
      void finished();
      void updated(int);
-};
-
-////////////////////
-// flag worker
-class ccWorker : public timeStampWorker
-{
-    unsigned int m_pid;
-
-public:
-    ccWorker(std::string &tsFile, unsigned int pid, Chart *chart);
-    bool getData(unsigned int& index, double& val) {
-        bool ret;
-        unsigned int pid;
-        do{
-            ret = m_timestamp->getNextCC(index, pid);
-        } while (ret == true || pid == m_pid);
-        return ret;
-    }
-};
-
-class rapFlagWorker : public timeStampWorker
-{
-    unsigned int m_pid;
-
-public:
-    rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart);
-    bool getData(unsigned int& index, double& val) {
-        bool ret;
-        unsigned int pid;
-        do{
-            ret = m_timestamp->getNextRap(index, pid);
-        } while (ret == true || pid == m_pid);
-        return ret;
-    }
 };
 
 ////////////////////
@@ -170,7 +138,6 @@ public:
         return m_timestamp->getNextBitrate(index, val);
     }
 };
-
 
 ////////////////////
 // PTS worker
@@ -261,4 +228,4 @@ public:
     }
 };
 
-#endif // THREAD_H
+#endif // WORKERS_H

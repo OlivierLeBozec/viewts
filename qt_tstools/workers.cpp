@@ -60,12 +60,11 @@ timeStampWorker::timeStampWorker(std::string &tsFileName, Chart *chart) :
     setAutoDelete (false);
 
     // get file size
-    std::ifstream* fileIn =  new std::ifstream(tsFileName.c_str(), std::ios::binary);
-    fileIn->seekg (0, std::ios::end);
-    m_fileSize = (unsigned long long)fileIn->tellg();
-    fileIn->seekg (0, std::ios::beg);
-    fileIn->close();
-    delete fileIn;
+    std::ifstream fileIn(tsFileName.c_str(), std::ios::binary);
+    fileIn.seekg (0, std::ios::end);
+    m_fileSize = static_cast<unsigned long long>(fileIn.tellg());
+    fileIn.seekg (0, std::ios::beg);
+    fileIn.close();
 }
 
 timeStampWorker::~timeStampWorker()
@@ -84,8 +83,8 @@ void timeStampWorker::updateProgress()
         double tmp = m_nbProgress;
         tmp *= 188;
         tmp *= 100;
-        tmp /= (double)m_fileSize;
-        emit updated((int)tmp);
+        tmp /= static_cast<double>(m_fileSize);
+        emit updated(static_cast<int>(tmp));
     }
 }
 
@@ -98,6 +97,11 @@ void timeStampWorker::showSeries()
 void timeStampWorker::hideSeries()
 {
     m_chart->removeSeries(m_Series);
+}
+
+QLineSeries* timeStampWorker::getSeries()
+{
+    return m_Series;
 }
 
 void timeStampWorker::serializeSeries(std::ofstream *outFile)
@@ -134,14 +138,14 @@ void timeStampWorker::run()
                 double time;
                 // time for X axis
                 if (m_timestamp->getTimeFromIndex(index, time) == true) {
-                    m_Series->append(time, (qreal)val);
+                    m_Series->append(time, static_cast<qreal>(val));
                     qDebug() << m_Series->name() << " - index " << index << " - " << time << " s - " << val;
                 }
             }
             else {
 
                 // packet index for X axis
-                m_Series->append( index, (qreal)val);
+                m_Series->append( index, static_cast<qreal>(val));
                 qDebug() << m_Series->name() << " - index " << index << " - " << val;
             }
         }
@@ -151,24 +155,6 @@ void timeStampWorker::run()
     m_isRunning = false;
     emit updated(100);
     emit finished();
-}
-
-////////////////////
-// Flag worker
-ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
-    timeStampWorker(tsFile, chart), m_pid(pid)
-{
-    // customize base class
-    m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString(tr("CC")));
-}
-
-rapFlagWorker::rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
-    timeStampWorker(tsFile, chart), m_pid(pid)
-{
-    // customize base class
-    m_timestamp = new timestamp(tsFile, pid);
-    m_Series->setName(QString(tr("RAP")));
 }
 
 ////////////////////

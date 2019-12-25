@@ -63,25 +63,28 @@ bool timestamp::run(unsigned int nbPacketToRead)
 
         // create packet from buffer
         packet packet(data);
+        unsigned int pid = packet.getPid();
 
-        if (packet.getPid() == m_pidpts || packet.getPid() == m_piddts || packet.getPid() == m_pidpcr)
+        // check flags
+        if ( pid == m_pidpts || pid == m_piddts || pid == m_pidpcr )
         {
             // compare expected continuity counter to current
-            if ((m_ccMap[packet.getPid()] + 1) % 0xF != packet.getCC())
+            if ((m_ccMap[pid] + 1) % 16 != packet.getCC())
             {
-                m_ccError[m_nbPacket] = packet.getPid();
+                m_ccError[m_nbPacket] = pid;
+                fprintf(stderr, "CC error for pid %u index %u\n", pid, m_nbPacket);
             }
-            m_ccMap[packet.getPid()] = packet.getCC();
+            m_ccMap[pid] = packet.getCC();
 
             // check RAP
-            if (packet.hasRap())
+            /*if (packet.hasRap())
             {
-                m_rapMap[m_nbPacket] = packet.getPid();
-            }
+                m_rapMap[m_nbPacket] = pid;
+            }*/
         }
 
         // update number of packet and store PCR
-        if (packet.getPid() == m_pidpcr)
+        if (pid == m_pidpcr)
         {
             if (packet.hasPcr()) {
                 m_pcrMap[m_nbPacket] = packet.getPcr();
@@ -106,29 +109,29 @@ bool timestamp::run(unsigned int nbPacketToRead)
         }
 
         // get PTS and DTS
-        if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && packet.hasPesHeader())
+        if ((pid == m_pidpts || pid == m_piddts) && packet.hasPesHeader())
         {
             // create pes from buffer
             pes pes(data + packet.getPesOffset());
 
-            if(pes.hasPts() && packet.getPid() == m_pidpts) {
+            if(pes.hasPts() && pid == m_pidpts) {
                 m_ptsMap[m_nbPacket] = pes.getPts();
                 updatePesLength = true;
             }
 
-            if(pes.hasDts() && packet.getPid() == m_piddts) {
+            if(pes.hasDts() && pid == m_piddts) {
                 m_dtsMap[m_nbPacket] = pes.getDts();
                 updatePesLength = true;
             }
         }
 
         // update PES length using timestamp as trigger - cause length is PES header can be null
-        if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && updatePesLength == true)
+        if ((pid == m_pidpts || pid == m_piddts) && updatePesLength == true)
         {
             startPacketIndex = m_nbPacket;
             m_pesLengthMap[startPacketIndex] = 184;
         }
-        else if ((packet.getPid() == m_pidpts || packet.getPid() == m_piddts) && startPacketIndex != 0)
+        else if ((pid == m_pidpts || pid == m_piddts) && startPacketIndex != 0)
         {
             // add remaining PES size
             m_pesLengthMap[startPacketIndex] += 184;

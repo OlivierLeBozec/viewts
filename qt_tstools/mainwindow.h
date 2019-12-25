@@ -7,11 +7,12 @@
 #include "chart.h"
 #include "chartview.h"
 #include "workers.h"
+#include "workersFlags.h"
 
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"
 
-#define VIEW_TS_VERSION "v1.1.0"
+#define VIEW_TS_VERSION "v1.2.0"
 
 class MainWindow : public QMainWindow
 {
@@ -51,9 +52,9 @@ private slots:
     void showBuffLevelPts();
     void buffLevelPtsDts(int state);
     void showBuffLevelPtsDts();
-    void cc(int state);
+    void cc(QLineSeries* series);
     void showCC();
-    void rapFlag(int state);
+    void rapFlag(QLineSeries* series);
     void showRapFlag();
 
     void showInfo();

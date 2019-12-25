@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     ../src/timestamp.cpp \
     ../src/pes.cpp \
     ../src/packet.cpp \
-    ../src/pidmap.cpp
+    ../src/pidmap.cpp \
+    workersFlags.cpp
 
 HEADERS  += mainwindow.h \
     chart.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
     ../src/timestamp.h \
     ../src/pes.h \
     ../src/packet.h \
-    ../src/pidmap.h
+    ../src/pidmap.h \
+    workersFlags.h
 
 
 RC_FILE = viewTS.rc
