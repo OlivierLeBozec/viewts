@@ -84,17 +84,17 @@ public:
     bool m_isAborting;
 
     // manipulate the series
-    void showSeries();
-    void hideSeries();
+    virtual void showSeries();
+    virtual void hideSeries();
 
     // write the serie of points in file
-    void serializeSeries(std::ofstream *outFile);
+    virtual void serializeSeries(std::ofstream *outFile);
 
     // abort the thread
-    void abort();
+    virtual void abort();
 
     // run function from QRunnable
-    void run();
+    virtual void run();
 
 signals:
      void finished();

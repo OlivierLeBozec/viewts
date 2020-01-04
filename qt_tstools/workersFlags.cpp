@@ -2,8 +2,8 @@
 
 ////////////////////////////////
 // Timestamp worker - base class
-workerFlag::workerFlag(std::string &tsFileName, Chart *chart, QLineSeries *YSeries) :
-    timeStampWorker(tsFileName, chart), m_YSeries(YSeries)
+workerFlag::workerFlag(std::string &tsFileName, Chart *chart) :
+    timeStampWorker(tsFileName, chart)
 
 {
     // new drawing
@@ -27,10 +27,43 @@ void workerFlag::hideSeries()
     m_chart->removeSeries(m_scatterSeries);
 }
 
+void workerFlag::run()
+{
+    m_isRunning = true;
+
+    while (m_timestamp->run(10000) == true && m_isAborting == false)
+    {
+        unsigned int index;
+        double val;
+        while(getData(index, val) == true  && m_isAborting == false)
+        {
+            if (m_isTimeXaxis) {
+                double time;
+                // time for X axis
+                if (m_timestamp->getTimeFromIndex(index, time) == true) {
+                    m_scatterSeries->append(time, static_cast<qreal>(val));
+                    qDebug() << m_scatterSeries->name() << " - index " << index << " - " << time << " s - " << val;
+                }
+            }
+            else {
+
+                // packet index for X axis
+                m_Series->append( index, static_cast<qreal>(val));
+                qDebug() << m_Series->name() << " - index " << index << " - " << val;
+            }
+        }
+        //updateProgress();
+    }
+
+    m_isRunning = false;
+    emit updated(100);
+    emit finished();
+}
+
 ////////////////////
 // Flag worker
-ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart, QLineSeries* YSeries) :
-    workerFlag(tsFile, chart, YSeries), m_pid(pid)
+ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
+    workerFlag(tsFile, chart), m_pid(pid)
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
@@ -39,12 +72,12 @@ ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart, QLineSer
     m_scatterSeries->setMarkerSize(15.0);
 }
 
-rapFlagWorker::rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart, QLineSeries* YSeries) :
-    workerFlag(tsFile, chart, YSeries), m_pid(pid)
+rapFlagWorker::rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
+    workerFlag(tsFile, chart), m_pid(pid)
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
     m_scatterSeries->setName(QString(tr("RAP")));
-    m_scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+    m_scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeRectangle);
     m_scatterSeries->setMarkerSize(15.0);
 }

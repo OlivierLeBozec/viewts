@@ -213,6 +213,8 @@ void MainWindow::createLayout(QWidget *widget)
     connect(m_jitterPcrBox, SIGNAL(stateChanged(int)), this, SLOT(jitterPcr(int)));
     connect(m_bitratePcrBox, SIGNAL(stateChanged(int)), this, SLOT(bitratePcr(int)));
     connect(m_pcrComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(erasePcrSeries(int)));
+    connect(m_ccBox, SIGNAL(stateChanged(int)), this, SLOT(cc(int)));
+    connect(m_rapFlagBox, SIGNAL(stateChanged(int)), this, SLOT(rapFlag(int)));
 
     // pts
     m_ptsGroupBox = new QGroupBox(tr("Pts"));
@@ -636,7 +638,7 @@ void MainWindow::Pcr(int state)
     else
         hideSeries(m_pcrWorker);
 
-    cc(m_pcrWorker->getSeries());
+    //cc(nullptr);
 }
 
 void  MainWindow::showPcr()
@@ -968,22 +970,21 @@ void MainWindow::showBuffLevelPtsDts()
     }
 }
 
-void MainWindow::cc(QLineSeries *series)
+void MainWindow::cc(int state)
 {
-    if (m_ccBox->isChecked()) {
+    if (state == Qt::Checked)
         if (m_ccWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
-            m_ccWorker = new ccWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()), series);
+            m_ccWorker = new ccWorker(m_tsFileName, pid, static_cast<Chart*>(m_chartView->chart()));
             m_ccWorker->SetTimeAxis(m_isTimeXAxis);
             connect(m_ccWorker, SIGNAL(finished()), this, SLOT(showCC()));
             buildSeries(m_ccWorker);
         }
-        //else
-            //showSeries(m_ccWorker);
-    //else
-        //hideSeries(m_ccWorker);
-    }
+        else
+            showSeries(m_ccWorker);
+    else
+        hideSeries(m_ccWorker);
 }
 
 void MainWindow::showCC()
@@ -994,9 +995,9 @@ void MainWindow::showCC()
     }
 }
 
-void MainWindow::rapFlag(QLineSeries *series)
+void MainWindow::rapFlag(int state)
 {
-/*    if (state == Qt::Checked)
+    if (state == Qt::Checked)
         if (m_rapFlagWorker == Q_NULLPTR)
         {
             unsigned int pid = m_pcrComboBox->itemData(m_pcrComboBox->currentIndex()).toUInt();
@@ -1009,7 +1010,6 @@ void MainWindow::rapFlag(QLineSeries *series)
             showSeries(m_rapFlagWorker);
     else
         hideSeries(m_rapFlagWorker);
-        */
 }
 
 void MainWindow::showRapFlag()

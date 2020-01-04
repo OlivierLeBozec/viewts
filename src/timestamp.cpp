@@ -77,10 +77,10 @@ bool timestamp::run(unsigned int nbPacketToRead)
             m_ccMap[pid] = packet.getCC();
 
             // check RAP
-            /*if (packet.hasRap())
+            if (packet.hasRap())
             {
                 m_rapMap[m_nbPacket] = pid;
-            }*/
+            }
         }
 
         // update number of packet and store PCR

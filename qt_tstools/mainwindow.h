@@ -52,9 +52,9 @@ private slots:
     void showBuffLevelPts();
     void buffLevelPtsDts(int state);
     void showBuffLevelPtsDts();
-    void cc(QLineSeries* series);
+    void cc(int state);
     void showCC();
-    void rapFlag(QLineSeries* series);
+    void rapFlag(int state);
     void showRapFlag();
 
     void showInfo();
