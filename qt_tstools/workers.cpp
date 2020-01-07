@@ -5,6 +5,9 @@
 infoWorker::infoWorker(std::string &tsFile, unsigned int pid) :
      m_isRunning(false)
 {
+    // do not destroy when worker is completed
+    setAutoDelete (false);
+
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);
 }

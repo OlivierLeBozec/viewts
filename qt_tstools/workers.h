@@ -45,13 +45,10 @@ class timeStampWorker : public QObject, public QRunnable
     unsigned int m_nbProgress;
     unsigned long long m_fileSize;
 
-    // update the competion rate
-    void updateProgress();
-
-    // number of packet read by library before run() returns
-    const unsigned int m_WindowPacket = 5000;
-
 protected:
+    // number of packet read by library before run() returns
+    const unsigned int m_WindowPacket = 10000;
+
     // retrieve the time stamps
     timestamp* m_timestamp;
 
@@ -66,6 +63,9 @@ protected:
 
     // function used in thread
     virtual bool getData(unsigned int& index, double& val) = 0;
+
+    // update the competion rate
+    virtual void updateProgress();
 
 public:
     timeStampWorker(std::string &tsFile, Chart *chart);

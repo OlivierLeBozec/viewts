@@ -31,7 +31,7 @@ void workerFlag::run()
 {
     m_isRunning = true;
 
-    while (m_timestamp->run(10000) == true && m_isAborting == false)
+    while (m_timestamp->run(m_WindowPacket) == true && m_isAborting == false)
     {
         unsigned int index;
         double val;
@@ -41,23 +41,32 @@ void workerFlag::run()
                 double time;
                 // time for X axis
                 if (m_timestamp->getTimeFromIndex(index, time) == true) {
-                    m_scatterSeries->append(time, static_cast<qreal>(val));
+                    m_scatterSeries->append( time, static_cast<qreal>(val));
                     qDebug() << m_scatterSeries->name() << " - index " << index << " - " << time << " s - " << val;
                 }
             }
             else {
-
                 // packet index for X axis
-                m_Series->append( index, static_cast<qreal>(val));
-                qDebug() << m_Series->name() << " - index " << index << " - " << val;
+                m_scatterSeries->append( index, static_cast<qreal>(val));
+                qDebug() << m_scatterSeries->name() << " - index " << index << " - " << val;
             }
         }
-        //updateProgress();
+        updateProgress();
     }
 
     m_isRunning = false;
     emit updated(100);
     emit finished();
+}
+
+void workerFlag::serializeSeries(std::ofstream *outFile)
+{
+    *outFile << m_scatterSeries->name().toStdString().c_str() << std::endl;
+    for (int i = 0; i < m_scatterSeries->count(); i++)
+    {
+        QString line = QString::number(m_scatterSeries->at(i).x(), 'f', 0) + ", " + QString::number(m_scatterSeries->at(i).y(), 'f', 9);
+        *outFile << line.toStdString().c_str() << std::endl;
+    }
 }
 
 ////////////////////

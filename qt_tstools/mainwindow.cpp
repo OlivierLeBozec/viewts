@@ -287,7 +287,7 @@ void MainWindow::createLayout(QWidget *widget)
     Chart *chart = new Chart;
     chart->setTitle("");
     chart->setAnimationOptions(QChart::NoAnimation);
-    chart->setTheme(QChart::ChartThemeDark);
+    chart->setTheme(QChart::ChartThemeBlueCerulean);
 
     m_chartView = new ChartView(chart);
     //m_chartView->setRenderHint(QPainter::Antialiasing);
@@ -356,7 +356,10 @@ void MainWindow::erasePcrSeries(int)
     m_diffPcrDtsBox->setChecked(false);
     m_buffLevelPtsBox->setChecked(false);
     m_buffLevelPtsDtsBox->setChecked(false);
+    m_ccBox->setChecked(false);
+    m_rapFlagBox->setChecked(false);
     cleanPcr();
+    cleanFlag();
 }
 
 void MainWindow::erasePtsSeries(int)
@@ -555,6 +558,8 @@ void MainWindow::saveAsFile()
         serializeSeries(outFile, m_diffPtsDtsWorker);
         serializeSeries(outFile, m_buffLevelPtsWorker);
         serializeSeries(outFile, m_buffLevelPtsDtsWorker);
+        serializeSeries(outFile, m_ccWorker);
+        serializeSeries(outFile, m_rapFlagWorker);
 
         outFile->close();
         statusBar()->showMessage(tr("Done..."), 1000);

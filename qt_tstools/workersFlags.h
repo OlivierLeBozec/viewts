@@ -21,6 +21,9 @@ public:
     workerFlag(std::string &tsFile, Chart *chart);
     ~workerFlag();
 
+    // write the serie of points in file
+    virtual void serializeSeries(std::ofstream *outFile);
+
     // run function from QRunnable
     void run();
 

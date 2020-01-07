@@ -530,6 +530,7 @@ bool timestamp::getNextCC(unsigned int& index, unsigned int& pid)
     if (m_ccError.empty())
         return false;
 
+    fprintf(stderr, "CC size %lu\n", m_ccError.size() );
     // init iterator
     if (m_isCCerrorInit == false)
     {
