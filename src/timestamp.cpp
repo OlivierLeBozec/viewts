@@ -68,11 +68,11 @@ bool timestamp::run(unsigned int nbPacketToRead)
         // check flags
         if ( pid == m_pidpts || pid == m_piddts || pid == m_pidpcr )
         {
-            // compare expected continuity counter to current
-            if ((m_ccMap[pid] + 1) % 16 != packet.getCC())
+            // compare expected continuity counter to current - must be identical or +1
+            if (((m_ccMap[pid] + 1) % 16 != packet.getCC()) &&
+                (m_ccMap[pid] % 16 != packet.getCC()))
             {
                 m_ccError[m_nbPacket] = pid;
-                fprintf(stderr, "CC error for pid %u index %u\n", pid, m_nbPacket);
             }
             m_ccMap[pid] = packet.getCC();
 
@@ -247,9 +247,9 @@ bool timestamp::getNextPcr(unsigned int& index, double& pcr)
         return true;
     }
 
-    ++m_pcr_ii;
-    if (m_pcr_ii != m_pcrMap.end())
+    if (m_pcr_ii != --m_pcrMap.end())
     {
+        ++m_pcr_ii;
         index = m_pcr_ii->first;
         pcr = m_pcr_ii->second;
         return true;
@@ -274,9 +274,9 @@ bool timestamp::getNextPts(unsigned int& index, double& pts)
         return true;
     }
 
-    ++m_pts_ii;
     if (m_pts_ii != --m_ptsMap.end())
     {
+        ++m_pts_ii;
         index = m_pts_ii->first;
         pts = m_pts_ii->second;
         return true;
@@ -301,9 +301,9 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
         return true;
     }
 
-    ++m_dts_ii;
-    if (m_dts_ii != m_dtsMap.end())
+    if (m_dts_ii != --m_dtsMap.end())
     {
+        ++m_dts_ii;
         index = m_dts_ii->first;
         dts = m_dts_ii->second;
         return true;
@@ -442,15 +442,15 @@ bool timestamp::getNextBitrate(unsigned int& index, double& bitrate)
         return false;
 
     // init iterator
-    if (m_bitrate_prev_pcr_val == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_bitrate_prev_pcr_val == TIMESTAMP_NOT_INITIALIZED)
+    {
         m_pcr_ii = m_pcrMap.begin();
         m_bitrate_prev_index_val = m_pcr_ii->first;
         m_bitrate_prev_pcr_val = m_pcr_ii->second;
     }
 
-    if (m_pcr_ii != --m_pcrMap.end()) {
-
+    if (m_pcr_ii != --m_pcrMap.end())
+    {
         ++m_pcr_ii;
         bitrate = m_pcr_ii->first - m_bitrate_prev_index_val;
         bitrate *= 188;
@@ -473,14 +473,14 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
         return false;
 
     // init index and level
-    if (m_level == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_level == TIMESTAMP_NOT_INITIALIZED)
+    {
         m_length_ii = m_pesLengthMap.begin();
         index = m_length_ii->first;
         levelTmp = m_level = m_length_ii->second;
     }
-    else if (m_length_ii != --m_pesLengthMap.end()) {
-
+    else if (m_length_ii != --m_pesLengthMap.end())
+    {
         ++m_length_ii;
         index = m_length_ii->first;
         levelTmp = m_length_ii->second;
@@ -530,7 +530,6 @@ bool timestamp::getNextCC(unsigned int& index, unsigned int& pid)
     if (m_ccError.empty())
         return false;
 
-    fprintf(stderr, "CC size %lu\n", m_ccError.size() );
     // init iterator
     if (m_isCCerrorInit == false)
     {
@@ -541,9 +540,9 @@ bool timestamp::getNextCC(unsigned int& index, unsigned int& pid)
         return true;
     }
 
-    ++m_cc_ii;
-    if (m_cc_ii != m_ccError.end())
+    if (m_cc_ii != --m_ccError.end())
     {
+        ++m_cc_ii;
         index = m_cc_ii->first;
         pid = m_cc_ii->second;
         return true;
@@ -568,9 +567,9 @@ bool timestamp::getNextRap(unsigned int& index, unsigned int& pid)
         return true;
     }
 
-    ++m_rap_ii;
-    if (m_rap_ii != m_rapMap.end())
+    if (m_rap_ii != --m_rapMap.end())
     {
+        ++m_rap_ii;
         index = m_rap_ii->first;
         pid = m_rap_ii->second;
         return true;
