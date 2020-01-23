@@ -1,6 +1,6 @@
 More details can be found in the Wiki.
 Qt and QChart is needed for this project.
-Binaries (for windows) are available in https://github.com/OlivierLeBozec/tstools/releases
+Binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
 
 ## qt tools
 viewTS : display the timestamp of a ts stream.
