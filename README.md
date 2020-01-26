@@ -1,13 +1,48 @@
-More details can be found in the Wiki.
-Qt and QChart is needed for this project.
-Binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
+viewts is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stream.
 
-## qt tools
-viewTS : display the timestamp of a ts stream.
+Qt and QChart are needed for this project.
 
-To compile first import in qt_tstools/viewTS.pro in QtCreator.
+    Qt Creator 4.11.0-rc1 (4.10.84)
+    Basé sur Qt 5.14.0 (GCC 5.3.1 20160406 (Red Hat 5.3.1-6), 64 bit)
 
-Windows and Linux are supported.
+Already compiled binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
+
+Some binary tools can be used in command line. They can be used for tests automatisation.
+
+# Feature
+
+Display :
+
+- PCR, PTS, DTS
+
+- continuity counter error
+
+- Random access point
+    
+Compute :
+    
+- Bitrate
+
+- PCR jitter
+
+- Diff between timestamps
+
+- ES buffer level, basically the VBV
+
+Other features :
+
+- X axis can be set to time or packet number
+
+- Save data into file
+
+- command line interface
+
+- ts file drag and drop
+
+- zoom on data
+
+
+# Screenshots
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
 
@@ -15,23 +50,34 @@ Windows and Linux are supported.
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
-# CLI tstools
-Bunch of tools for MPEG-TS streams.
+# compile viewts
+To compile first import in qt_tstools/viewTS.pro in QtCreator.
 
-To compile first import in top level CMakelists.txt in QtCreator.
+Windows and Linux are supported.
+
+Use Qt5.7 with mandatory QChart.
+
+# compile CLI tools
+Bunch of tools for MPEG-TS streams are also provided.
+
+To compile first import in Qt top level CMakeLists.txt.
+
+It will generate two static libs, the cli tools and a binary for google tests.
+
+Visual can also be used with proper CMake generator.
 
 Windows and Linux are supported.
 
 ## tsmap
-NAME
-    ./tsmap - list mpeg ts content
-    Version 1.0
+    NAME
+        ./tsmap - list mpeg ts content
+        Version 1.0
 
-SYNOPSIS
-    ./tsmap FILE [-pidlist -pidmap]
+    SYNOPSIS
+        ./tsmap FILE [-pidlist -pidmap]
 
-DESCRIPTION
-    List mpeg information about the FILE. Without using PSI-SI tables
+    DESCRIPTION
+        List mpeg information about the FILE. Without using PSI-SI tables
 
     -pidlist
        list of the pid in the file
@@ -40,15 +86,15 @@ DESCRIPTION
        map of the pid in the file
 
 ## tscheck
-NAME
-    ./tscheck - check timestamp
-    Version 1.0
+    NAME
+        ./tscheck - check timestamp
+        Version 1.0
 
-SYNOPSIS
-    ./tscheck FILE -pid <PID> [...]
+    SYNOPSIS
+        ./tscheck FILE -pid <PID> [...]
 
-DESCRIPTION
-    Display specified timestamp operation
+    DESCRIPTION
+        Display specified timestamp operation
 
     -pidpcr <PID>
            set pcr pid
@@ -80,17 +126,21 @@ Following commands are available only at least one PID is specified
            diff between 2 timestamps : pts - pcr, dts - pts or pts - dts
 
 ## tscut
-   tscut - cut mpeg ts content
-   Version 1.0
+    NAME
+       tscut - cut mpeg ts content
+       Version 1.1
 
-SYNOPSIS
-   /home/olivier/tstools/tscut FILE [-split <nb packet>]
+    SYNOPSIS
+       ./tscut FILE [-split <nb packet>] [-divide <nb chunck>]
 
-DESCRIPTION
-   cut ts stream
+    DESCRIPTION
+       cut ts stream
 
     -split <nb packets>
           cut file every nb packets
+    -divide <nb chunks>
+          cut file in nb chunks
+
 
 ## Tested examples:
     ./tsmap ./ts/audio.ts -pidlist -pidmap
@@ -107,12 +157,3 @@ DESCRIPTION
     ./tscheck ./ts/video.ts -pidpcr 601 -pidpts 601 -diff
     ./tscheck ./ts/video.ts -pidpcr 601 -pidpts 301 -diff
     ./tscheck ./ts/video.ts -piddts 601 -pidpts 601 -diff
-
-# Linux env
-Qt 5.12.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 5.3.1 20160406 (Red Hat 5.3.1-6)) on "xcb" 
-
-OS: CentOS Linux 7 (Core) [linux version 3.10.0-693.21.1.el7.x86_64]
-
-From revision 7c17edcce2
-
-Built on Nov 23 2018 01:26:40
