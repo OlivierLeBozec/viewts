@@ -1,13 +1,7 @@
-More details can be found in the Wiki.
-Qt and QChart is needed for this project.
-Binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
+Tsview is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stream.  
+Qt and QChart are needed for this project.
+Already compiled binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
 
-## qt tools
-viewTS : display the timestamp of a ts stream.
-
-To compile first import in qt_tstools/viewTS.pro in QtCreator.
-
-Windows and Linux are supported.
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
 
@@ -15,11 +9,15 @@ Windows and Linux are supported.
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
-# CLI tstools
-Bunch of tools for MPEG-TS streams.
+# compile tsview
+To compile first import in qt_tstools/viewTS.pro in QtCreator.
+Windows and Linux are supported.
+Use Qt5.7 with mandatory QChart.
 
-To compile first import in top level CMakelists.txt in QtCreator.
-
+# compile CLI tools
+Bunch of tools for MPEG-TS streams are also provided.
+To compile first import in Qt top level CMakeLists.txt. It will generate two static libs, the cli tools and a binary for google tests.
+Visual can also be used with proper CMake generator.
 Windows and Linux are supported.
 
 ## tsmap
