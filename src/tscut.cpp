@@ -5,7 +5,7 @@
 
 #include <stdlib.h> // atoi()
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 void Usage(char *pName) {
     std::cout << "NAME" << std::endl;
@@ -13,7 +13,7 @@ void Usage(char *pName) {
     std::cout << "   Version " << VERSION << std::endl;
     std::cout << std::endl;
     std::cout << "SYNOPSIS" << std::endl;
-    std::cout << "   " << pName << " FILE [-split <nb packet>]" << std::endl;
+    std::cout << "   " << pName << " FILE [-split <nb packet>] [-divide <nb chunck>]" << std::endl;
     std::cout << std::endl;
     std::cout << "DESCRIPTION" << std::endl;
     std::cout << "   cut ts stream" << std::endl;
