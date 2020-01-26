@@ -1,51 +1,5 @@
 #include "workers.h"
 
-////////////////////
-// Info worker
-infoWorker::infoWorker(std::string &tsFile, unsigned int pid) :
-     m_isRunning(false)
-{
-    // do not destroy when worker is completed
-    setAutoDelete (false);
-
-    // customize base class
-    m_timestamp = new timestamp(tsFile, pid);
-}
-
-infoWorker::~infoWorker()
-{
-    delete m_timestamp;
-}
-
-void infoWorker::run()
-{
-    m_isRunning = true;
-    m_timestamp->run();
-    m_isRunning = false;
-
-    emit finished();
-}
-
-double infoWorker::getGlobalBitrate()
-{
-    if (m_timestamp && m_isRunning == false)
-    {
-        // in byte per seconds
-        return m_timestamp->getGlobalBitrate();
-    }
-    return 0;
-}
-
-double infoWorker::getGlobalDuration()
-{
-    if (m_timestamp && m_isRunning == false)
-    {
-        // in seconds
-        return m_timestamp->getDuration();
-    }
-    return 0;
-}
-
 ////////////////////////////////
 // Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string &tsFileName, Chart *chart) :
@@ -105,6 +59,26 @@ void timeStampWorker::hideSeries()
 QLineSeries* timeStampWorker::getSeries()
 {
     return m_Series;
+}
+
+double timeStampWorker::getGlobalBitrate()
+{
+    if (m_timestamp && m_isRunning == false)
+    {
+        // in byte per seconds
+        return m_timestamp->getGlobalBitrate();
+    }
+    return 0;
+}
+
+double timeStampWorker::getGlobalDuration()
+{
+    if (m_timestamp && m_isRunning == false)
+    {
+        // in seconds
+        return m_timestamp->getDuration();
+    }
+    return 0;
 }
 
 void timeStampWorker::serializeSeries(std::ofstream *outFile)

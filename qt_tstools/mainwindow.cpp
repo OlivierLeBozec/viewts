@@ -3,6 +3,7 @@
 
 MainWindow::MainWindow() :
     m_pthreadPool(QThreadPool::globalInstance()),
+    m_pcrInfoWorker(Q_NULLPTR),
     m_pcrWorker(Q_NULLPTR), m_ptsWorker(Q_NULLPTR), m_dtsWorker(Q_NULLPTR),
     m_pcrDeltaWorker(Q_NULLPTR), m_jitterPcrWorker(Q_NULLPTR), m_bitratePcrWorker(Q_NULLPTR),
     m_ptsDeltaWorker(Q_NULLPTR), m_dtsDeltaWorker(Q_NULLPTR), m_diffPcrPtsWorker(Q_NULLPTR),
@@ -519,21 +520,28 @@ void MainWindow::buildInfo(pidmap& pm)
     std::vector<unsigned int> pidVect;
     pm.getPcrPid(pidVect);
 
-    if (pidVect.size() != 0)
+    if (pidVect.size() != 0 && m_pcrInfoWorker == nullptr)
     {
         // start thread to get the info using first pcr pid
-        m_infoWorker = new infoWorker(m_tsFileName, pidVect[0]);
-        connect(m_infoWorker, SIGNAL(finished()), this, SLOT(showInfo()));
-        m_pthreadPool->start(m_infoWorker);
+        m_pcrInfoWorker = new pcrWorker(m_tsFileName, pidVect[0], static_cast<Chart*>(m_chartView->chart()));
+        connect(m_pcrInfoWorker, SIGNAL(finished()), this, SLOT(showInfo()));
+        m_pthreadPool->start(m_pcrInfoWorker);
     }
 }
 
 // display bitrate and duration
 void MainWindow::showInfo()
 {
-    QString bitrate = QString(tr("bitrate: %1 B/s")).arg(QString::number(m_infoWorker->getGlobalBitrate()));
-    QString duration = QString(tr("duration: %1 s")).arg(QString::number(m_infoWorker->getGlobalDuration()));
-    m_infoLabel->setText(bitrate+"\n"+duration);
+    if (m_pcrInfoWorker != nullptr)
+    {
+        QString bitrate = QString(tr("bitrate: %1 B/s")).arg(QString::number(m_pcrInfoWorker->getGlobalBitrate()));
+        QString duration = QString(tr("duration: %1 s")).arg(QString::number(m_pcrInfoWorker->getGlobalDuration()));
+        m_infoLabel->setText(bitrate+"\n"+duration);
+
+        // no longer used
+        delete m_pcrInfoWorker;
+        m_pcrInfoWorker = nullptr;
+    }
 }
 
 void MainWindow::saveAsFile()
@@ -642,8 +650,6 @@ void MainWindow::Pcr(int state)
             showSeries(m_pcrWorker);
     else
         hideSeries(m_pcrWorker);
-
-    //cc(nullptr);
 }
 
 void  MainWindow::showPcr()

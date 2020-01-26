@@ -102,8 +102,8 @@ private:
     QCheckBox* m_buffLevelPtsBox;
 
     QLabel* m_infoLabel;
-    infoWorker* m_infoWorker;
 
+    pcrWorker    *m_pcrInfoWorker;
     pcrWorker    *m_pcrWorker;
     ptsWorker    *m_ptsWorker;
     dtsWorker    *m_dtsWorker;
