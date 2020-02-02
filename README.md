@@ -1,3 +1,5 @@
+![viewts](https://github.com/OlivierLeBozec/viewts/workflows/viewts/badge.svg)
+
 viewts is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stream.
 
 Qt and QChart are needed for this project.
