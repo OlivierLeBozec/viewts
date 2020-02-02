@@ -25,6 +25,7 @@ jobs:
         modules: qtcharts
     - name: Build
       run: |
-        cd ${{ github.repository }}/qt_tstools
+        pwd
+        find
         qmake viewTS.pro -spec linux-g++
         make
