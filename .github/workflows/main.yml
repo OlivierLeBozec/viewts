@@ -18,7 +18,7 @@ jobs:
       uses: jurplel/install-qt-action@v2.3.0
       timeout-minutes: 10
       with:
-        version: 5.12.5
+        #version: 5.12.5
         target: desktop
         host: linux
         install-deps: true
