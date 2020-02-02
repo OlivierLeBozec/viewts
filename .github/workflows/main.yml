@@ -18,14 +18,12 @@ jobs:
       uses: jurplel/install-qt-action@v2.3.0
       timeout-minutes: 10
       with:
-        #version: 5.12.5
         target: desktop
         host: linux
         install-deps: true
         modules: qtcharts
     - name: Build
       run: |
-        ls -l
         cd qt_tstools/ 
         qmake viewTS.pro -spec linux-g++
         make
