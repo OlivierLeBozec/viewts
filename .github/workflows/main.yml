@@ -1,0 +1,30 @@
+# Development CI Script
+#
+# This script kicks off a build for every event excluding commits pushed to the
+# master branch. This includes pull requests and page builds to any branch.
+
+name: viewts
+
+on: [push]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2.0.0
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.3.0
+      timeout-minutes: 10
+      with:
+        version: 5.12.5
+        target: desktop
+        host: linux
+        install-deps: true
+        modules: qtcharts
+    - name: Build
+      run: |
+        cd ${{ github.repository }}/qt_tstools
+        qmake viewTS.pro -spec linux-g++
+        make
