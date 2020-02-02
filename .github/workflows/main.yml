@@ -1,7 +1,4 @@
-# Development CI Script
-#
-# This script kicks off a build for every event excluding commits pushed to the
-# master branch. This includes pull requests and page builds to any branch.
+# Compile viewts under linux
 
 name: viewts
 
