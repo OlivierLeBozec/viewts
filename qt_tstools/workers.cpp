@@ -3,7 +3,7 @@
 ////////////////////////////////
 // Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string &tsFileName, Chart *chart) :
-   m_nbProgress(0),  m_chart(chart), m_isTimeXaxis(true), m_isRunning(false), m_isAborting(false)
+   m_nbProgress(0), m_timestamp(nullptr), m_chart(chart), m_isTimeXaxis(true), m_isRunning(false), m_isAborting(false)
 
 {
     // new drawing

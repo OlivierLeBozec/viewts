@@ -24,6 +24,8 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     m_delta_prev_val(TIMESTAMP_NOT_INITIALIZED),
     m_jitter_prev_index(TIMESTAMP_NOT_INITIALIZED),
     m_jitter_prev_val(TIMESTAMP_NOT_INITIALIZED),
+    m_diff_map1(nullptr),
+    m_diff_map2(nullptr),
     m_diff_prev_index(TIMESTAMP_NOT_INITIALIZED),
     m_diff_prev_value(TIMESTAMP_NOT_INITIALIZED),
     m_bitrate_prev_index_val(TIMESTAMP_NOT_INITIALIZED),
@@ -204,7 +206,7 @@ bool timestamp::getTimeFromIndex(unsigned int index, double &time)
         itlow = ithigh = m_pcrMap.upper_bound(index);
         if (ithigh == m_pcrMap.begin() || ithigh == m_pcrMap.end())
             return false;
-        itlow--;
+        --itlow;
 
         //printf("upper %u [%u] %llf\n", index, ithigh->first, ithigh->second);
         //printf("lower %u [%u] %llf\n", index, itlow->first, itlow->second);
@@ -508,7 +510,7 @@ bool timestamp::getNextLevel(unsigned int& index, double& level)
 
         // decrease buffer level - remove old buffer
         std::map<double, unsigned int>::iterator level_ii = m_levelMap.begin();
-        for (;level_ii != m_levelMap.end(); level_ii++)
+        for (;level_ii != m_levelMap.end(); ++level_ii)
         {
             // compare release time with current time
             if (level_ii->first < current_time && level_ii->second) {

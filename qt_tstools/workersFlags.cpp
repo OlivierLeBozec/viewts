@@ -82,7 +82,7 @@ ccWorker::ccWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
 }
 
 rapFlagWorker::rapFlagWorker(std::string &tsFile, unsigned int pid, Chart *chart) :
-    workerFlag(tsFile, chart), m_pid(pid)
+    workerFlag(tsFile, chart), m_pid(pid), m_index(0)
 {
     // customize base class
     m_timestamp = new timestamp(tsFile, pid);

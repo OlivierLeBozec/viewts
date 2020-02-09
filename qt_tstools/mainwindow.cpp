@@ -459,7 +459,7 @@ void MainWindow::loadFile()
     // get pcr pid list
     bool hasPcr = false;
     pm.getPcrPid(pidVect);
-    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    for (it = pidVect.begin(); it < pidVect.end(); ++it)
     {
         hasPcr = true;
         m_pcrComboBox->addItem(QString::number(*it), *it);
@@ -470,7 +470,7 @@ void MainWindow::loadFile()
     // get pts pid list
     bool hasPts = false;
     pm.getPtsPid(pidVect);
-    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    for (it = pidVect.begin(); it < pidVect.end(); ++it)
     {
         hasPts = true;
         m_ptsComboBox->addItem(QString::number(*it), *it);
@@ -481,7 +481,7 @@ void MainWindow::loadFile()
     // get dts pid list
     bool hasDts = false;
     pm.getDtsPid(pidVect);
-    for (it = pidVect.begin(); it < pidVect.end(); it++)
+    for (it = pidVect.begin(); it < pidVect.end(); ++it)
     {
         hasDts = true;
         m_dtsComboBox->addItem(QString::number(*it), *it);

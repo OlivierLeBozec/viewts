@@ -45,4 +45,5 @@ linux {
   DESTDIR = $$PWD/../bin/linux/
   INCLUDEPATH += $$PWD/../bin/linux
   DEPENDPATH += $$PWD/../bin/linux
+  # TODO CONFIG  += static
 }
