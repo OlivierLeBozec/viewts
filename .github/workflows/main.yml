@@ -1,6 +1,6 @@
 # Compile viewts under linux
 
-name: viewts
+name: linux_compile
 
 on: [push]
 
