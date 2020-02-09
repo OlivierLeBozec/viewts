@@ -22,9 +22,9 @@ Display :
   - continuity counter error
 
   - Random access point
-    
+
 Compute :
-    
+
   - Bitrate
 
   - PCR jitter
@@ -156,7 +156,6 @@ Following commands are available only at least one PID is specified
           cut file every nb packets
     -divide <nb chunks>
           cut file in nb chunks
-
 
 ### Tested examples
     ./tsmap ./ts/audio.ts -pidlist -pidmap
