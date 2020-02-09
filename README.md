@@ -1,4 +1,6 @@
-![viewts](https://github.com/OlivierLeBozec/viewts/workflows/viewts/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fb4b49561494673ad88048db7b17943)](https://app.codacy.com/manual/OlivierLeBozec/viewts?utm_source=github.com&utm_medium=referral&utm_content=OlivierLeBozec/viewts&utm_campaign=Badge_Grade_Dashboard)
+![viewts](https://github.com/OlivierLeBozec/viewts/workflows/viewts/badge.svg)  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fb4b49561494673ad88048db7b17943)](https://app.codacy.com/manual/OlivierLeBozec/viewts?utm_source=github.com&utm_medium=referral&utm_content=OlivierLeBozec/viewts&utm_campaign=Badge_Grade_Dashboard)
+
+# viewts - Display timestamps and related feature
 
 viewts is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stream.
 
@@ -11,40 +13,39 @@ Already compiled binaries (for windows and linux) are available in https://githu
 
 Some binary tools can be used in command line. They can be used for tests automatisation.
 
-# Feature
+## Feature
 
 Display :
 
-- PCR, PTS, DTS
+  - PCR, PTS, DTS
 
-- continuity counter error
+  - continuity counter error
 
-- Random access point
+  - Random access point
     
 Compute :
     
-- Bitrate
+  - Bitrate
 
-- PCR jitter
+  - PCR jitter
 
-- Diff between timestamps
+  - Diff between timestamps
 
-- ES buffer level, basically the VBV
+  - ES buffer level, basically the VBV
 
 Other features :
 
-- X axis can be set to time or packet number
+  - X axis can be set to time or packet number
 
-- Save data into file
+  - Save data into file
 
-- command line interface
+  - command line interface
 
-- ts file drag and drop
+  - ts file drag and drop
 
-- zoom on data
+  - zoom on data
 
-
-# Screenshots
+## Screenshots
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/pcrjitter.png)
 
@@ -52,14 +53,14 @@ Other features :
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
-# compile viewts
+## compile viewts
 To compile first import in qt_tstools/viewTS.pro in QtCreator.
 
 Windows and Linux are supported.
 
 Use Qt5.7 with mandatory QChart.
 
-# compile CLI tools
+## compile CLI tools
 Bunch of tools for MPEG-TS streams are also provided.
 
 To compile first import in Qt top level CMakeLists.txt.
@@ -70,7 +71,20 @@ Visual can also be used with proper CMake generator.
 
 Windows and Linux are supported.
 
-## tsmap
+## How to Contribute
+
+We welcome contributions of all kinds, including bug fixes, new features,
+documentation and translations. By contributing, you agree to release
+your contributions under the terms of the license.
+
+Contribute by following the typical
+[GitHub workflow](https://guides.github.com/introduction/flow/index.html)
+for pull requests. Fork the repository and make changes on a new named
+branch. Create pull requests against the `master` branch. Follow the
+[seven guidelines](https://chris.beams.io/posts/git-commit/) to writing a
+great commit message.
+
+### tsmap
     NAME
         ./tsmap - list mpeg ts content
         Version 1.0
@@ -87,7 +101,7 @@ Windows and Linux are supported.
     -pidmap
        map of the pid in the file
 
-## tscheck
+### tscheck
     NAME
         ./tscheck - check timestamp
         Version 1.0
@@ -127,7 +141,7 @@ Following commands are available only at least one PID is specified
     -diff
            diff between 2 timestamps : pts - pcr, dts - pts or pts - dts
 
-## tscut
+### tscut
     NAME
        tscut - cut mpeg ts content
        Version 1.1
@@ -144,7 +158,7 @@ Following commands are available only at least one PID is specified
           cut file in nb chunks
 
 
-## Tested examples:
+### Tested examples
     ./tsmap ./ts/audio.ts -pidlist -pidmap
 
     ./tscheck ./ts/audio.ts -pidpcr 305 -dur -rate
