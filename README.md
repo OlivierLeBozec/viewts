@@ -1,5 +1,5 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fb4b49561494673ad88048db7b17943)](https://app.codacy.com/manual/OlivierLeBozec/viewts?utm_source=github.com&utm_medium=referral&utm_content=OlivierLeBozec/viewts&utm_campaign=Badge_Grade_Dashboard)
-![viewts](https://github.com/OlivierLeBozec/viewts/workflows/viewts/badge.svg)  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fb4b49561494673ad88048db7b17943)](https://app.codacy.com/manual/OlivierLeBozec/viewts?utm_source=github.com&utm_medium=referral&utm_content=OlivierLeBozec/viewts&utm_campaign=Badge_Grade_Dashboard)
+![viewts](https://github.com/OlivierLeBozec/viewts/workflows/viewts/badge.svg)
 
 # viewts - Display timestamps and related feature
 
