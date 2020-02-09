@@ -1,8 +1,13 @@
 # Compile viewts under linux
 
-name: linux_compile
+name: linux compile
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - master
 
 jobs:
 
