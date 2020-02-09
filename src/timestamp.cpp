@@ -41,7 +41,11 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     unsigned int index = 0;
 
     m_fileIn.read(start, sizeof start);
-    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start)) index++;
+    if(m_fileIn)
+    {
+        while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start))
+            index++;
+    }
 
     // loop on packet
     m_fileIn.clear();
@@ -60,7 +64,8 @@ bool timestamp::run(unsigned int nbPacketToRead)
         bool updatePesLength = false;
 
         // leave if no more data
-        if (!m_fileIn.read((char*)data, 188)) break;
+        m_fileIn.read((char*)data, 188);
+        if (!m_fileIn) break;
         isDatatoRead = true;
 
         // create packet from buffer
