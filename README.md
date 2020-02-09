@@ -17,34 +17,31 @@ Some binary tools can be used in command line. They can be used for tests automa
 ## Feature
 
 Display :
-  
-  * PCR, PTS, DTS
+* PCR, PTS, DTS
 
-  * continuity counter error
+* continuity counter error
 
-  * Random access point
+* Random access point
 
 Compute :
-  
-  * Bitrate
+* Bitrate
 
-  * PCR jitter
+* PCR jitter
 
-  * Diff between timestamps
+* Diff between timestamps
 
-  * ES buffer level, basically the VBV
+* ES buffer level, basically the VBV
 
 Other features :
-  
-  * X axis can be set to time or packet number
+* X axis can be set to time or packet number
 
-  * Save data into file
+* Save data into file
 
-  * command line interface
+* command line interface
 
-  * ts file drag and drop
+* ts file drag and drop
 
-  * zoom on data
+* zoom on data
 
 ## Screenshots
 
