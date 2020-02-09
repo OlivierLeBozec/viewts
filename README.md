@@ -9,7 +9,7 @@ Qt and QChart are needed for this project.
     Qt Creator 4.11.0-rc1 (4.10.84)
     Basé sur Qt 5.14.0 (GCC 5.3.1 20160406 (Red Hat 5.3.1-6), 64 bit)
 
-Already compiled binaries (for windows and linux) are available in https://github.com/OlivierLeBozec/tstools/releases
+Already compiled binaries (for windows and linux) are available in <https://github.com/OlivierLeBozec/tstools/releases>
 
 Some binary tools can be used in command line. They can be used for tests automatisation.
 
