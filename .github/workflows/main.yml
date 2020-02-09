@@ -1,0 +1,26 @@
+# Compile viewts under linux
+
+name: linux_compile
+
+on: [push]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2.0.0
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.3.0
+      timeout-minutes: 10
+      with:
+        target: desktop
+        host: linux
+        install-deps: true
+        modules: qtcharts
+    - name: Build
+      run: |
+        cd qt_tstools/ 
+        qmake viewTS.pro -spec linux-g++
+        make
