@@ -13,6 +13,8 @@ Some binary tools can be used in command line. They can be used for tests automa
 
 # Feature
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fb4b49561494673ad88048db7b17943)](https://app.codacy.com/manual/OlivierLeBozec/viewts?utm_source=github.com&utm_medium=referral&utm_content=OlivierLeBozec/viewts&utm_campaign=Badge_Grade_Dashboard)
+
 Display :
 
 - PCR, PTS, DTS
