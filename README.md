@@ -17,12 +17,11 @@ Some binary tools can be used in command line. They can be used for tests automa
 ## Feature
 
 Display :
+* PCR, PTS, DTS
 
-  - PCR, PTS, DTS
+* continuity counter error
 
-  - continuity counter error
-
-  - Random access point
+* Random access point
 
 Compute :
 
