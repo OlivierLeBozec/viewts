@@ -3,6 +3,7 @@
 #include "pes.h"
 #include "assert.h"
 #include <stdexcept>
+#include <memory>
 
 timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int pidpts, unsigned int piddts):
     m_packetBeforeFirstPcr(0),
@@ -37,13 +38,13 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
       throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 
     // align file on first 0x47
-    char start[512];
+    std::unique_ptr <char []> startBuf(new (char [512]));
     unsigned int index = 0;
 
-    m_fileIn.read(start, sizeof start);
+    m_fileIn.read(startBuf.get(), sizeof (char [512]));
     if(m_fileIn)
     {
-        while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < (sizeof start))
+        while (startBuf[index] != 0x47 && startBuf[index+188] != 0x47 && (index+188) < (sizeof startBuf))
             index++;
     }
 
