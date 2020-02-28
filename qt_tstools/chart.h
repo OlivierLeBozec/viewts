@@ -51,9 +51,6 @@ protected:
 
 private:
     bool gestureEvent(QGestureEvent *event);
-
-private:
-
 };
 
 #endif // CHART_H
