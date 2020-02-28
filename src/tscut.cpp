@@ -36,8 +36,8 @@ int main(int argc, char** argv)
 
     // check filename
     std::ifstream tsFile(argv[1], std::ios::binary);
-    if (!tsFile.is_open()) {
-
+    if (!tsFile.is_open())
+    {
         std::cerr << "Failed to open file " << argv[1] << std::endl;
         return -1;
     }
