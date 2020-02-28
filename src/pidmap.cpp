@@ -24,10 +24,12 @@ pidmap::pidmap(std::string& fileNameIn) :
 
 pidmap::~pidmap()
 {
-    if (!m_pidMap.empty()) {
+    if (!m_pidMap.empty())
+    {
         m_pidMap.clear();
     }
-    if (!m_pidVec.empty()) {
+    if (!m_pidVec.empty())
+    {
         m_pidVec.clear();
     }
 
@@ -61,7 +63,8 @@ bool pidmap::run(unsigned int nbPacketToRead)
         m_pidMap[pid].nb_packet++;
         m_pidMap[pid].has_pcr |= packet.hasPcr();
 
-        if (packet.hasPesHeader()) {
+        if (packet.hasPesHeader())
+        {
             // create pes from buffer
             pes pes(data + packet.getPesOffset());
             m_pidMap[pid].has_pts |= pes.hasPts();
@@ -81,8 +84,8 @@ bool pidmap::run(unsigned int nbPacketToRead)
     return isDataToRead;
 }
 
-void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector) {
-
+void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector)
+{
     std::map<unsigned int, pidinfo>::iterator ii;
     for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
     {
@@ -91,8 +94,8 @@ void pidmap::getPcrPid(std::vector<unsigned int>&  pidVector) {
     }
 }
 
-void pidmap::getPtsPid(std::vector<unsigned int>&  pidVector) {
-
+void pidmap::getPtsPid(std::vector<unsigned int>&  pidVector) 
+{
     std::map<unsigned int, pidinfo>::iterator ii;
     for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
     {
@@ -101,8 +104,8 @@ void pidmap::getPtsPid(std::vector<unsigned int>&  pidVector) {
     }
 }
 
-void pidmap::getDtsPid(std::vector<unsigned int>&  pidVector) {
-
+void pidmap::getDtsPid(std::vector<unsigned int>&  pidVector)
+{
     std::map<unsigned int, pidinfo>::iterator ii;
     for (ii=m_pidMap.begin(); ii!=m_pidMap.end(); ++ii)
     {
@@ -118,16 +121,16 @@ bool pidmap::GetNextPidInfo(unsigned int& pid, pidinfo& pidInfo)
         return false;
 
     // init iterator
-    if (m_prev_pid == PID_NOT_INITIALIZED) {
-
+    if (m_prev_pid == PID_NOT_INITIALIZED)
+    {
         m_pidMap_ii = m_pidMap.begin();
         m_prev_pid = pid = (*m_pidMap_ii).first;
         pidInfo = (*m_pidMap_ii).second;
         return true;
     }
 
-    if (m_pidMap_ii != --m_pidMap.end()) {
-
+    if (m_pidMap_ii != --m_pidMap.end())
+    {
         ++m_pidMap_ii;
         m_prev_pid = pid = (*m_pidMap_ii).first;
         pidInfo = (*m_pidMap_ii).second;
@@ -144,15 +147,15 @@ bool pidmap::GetNextPattern(unsigned char& pattern)
         return false;
 
     // init iterator
-    if (m_prev_pattern == 255) {
-
+    if (m_prev_pattern == 255)
+    {
         m_pidVec_ii = m_pidVec.begin();
         m_prev_pattern = pattern = m_pidMap[*m_pidVec_ii].pattern;
         return true;
     }
 
-    if (m_pidVec_ii != --m_pidVec.end()) {
-
+    if (m_pidVec_ii != --m_pidVec.end())
+    {
         ++m_pidVec_ii;
         m_prev_pattern = pattern = m_pidMap[*m_pidVec_ii].pattern;
         return true;
