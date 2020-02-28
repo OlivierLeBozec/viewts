@@ -398,8 +398,8 @@ bool timestamp::getNextDiff(unsigned int& index, double& diff)
             m_diff_map1 = &m_dtsMap;
             m_diff_map2 = &m_ptsMap;
         }
-        else if (m_pidpcr != TIMESTAMP_NO_PID && m_piddts != TIMESTAMP_NO_PID) {
-
+        else if (m_pidpcr != TIMESTAMP_NO_PID && m_piddts != TIMESTAMP_NO_PID)
+        {
             // dts - pcr
             m_diff_map1 = &m_pcrMap;
             m_diff_map2 = &m_dtsMap;
