@@ -4,7 +4,6 @@
 // Timestamp worker - base class
 timeStampWorker::timeStampWorker(std::string &tsFileName, Chart *chart) :
    m_nbProgress(0), m_timestamp(nullptr), m_chart(chart), m_isTimeXaxis(true), m_isRunning(false), m_isAborting(false)
-
 {
     // new drawing
     m_Series = new QLineSeries();
@@ -111,7 +110,8 @@ void timeStampWorker::run()
         double val;
         while(getData(index, val) == true  && m_isAborting == false)
         {
-            if (m_isTimeXaxis) {
+            if (m_isTimeXaxis)
+            {
                 double time;
                 // time for X axis
                 if (m_timestamp->getTimeFromIndex(index, time) == true) {
@@ -119,8 +119,8 @@ void timeStampWorker::run()
                     qDebug() << m_Series->name() << " - index " << index << " - " << time << " s - " << val;
                 }
             }
-            else {
-
+            else
+            {
                 // packet index for X axis
                 m_Series->append( index, static_cast<qreal>(val));
                 qDebug() << m_Series->name() << " - index " << index << " - " << val;
