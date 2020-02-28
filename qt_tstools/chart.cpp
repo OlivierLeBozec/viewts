@@ -41,10 +41,7 @@ Chart::Chart(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     grabGesture(Qt::PinchGesture);
 }
 
-Chart::~Chart()
-{
-
-}
+Chart::~Chart() {}
 
 //![1]
 bool Chart::sceneEvent(QEvent *event)
