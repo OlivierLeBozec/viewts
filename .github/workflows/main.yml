@@ -26,6 +26,6 @@ jobs:
         modules: qtcharts
     - name: Build
       run: |
-        cd qt_tstools/ 
+        cd qt_tstools/
         qmake viewTS.pro -spec linux-g++
         make
