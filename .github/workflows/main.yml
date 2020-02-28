@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2.0.0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2.3.0
+      uses: jurplel/install-qt-action@v2.2.1
       timeout-minutes: 10
       with:
         target: desktop
