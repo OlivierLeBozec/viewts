@@ -41,8 +41,8 @@ int main(int argc, char** argv)
         std::cerr << "Failed to open file " << argv[1] << std::endl;
         return -1;
     }
-    else {
-
+    else
+    {
         // align file on 0x47
         char start[512];
         unsigned int index = 0;
@@ -62,7 +62,8 @@ int main(int argc, char** argv)
     {
         std::string StrOption(argv[i]);
         if (StrOption == StrSplit) splitNb = atoi(argv[++i]);
-        if (StrOption == StrDivide) {
+        if (StrOption == StrDivide)
+        {
             // get file size
             long curIndex = tsFile.tellg();
             tsFile.seekg( 0, std::ios::end);
@@ -75,7 +76,8 @@ int main(int argc, char** argv)
     }
 
     // cut into files
-    if (splitNb){
+    if (splitNb)
+    {
         char* data = (char*)malloc(188*splitNb);
         int totalRead = 0;
 
