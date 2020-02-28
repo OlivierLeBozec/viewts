@@ -322,8 +322,8 @@ bool timestamp::getNextDts(unsigned int& index, double& dts)
 
 bool timestamp::getNextDelta(unsigned int& index, double& delta)
 {
-    if (m_delta_prev_val == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_delta_prev_val == TIMESTAMP_NOT_INITIALIZED)
+    {
         if(m_piddts != TIMESTAMP_NO_PID) {
             m_delta_map = &m_dtsMap;
         }
@@ -358,15 +358,15 @@ bool timestamp::getNextDelta(unsigned int& index, double& delta)
 
 bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
 {
-    if (m_jitter_prev_val == TIMESTAMP_NOT_INITIALIZED && m_jitter_prev_index == TIMESTAMP_NOT_INITIALIZED) {
-
+    if (m_jitter_prev_val == TIMESTAMP_NOT_INITIALIZED && m_jitter_prev_index == TIMESTAMP_NOT_INITIALIZED) 
+    {
         m_jitter_ii = m_pcrMap.begin();
         m_jitter_prev_index = m_jitter_ii->first;
         m_jitter_prev_val = m_jitter_ii->second;
     }
 
-    if (m_jitter_ii != --m_pcrMap.end()) {
-
+    if (m_jitter_ii != --m_pcrMap.end())
+    {
         // next
         ++m_jitter_ii;
 
@@ -390,10 +390,10 @@ bool timestamp::getNextJitterPcr(unsigned int& index, double& jitter)
 
 bool timestamp::getNextDiff(unsigned int& index, double& diff)
 {
-    if (m_diff_prev_index == TIMESTAMP_NOT_INITIALIZED && m_diff_prev_value == TIMESTAMP_NOT_INITIALIZED) {
-
-        if(m_piddts != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) {
-
+    if (m_diff_prev_index == TIMESTAMP_NOT_INITIALIZED && m_diff_prev_value == TIMESTAMP_NOT_INITIALIZED) 
+    {
+        if(m_piddts != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) 
+        {
             // pts - dts
             m_diff_map1 = &m_dtsMap;
             m_diff_map2 = &m_ptsMap;
@@ -404,8 +404,8 @@ bool timestamp::getNextDiff(unsigned int& index, double& diff)
             m_diff_map1 = &m_pcrMap;
             m_diff_map2 = &m_dtsMap;
         }
-        else if (m_pidpcr != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) {
-
+        else if (m_pidpcr != TIMESTAMP_NO_PID && m_pidpts != TIMESTAMP_NO_PID) 
+        {
             // pts - pcr
             m_diff_map1 = &m_pcrMap;
             m_diff_map2 = &m_ptsMap;
@@ -418,8 +418,8 @@ bool timestamp::getNextDiff(unsigned int& index, double& diff)
         m_diff_prev_value = m_diff_ii->second;
     }
 
-    while (m_diff_ii != --m_diff_map1->end()) {
-
+    while (m_diff_ii != --m_diff_map1->end())
+    {
         ++m_diff_ii;
         for (unsigned int _index = m_diff_prev_index; _index < m_diff_ii->first; ++_index)
         {
