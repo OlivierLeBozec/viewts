@@ -16,6 +16,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2.0.0
+    - name: Build tstools
+      uses: lukka/run-cmake@v0
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: 'CMakeLists.txt'
+        useVcpkgToolchainFile: true
+        buildDirectory: '.'
+        cmakeAppendedArgs: 'build --target all'    
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.2.1
       timeout-minutes: 10
@@ -24,14 +32,6 @@ jobs:
         host: linux
         install-deps: true
         modules: qtcharts
-    - name: 'Run CMake with Ninja'
-      uses: lukka/run-cmake@v0
-      with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: 'CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        buildDirectory: '.'
-        cmakeAppendedArgs: '--target all'    
     - name: Build Qt
       run: |
         cd qt_tstools/
