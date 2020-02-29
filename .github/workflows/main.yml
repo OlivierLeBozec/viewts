@@ -22,7 +22,9 @@ jobs:
         cmake --build . --target all
     - name: Google test
       run: |
-        ./bin/linux/tstools_test
+        ll
+        pwd
+        bin/linux/tstools_test
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.2.1
       timeout-minutes: 10
