@@ -17,7 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2.0.0
     - name: Build tstools
-      run: cmake --build . --target all
+      run: |
+        cmake .
+        cmake --build . --target all
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.2.1
       timeout-minutes: 10
