@@ -8,8 +8,7 @@ viewts is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stre
 
 Qt and QChart are needed for this project.
 
-    Qt Creator 4.11.0-rc1 (4.10.84)
-    Basé sur Qt 5.14.0 (GCC 5.3.1 20160406 (Red Hat 5.3.1-6), 64 bit)
+Github action is configure to test and compile this project. Check file workflows/main.yml to see how to compile.
 
 Already compiled binaries (for windows and linux) are available in <https://github.com/OlivierLeBozec/tstools/releases>
 
