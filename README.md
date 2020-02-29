@@ -131,22 +131,6 @@ Following commands are available only at least one PID is specified
     -diff
            diff between 2 timestamps : pts - pcr, dts - pts or pts - dts
 
-### tscut
-    NAME
-       tscut - cut mpeg ts content
-       Version 1.1
-
-    SYNOPSIS
-       ./tscut FILE [-split <nb packet>] [-divide <nb chunck>]
-
-    DESCRIPTION
-       cut ts stream
-
-    -split <nb packets>
-          cut file every nb packets
-    -divide <nb chunks>
-          cut file in nb chunks
-
 ### Tested examples
     ./tsmap ./ts/audio.ts -pidlist -pidmap
 
