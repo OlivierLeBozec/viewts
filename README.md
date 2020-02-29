@@ -19,29 +19,20 @@ Some binary tools can be used in command line. They can be used for tests automa
 
 Display :
 *   PCR, PTS, DTS
-
 *   continuity counter error
-
 *   Random access point
 
 Compute :
 *   Bitrate
-
 *   PCR jitter
-
 *   Diff between timestamps
-
 *   ES buffer level, basically the VBV
 
 Other features :
 *   X axis can be set to time or packet number
-
 *   Save data into file
-
 *   command line interface
-
 *   ts file drag and drop
-
 *   zoom on data
 
 ## Screenshots
