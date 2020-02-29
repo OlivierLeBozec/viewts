@@ -59,11 +59,3 @@ add_executable(tsmap ${SOURCE_FILES} ${HEADER_FILES})
 
 #build dependencies
 target_link_libraries(tsmap tstoolmap)
-
-#---------------------------------------------------------------- target tscut
-#source files
-set(SOURCE_FILES
-    tscut.cpp
-)
-
-add_executable(tscut ${SOURCE_FILES})

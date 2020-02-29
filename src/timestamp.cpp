@@ -37,16 +37,12 @@ timestamp::timestamp(std::string &fileNameIn, unsigned int pidpcr, unsigned int 
     if(!m_fileIn.is_open())
       throw std::runtime_error("Can't open '" + fileNameIn + "' for reading");
 
-    // align file on first 0x47
-    std::unique_ptr <char []> startBuf(new (char [512]));
+    // align file on first 0x47 - alloc on heap
+    char startBuf[512];
     unsigned int index = 0;
 
-    m_fileIn.read(startBuf.get(), sizeof (char [512]));
-    if(m_fileIn)
-    {
-        while (startBuf[index] != 0x47 && startBuf[index+188] != 0x47 && (index+188) < (sizeof startBuf))
-            index++;
-    }
+    m_fileIn.read(startBuf, sizeof startBuf);
+    while (startBuf[index] != 0x47 && startBuf[index+188] != 0x47 && (index+188) < (sizeof startBuf)) index++;
 
     // loop on packet
     m_fileIn.clear();
@@ -65,8 +61,8 @@ bool timestamp::run(unsigned int nbPacketToRead)
         bool updatePesLength = false;
 
         // leave if no more data
-        m_fileIn.read((char*)data, 188);
-        if (!m_fileIn) break;
+        m_fileIn.read((char*)data, sizeof data);
+        if (!m_fileIn.good()) break;
         isDatatoRead = true;
 
         // create packet from buffer

@@ -15,10 +15,8 @@ pidmap::pidmap(std::string& fileNameIn) :
     unsigned int index = 0;
 
     m_fileIn.read(start, sizeof start);
-    if (m_fileIn.good())
-    {
-        while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
-    }
+    while (start[index] != 0x47 && start[index+188] != 0x47 && (index+188) < 512) index++;
+
     // loop on packet
     m_fileIn.clear();
     m_fileIn.seekg(index);
@@ -47,7 +45,8 @@ bool pidmap::run(unsigned int nbPacketToRead)
     while (nbPacketToRead)
     {
         // leave if no more data
-        if (! m_fileIn.read((char*)data, 188)) break;
+        m_fileIn.read((char*)data, sizeof data);
+        if (!m_fileIn.good()) break;
         isDataToRead = true;
 
         // create packet from buffer
