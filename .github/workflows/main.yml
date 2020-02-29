@@ -22,7 +22,7 @@ jobs:
         cmake --build . --target all
     - name: Google test
       run: |
-        ll
+        ls -l
         pwd
         bin/linux/tstools_test
     - name: Install Qt
