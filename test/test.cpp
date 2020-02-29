@@ -1,6 +1,6 @@
 #include "../src/timestamp.h"
 #include "../src/pidmap.h"
-#include "gtest/gtest.h"
+#include "googletest-release-1.8.1/googletest/include/gtest/gtest.h"
 
 
 TEST(pid, check_pid_on_video_dvbSub)
