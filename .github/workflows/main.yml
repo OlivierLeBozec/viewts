@@ -29,3 +29,6 @@ jobs:
         cd qt_tstools/
         qmake viewTS.pro -spec linux-g++
         make
+    - name : Build tstools
+      run: |
+        cmake3 --build . --target all
