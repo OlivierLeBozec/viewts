@@ -24,7 +24,15 @@ jobs:
         host: linux
         install-deps: true
         modules: qtcharts
-    - name: Build
+    - name: 'Run CMake with Ninja'
+      uses: lukka/run-cmake@v0
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: 'CMakeLists.txt'
+        useVcpkgToolchainFile: true
+        buildDirectory: '.'
+        cmakeAppendedArgs: '--target all'    
+    - name: Build Qt
       run: |
         cd qt_tstools/
         qmake viewTS.pro -spec linux-g++
