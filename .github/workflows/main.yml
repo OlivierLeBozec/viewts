@@ -31,7 +31,7 @@ jobs:
         host: linux
         install-deps: true
         modules: qtcharts
-    - name: Build Qt
+    - name: Build viewts
       run: |
         cd qt_tstools/
         qmake viewTS.pro -spec linux-g++
