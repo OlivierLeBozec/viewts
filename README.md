@@ -41,7 +41,7 @@ Github action is configure to test and compile this project.
 
 Check file .github/workflows/main.yml to see how to compile
 
-This project contains viewts and tstool. They can be compile separatly. tstool is a "subproject" of viewts.
+This project contains viewts and tstool. They can be compiled separatly. tstool is a "subproject" of viewts.
 Unfortunatly for tstool I had to include googletest code in this project cause download of tag 1.8.1 failed.
 
 ## How to Contribute
