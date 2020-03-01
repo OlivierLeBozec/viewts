@@ -4,15 +4,11 @@
 
 # viewts - Display timestamps and related feature
 
-viewts is a tool that enables you to analyse pts, pcr and dts in a ts MPEG2 stream.
+viewts is a tool to analyse pts, pcr and dts in a ts MPEG2 stream.
 
 Qt and QChart are needed for this project.
 
-Github action is configure to test and compile this project. Check file workflows/main.yml to see how to compile.
-
 Already compiled binaries (for windows and linux) are available in <https://github.com/OlivierLeBozec/tstools/releases>
-
-Some binary tools can be used in command line. They can be used for tests automatisation.
 
 ## Feature
 
@@ -42,23 +38,12 @@ Other features :
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
-## compile viewts
-To compile first import in qt_tstools/viewTS.pro in QtCreator.
+## compile
+Github action is configure to test and compile this project. Check file .github/workflows/main.yml to see how to compile.
 
-Windows and Linux are supported.
+This project contains viewts and tstool. They can be compile separatly. tstool is a "subproject" of viewts.
 
-Use Qt5.7 with mandatory QChart.
-
-## compile CLI tools
-Bunch of tools for MPEG-TS streams are also provided.
-
-To compile first import in Qt top level CMakeLists.txt.
-
-It will generate two static libs, the cli tools and a binary for google tests.
-
-Visual can also be used with proper CMake generator.
-
-Windows and Linux are supported.
+Unfortunatly for tstool I had to include googletest code in this project cause download of tag 1.8.1 failed.
 
 ## How to Contribute
 
@@ -72,76 +57,3 @@ for pull requests. Fork the repository and make changes on a new named
 branch. Create pull requests against the `master` branch. Follow the
 [seven guidelines](https://chris.beams.io/posts/git-commit/) to writing a
 great commit message.
-
-### tsmap
-    NAME
-        ./tsmap - list mpeg ts content
-        Version 1.0
-
-    SYNOPSIS
-        ./tsmap FILE [-pidlist -pidmap]
-
-    DESCRIPTION
-        List mpeg information about the FILE. Without using PSI-SI tables
-
-    -pidlist
-       list of the pid in the file
-
-    -pidmap
-       map of the pid in the file
-
-### tscheck
-    NAME
-        ./tscheck - check timestamp
-        Version 1.0
-
-    SYNOPSIS
-        ./tscheck FILE -pid <PID> [...]
-
-    DESCRIPTION
-        Display specified timestamp operation
-
-    -pidpcr <PID>
-           set pcr pid
-
-    -pidpts <PID>
-           set pts pid
-
-    -piddts <PID>
-           set dts pid
-
-Following commands are available only at least one PID is specified
-
-    -dump
-           dump timestamp
-
-    -dur
-           get duration of the stream
-
-    -rate
-           get bitrate of pid
-
-    -delta
-           diff between same consecutive timestamp for pcr, pts or dts
-
-    -jitter
-           display jitter for pcr
-
-    -diff
-           diff between 2 timestamps : pts - pcr, dts - pts or pts - dts
-
-### Tested examples
-    ./tsmap ./ts/audio.ts -pidlist -pidmap
-
-    ./tscheck ./ts/audio.ts -pidpcr 305 -dur -rate
-    ./tscheck ./ts/audio.ts -pidpcr 305 -dump
-    ./tscheck ./ts/audio.ts -pidpts 305 -dump
-    ./tscheck ./ts/audio.ts -pidpcr 305 -pidpts 305 -diff
-    ./tscheck ./ts/audio.ts -pidpcr 305 -jitter
-    ./tscheck ./ts/audio.ts -pidpcr 305 -delta
-
-    ./tscheck ./ts/video.ts -pidpcr 601 -dump
-    ./tscheck ./ts/video.ts -piddts 601 -dump
-    ./tscheck ./ts/video.ts -pidpcr 601 -pidpts 601 -diff
-    ./tscheck ./ts/video.ts -pidpcr 601 -pidpts 301 -diff
-    ./tscheck ./ts/video.ts -piddts 601 -pidpts 601 -diff
