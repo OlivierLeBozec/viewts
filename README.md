@@ -6,7 +6,7 @@
 
 viewts is a tool to analyse pts, pcr and dts in a ts MPEG2 stream.
 
-Qt and QChart are needed for this project.
+Qt and QCharts are needed for this project.
 
 Already compiled binaries (for windows and linux) are available in <https://github.com/OlivierLeBozec/tstools/releases>
 
@@ -16,8 +16,6 @@ Display :
 *   PCR, PTS, DTS
 *   continuity counter error
 *   Random access point
-
-Compute :
 *   Bitrate
 *   PCR jitter
 *   Diff between timestamps
@@ -38,11 +36,12 @@ Other features :
 
 ![alt text](https://github.com/OlivierLeBozec/tstools/blob/master/screenshots/ptspcr.png)
 
-## compile
-Github action is configure to test and compile this project. Check file .github/workflows/main.yml to see how to compile.
+## Compile
+Github action is configure to test and compile this project.
+
+Check file .github/workflows/main.yml to see how to compile
 
 This project contains viewts and tstool. They can be compile separatly. tstool is a "subproject" of viewts.
-
 Unfortunatly for tstool I had to include googletest code in this project cause download of tag 1.8.1 failed.
 
 ## How to Contribute
